@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane id="AnchorPane" prefWidth="793.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eshopn.controllers.CategoriePDFController">
+   <children>
+      <VBox fx:id="vboxPane" prefHeight="200.0" prefWidth="100.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <Label fx:id="categorieLabel" prefHeight="29.0" prefWidth="337.0" style="-fx-font-size: 12; -fx-font-weight: bold; -fx-background-color: #4ecc99; -fx-background-radius: 0 15 15 0;" text="Nom de la catégorie" textFill="#222c3a">
+               <padding>
+                  <Insets left="10.0" />
+               </padding>
+               <VBox.margin>
+                  <Insets left="25.0" />
+               </VBox.margin>
+            </Label>
+            <HBox fx:id="content" prefHeight="117.0" prefWidth="758.0" spacing="15.0">
+               <VBox.margin>
+                  <Insets left="40.0" right="10.0" />
+               </VBox.margin>
+            </HBox>
+            <Label fx:id="categorieLabel2" prefHeight="27.0" prefWidth="337.0" style="-fx-font-size: 12; -fx-font-weight: bold; -fx-background-color: #4ecc99; -fx-background-radius: 0 15 15 0;" text="Nom de la catégorie" textFill="#222c3a">
+               <padding>
+                  <Insets left="10.0" />
+               </padding>
+               <VBox.margin>
+                  <Insets left="25.0" />
+               </VBox.margin>
+            </Label>
+            <HBox fx:id="content2" prefHeight="117.0" prefWidth="788.0" spacing="15.0">
+               <VBox.margin>
+                  <Insets left="40.0" />
+               </VBox.margin>
+            </HBox>
+         </children>
+         <padding>
+            <Insets top="30.0" />
+         </padding>
+      </VBox>
+   </children>
+</AnchorPane>

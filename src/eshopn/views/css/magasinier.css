@@ -1,0 +1,46 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 7 mars 2018, 20:03:35
+    Author     : FRANCINE
+*/
+.profile{
+    -fx-background-color: transparent;
+    -fx-background-radius: 0px;
+}
+.buttons{
+    -fx-background-color: transparent;
+    -fx-background-radius: 0px;
+/*    -fx-font-weight:bold;*/
+}
+.buttons:hover{
+    -fx-background-color: transparent;
+    -fx-background-radius: 0px;
+    -fx-border-color: #222c3a;
+    -fx-border-width: 0px 0px 3px 0px;
+    -fx-border-style: solid;
+    
+}
+
+.onHoverbtn{
+    -fx-background-color: transparent;
+    -fx-background-radius: 0px;
+    -fx-border-color: #222c3a;
+    -fx-border-width: 0px 0px 3px 0px;
+    -fx-border-style: solid;
+}
+
+/*CSS Catégories */
+.catbutton{
+     -fx-background-color: transparent;
+    -fx-background-radius: 0px;
+}
+.catbutton:hover{
+     -fx-background-color: transparent;
+    -fx-background-radius: 0px;
+    -fx-background-size: 1.7em;
+}
+

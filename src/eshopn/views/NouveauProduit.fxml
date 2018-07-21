@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXTextArea?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane id="AnchorPane" prefHeight="615.0" prefWidth="655.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eshopn.controllers.NouveauProduitController">
+   <children>
+      <AnchorPane prefHeight="86.0" prefWidth="655.0" style="-fx-background-color: #222c3a;" AnchorPane.bottomAnchor="529.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <Label fx:id="titleLabel" alignment="CENTER" layoutY="43.0" prefHeight="32.0" prefWidth="655.0" style="-fx-font-size: 18; -fx-font-weight: bold;" text="Ajouter Produit" textFill="WHITE" AnchorPane.bottomAnchor="11.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="43.0">
+               <effect>
+                  <DropShadow />
+               </effect>
+            </Label>
+            <FontAwesomeIcon fill="#00ba9b" iconName="USER" layoutX="316.0" layoutY="38.0" size="35" wrappingWidth="24.0" AnchorPane.bottomAnchor="43.0" AnchorPane.leftAnchor="316.0" AnchorPane.rightAnchor="315.0" AnchorPane.topAnchor="8.0" />
+         </children>
+      </AnchorPane>
+      <AnchorPane layoutY="580.0" prefHeight="35.0" prefWidth="655.0" style="-fx-background-color: #222c3a;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="580.0" />
+      <AnchorPane layoutY="86.0" prefHeight="494.0" prefWidth="655.0" AnchorPane.bottomAnchor="35.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="86.0">
+         <children>
+            <JFXButton buttonType="RAISED" layoutX="11.0" layoutY="241.0" onAction="#onBrowse" style="-fx-background-color: #252365;" text="Parcourir" textFill="WHITE" AnchorPane.bottomAnchor="222.0" AnchorPane.leftAnchor="11.0">
+               <font>
+                  <Font name="System Bold" size="15.0" />
+               </font>
+            </JFXButton>
+            <JFXButton buttonType="RAISED" layoutX="374.0" layoutY="445.0" onAction="#onCancel" prefHeight="35.0" prefWidth="114.0" style="-fx-background-color: #252365;" text="Annuler" textFill="WHITE">
+               <font>
+                  <Font size="15.0" />
+               </font>
+            </JFXButton>
+            <JFXButton buttonType="RAISED" defaultButton="true" layoutX="512.0" layoutY="445.0" onAction="#onAdd" prefHeight="35.0" prefWidth="114.0" style="-fx-background-color: #252365;" text="Ajouter" textFill="WHITE">
+               <font>
+                  <Font size="15.0" />
+               </font>
+            </JFXButton>
+            <Separator layoutX="17.0" layoutY="431.0" prefHeight="4.0" prefWidth="622.0" />
+            <HBox layoutX="47.0" layoutY="47.0" prefHeight="28.0" prefWidth="241.0" spacing="12.0">
+               <children>
+                  <FontAwesomeIcon fill="#222c3a" iconName="PENCIL_SQUARE" size="35" text="">
+                     <HBox.margin>
+                        <Insets />
+                     </HBox.margin>
+                  </FontAwesomeIcon>
+                  <JFXTextField fx:id="nomProduitField" prefHeight="25.0" prefWidth="200.0" promptText="Entrer nom produit">
+                     <font>
+                        <Font size="15.0" />
+                     </font>
+                  </JFXTextField>
+               </children>
+            </HBox>
+            <HBox layoutX="47.0" layoutY="144.0" spacing="12.0">
+               <children>
+                  <FontAwesomeIcon fill="#222c3a" iconName="DATABASE" size="35" />
+                  <JFXTextField fx:id="prixUnitField" prefHeight="25.0" prefWidth="200.0" promptText="Prix Unitaire">
+                     <font>
+                        <Font size="14.0" />
+                     </font></JFXTextField>
+               </children>
+            </HBox>
+            <JFXTextArea fx:id="descriptField" layoutX="401.0" layoutY="110.0" prefHeight="62.0" prefWidth="200.0" promptText="Description du produit">
+               <font>
+                  <Font size="15.0" />
+               </font>
+            </JFXTextArea>
+            <ScrollPane fx:id="pane" layoutY="285.0" prefHeight="147.0" prefWidth="655.0" vbarPolicy="NEVER" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" />
+            <HBox layoutX="360.0" layoutY="47.0" prefHeight="28.0" prefWidth="241.0" spacing="12.0">
+               <children>
+                  <FontAwesomeIcon fill="#222c3a" iconName="PENCIL_SQUARE" size="35" text="">
+                     <HBox.margin>
+                        <Insets />
+                     </HBox.margin>
+                  </FontAwesomeIcon>
+                  <JFXTextField fx:id="codeFourfield" prefHeight="25.0" prefWidth="200.0" promptText="Code du Fournisseur">
+                     <font>
+                        <Font size="15.0" />
+                     </font>
+                  </JFXTextField>
+               </children>
+            </HBox>
+         </children>
+      </AnchorPane>
+   </children>
+</AnchorPane>

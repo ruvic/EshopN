@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXTextArea?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane id="AnchorPane" prefHeight="615.0" prefWidth="655.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eshopn.controllers.DétailsProduitController">
+   <children>
+      <AnchorPane prefHeight="86.0" prefWidth="655.0" style="-fx-background-color: #222c3a;">
+         <children>
+            <Label fx:id="titleLabel" alignment="CENTER" layoutY="43.0" prefHeight="32.0" prefWidth="655.0" style="-fx-font-size: 18; -fx-font-weight: bold;" text="Détails Produit" textFill="WHITE" AnchorPane.bottomAnchor="11.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="43.0">
+               <effect>
+                  <DropShadow />
+               </effect>
+            </Label>
+            <FontAwesomeIcon fill="#00ba9b" iconName="USER" layoutX="316.0" layoutY="38.0" size="35" wrappingWidth="24.0" AnchorPane.bottomAnchor="43.0" AnchorPane.leftAnchor="316.0" AnchorPane.rightAnchor="315.0" AnchorPane.topAnchor="8.0" />
+         </children>
+      </AnchorPane>
+      <AnchorPane layoutY="580.0" prefHeight="35.0" prefWidth="655.0" style="-fx-background-color: #222c3a;" />
+      <AnchorPane layoutX="-1.0" layoutY="86.0" prefHeight="495.0" prefWidth="655.0">
+         <children>
+            <ImageView fx:id="photoVue" fitHeight="202.0" fitWidth="305.0" layoutX="28.0" layoutY="34.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../../../images/Produits/robe.jpg" />
+               </image>
+               <effect>
+                  <DropShadow />
+               </effect>
+            </ImageView>
+            <VBox layoutX="350.0" layoutY="27.0" prefHeight="368.0" prefWidth="270.0" spacing="18.0">
+               <children>
+                  <HBox>
+                     <children>
+                        <Label prefHeight="25.0" prefWidth="82.0" text="Code">
+                           <font>
+                              <Font name="System Bold" size="16.0" />
+                           </font>
+                        </Label>
+                        <JFXTextField fx:id="codeProd" editable="false" prefHeight="25.0" prefWidth="177.0">
+                           <font>
+                              <Font size="15.0" />
+                           </font>
+                        </JFXTextField>
+                     </children>
+                  </HBox>
+                  <HBox>
+                     <children>
+                        <Label prefHeight="25.0" prefWidth="82.0" text="Nom">
+                           <font>
+                              <Font name="System Bold" size="16.0" />
+                           </font>
+                        </Label>
+                        <JFXTextField fx:id="nomProd" prefHeight="25.0" prefWidth="175.0">
+                           <font>
+                              <Font size="15.0" />
+                           </font>
+                        </JFXTextField>
+                     </children>
+                  </HBox>
+                  <HBox>
+                     <children>
+                        <Label prefHeight="25.0" prefWidth="82.0" text="Prix">
+                           <font>
+                              <Font name="System Bold" size="16.0" />
+                           </font>
+                        </Label>
+                        <JFXTextField fx:id="prixProd" prefHeight="25.0" prefWidth="172.0">
+                           <font>
+                              <Font size="15.0" />
+                           </font>
+                        </JFXTextField>
+                     </children>
+                  </HBox>
+                  <HBox layoutX="10.0" layoutY="10.0">
+                     <children>
+                        <Label prefHeight="25.0" prefWidth="83.0" text="Qté">
+                           <font>
+                              <Font name="System Bold" size="16.0" />
+                           </font>
+                        </Label>
+                        <JFXTextField fx:id="qteProd" editable="false" prefHeight="25.0" prefWidth="177.0">
+                           <font>
+                              <Font size="15.0" />
+                           </font>
+                        </JFXTextField>
+                     </children>
+                  </HBox>
+                  <HBox>
+                     <children>
+                        <Label prefHeight="25.0" prefWidth="84.0" text="Catégorie">
+                           <font>
+                              <Font name="System Bold" size="16.0" />
+                           </font>
+                        </Label>
+                        <JFXTextField fx:id="categorieProd" editable="false" prefHeight="25.0" prefWidth="171.0">
+                           <font>
+                              <Font size="15.0" />
+                           </font>
+                        </JFXTextField>
+                     </children>
+                  </HBox>
+                  <HBox layoutX="10.0" layoutY="198.0">
+                     <children>
+                        <Label prefHeight="25.0" prefWidth="84.0" text="CodeFour.">
+                           <font>
+                              <Font name="System Bold" size="16.0" />
+                           </font>
+                        </Label>
+                        <JFXTextField fx:id="codeFourField" editable="false" prefHeight="25.0" prefWidth="171.0">
+                           <font>
+                              <Font size="15.0" />
+                           </font>
+                        </JFXTextField>
+                     </children>
+                  </HBox>
+                  <Label prefHeight="25.0" prefWidth="105.0" text="Description">
+                     <font>
+                        <Font name="System Bold" size="16.0" />
+                     </font>
+                  </Label>
+                  <JFXTextArea fx:id="descriptionProd" prefHeight="117.0" prefWidth="235.0" promptText="Description du produit">
+                     <font>
+                        <Font size="15.0" />
+                     </font>
+                  </JFXTextArea>
+               </children>
+            </VBox>
+            <ScrollPane fx:id="pane" layoutX="30.0" layoutY="292.0" prefHeight="107.0" prefWidth="305.0">
+               <effect>
+                  <DropShadow height="9.14" radius="4.8100000000000005" width="12.1" />
+               </effect></ScrollPane>
+            <Separator layoutX="28.0" layoutY="399.0" prefHeight="25.0" prefWidth="600.0" />
+            <JFXButton fx:id="modifBTn" buttonType="RAISED" defaultButton="true" layoutX="503.0" layoutY="435.0" onAction="#onEdit" prefHeight="35.0" prefWidth="114.0" style="-fx-background-color: #252365;" text="Modifier" textFill="WHITE">
+               <font>
+                  <Font size="15.0" />
+               </font>
+            </JFXButton>
+            <JFXButton fx:id="cancelBtn" buttonType="RAISED" layoutX="366.0" layoutY="435.0" onAction="#onClose" prefHeight="35.0" prefWidth="114.0" style="-fx-background-color: #252365;" text="Annuler" textFill="WHITE">
+               <font>
+                  <Font size="15.0" />
+               </font>
+            </JFXButton>
+            <JFXButton fx:id="browsBtn" buttonType="RAISED" layoutX="32.0" layoutY="256.0" onAction="#onBrowse" style="-fx-background-color: #252365;" text="Parcourir" textFill="WHITE">
+               <font>
+                  <Font name="System Bold" size="15.0" />
+               </font>
+            </JFXButton>
+         </children>
+      </AnchorPane>
+   </children>
+</AnchorPane>

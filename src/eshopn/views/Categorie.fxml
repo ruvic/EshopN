@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.effect.InnerShadow?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eshopn.controllers.CategorieController">
+   <children>
+      <AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="136.0" prefWidth="214.0" style="-fx-background-color: white; -fx-background-radius: 15px;">
+         <effect>
+            <DropShadow color="#171717" height="20.17" radius="8.31" width="15.07">
+               <input>
+                  <InnerShadow choke="0.11" color="#0e3780" height="25.45" radius="11.8525" width="23.96" />
+               </input>
+            </DropShadow>
+         </effect>
+         <children>
+            <Label fx:id="categorieTitle" alignment="CENTER" prefHeight="71.0" prefWidth="214.0" style="-fx-font-weight: bold; -fx-alignment: center;" text="Vêtements Homme" textAlignment="CENTER" wrapText="true" AnchorPane.leftAnchor="2.0" AnchorPane.rightAnchor="-2.0">
+               <font>
+                  <Font size="15.0" />
+               </font>
+            </Label>
+            <JFXButton contentDisplay="GRAPHIC_ONLY" onAction="#onShowProduits" prefHeight="71.0" prefWidth="218.0" />
+            <Separator layoutX="7.0" layoutY="72.0" prefWidth="200.0" />
+            <Label fx:id="priceLabel" alignment="CENTER" layoutX="18.0" layoutY="97.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="20.0" prefWidth="33.0" style="-fx-font-weight: bold; -fx-font-size: 18;" text="65">
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Label>
+            <JFXButton fx:id="editBtn" buttonType="RAISED" contentDisplay="GRAPHIC_ONLY" layoutX="167.0" layoutY="96.0" onAction="#onEdit" ripplerFill="WHITE">
+               <graphic>
+                  <FontAwesomeIcon fill="#222c3a" iconName="SEARCH_PLUS" size="1.5em" />
+               </graphic>
+            </JFXButton>
+         </children>
+      </AnchorPane>
+   </children>
+</AnchorPane>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXPasswordField?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import com.jfoenix.controls.JFXToggleButton?>
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane id="AnchorPane" prefHeight="593.0" prefWidth="419.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eshopn.controllers.AdminAjoutGestionnaireController">
+   <children>
+      <AnchorPane prefHeight="116.0" prefWidth="477.0" style="-fx-background-color: #222c3a;">
+         <children>
+            <Label fx:id="titleLabel" alignment="CENTER" layoutX="172.0" layoutY="58.0" prefHeight="32.0" prefWidth="410.0" style="-fx-font-size: 18; -fx-font-weight: bold;" text="Ajouter Magasinier" textFill="WHITE" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+               <effect>
+                  <DropShadow />
+               </effect>
+            </Label>
+            <FontAwesomeIcon fill="#00ba9b" iconName="USER" layoutX="225.0" layoutY="49.0" size="35" wrappingWidth="24.0" />
+         </children>
+      </AnchorPane>
+      <VBox layoutX="93.0" layoutY="167.0" prefHeight="260.0" prefWidth="308.0" spacing="10.0" AnchorPane.leftAnchor="80.0" AnchorPane.rightAnchor="80.0">
+         <children>
+            <HBox prefHeight="56.0" prefWidth="295.0" spacing="10.0">
+               <children>
+                  <FontAwesomeIcon fill="#222c3a" iconName="USER" size="35" />
+                  <JFXTextField fx:id="nameField" prefHeight="32.0" prefWidth="250.0" promptText="Nom (s) et prénom(s)">
+                     <font>
+                        <Font size="15.0" />
+                     </font>
+                  </JFXTextField>
+               </children>
+            </HBox>
+            <HBox prefHeight="56.0" prefWidth="295.0" spacing="10.0">
+               <children>
+                  <FontAwesomeIcon fill="#222c3a" iconName="USER_SECRET" size="35" />
+                  <JFXTextField fx:id="usernameField" prefHeight="32.0" prefWidth="252.0" promptText="Nom d'utilisateur">
+                     <font>
+                        <Font size="15.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets />
+                     </HBox.margin>
+                  </JFXTextField>
+               </children>
+            </HBox>
+            <HBox prefHeight="56.0" prefWidth="295.0" spacing="10.0">
+               <children>
+                  <FontAwesomeIcon fill="#222c3a" iconName="UNLOCK_ALT" size="35" />
+                  <JFXPasswordField fx:id="pwdField" prefHeight="29.0" prefWidth="254.0" promptText="Mot de passe">
+                     <font>
+                        <Font size="15.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets left="5.0" />
+                     </HBox.margin>
+                  </JFXPasswordField>
+               </children>
+            </HBox>
+            <HBox prefHeight="56.0" prefWidth="295.0" spacing="10.0">
+               <children>
+                  <JFXPasswordField fx:id="confirmpwdField" prefHeight="29.0" prefWidth="255.0" promptText="Confirmer mot de passe">
+                     <font>
+                        <Font size="15.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets left="38.0" />
+                     </HBox.margin>
+                  </JFXPasswordField>
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+      <FontAwesomeIcon fill="#222c3a" iconName="TOGGLE_RIGHT" layoutX="80.0" layoutY="451.0" size="35" />
+      <Label layoutX="118.0" layoutY="418.0" prefHeight="41.0" prefWidth="63.0" style="-fx-alignment: right;" text="Statut : " textAlignment="RIGHT">
+         <font>
+            <Font size="15.0" />
+         </font>
+      </Label>
+      <JFXToggleButton fx:id="actifToogleBtn" layoutX="201.0" layoutY="411.0" prefHeight="56.0" prefWidth="129.0" text="Desactivé" />
+      <JFXButton buttonType="RAISED" focusTraversable="false" layoutX="263.0" layoutY="492.0" onAction="#onAdd" prefHeight="41.0" prefWidth="134.0" style="-fx-background-color: #252365;" text="Ajouter" textFill="WHITE">
+         <font>
+            <Font name="System Bold" size="15.0" />
+         </font>
+      </JFXButton>
+      <JFXButton buttonType="RAISED" focusTraversable="false" layoutX="69.0" layoutY="492.0" onAction="#onCancel" prefHeight="41.0" prefWidth="134.0" style="-fx-background-color: #252365;" text="Annuler" textFill="WHITE">
+         <font>
+            <Font name="System Bold" size="15.0" />
+         </font>
+      </JFXButton>
+      <Separator layoutX="69.0" layoutY="466.0" prefHeight="21.0" prefWidth="330.0" />
+      <AnchorPane layoutX="5.0" layoutY="550.0" prefHeight="41.0" prefWidth="469.0" style="-fx-background-color: #222c3a;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+   </children>
+</AnchorPane>

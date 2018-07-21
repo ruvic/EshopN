@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Pagination?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="533.0" prefWidth="744.0" stylesheets="@css/style.css" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eshopn.controllers.ListeCategoriesController">
+   <children>
+      <ImageView fx:id="arrowsImg" fitHeight="25.0" fitWidth="98.0" layoutX="13.0" layoutY="5.0" pickOnBounds="true" AnchorPane.leftAnchor="13.0" AnchorPane.topAnchor="0.0">
+         <image>
+            <Image url="@../../../images/arrow.png" />
+         </image>
+         <effect>
+            <DropShadow height="3.21" radius="5.5525" />
+         </effect>
+      </ImageView>
+      <Label layoutX="30.0" layoutY="7.0" style="-fx-font-size: 15; -fx-font-weight: bold;" text="Accueil" textFill="WHITE" AnchorPane.leftAnchor="38.0" AnchorPane.topAnchor="1.0" />
+      <ImageView fx:id="arrowsSelected" fitHeight="25.0" fitWidth="138.0" layoutX="109.0" layoutY="5.0" pickOnBounds="true" AnchorPane.leftAnchor="106.0" AnchorPane.topAnchor="0.0">
+         <image>
+            <Image url="@../../../images/arrow_selected.png" />
+         </image>
+         <effect>
+            <DropShadow height="3.21" radius="5.5525" />
+         </effect>
+      </ImageView>
+      <Label layoutX="140.0" layoutY="1.0" style="-fx-font-size: 15; -fx-font-weight: bold;" text="Catégories" textFill="WHITE" AnchorPane.leftAnchor="140.0" AnchorPane.topAnchor="1.0" />
+      <AnchorPane layoutY="66.0" prefHeight="495.0" prefWidth="744.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="38.0">
+         <children>
+            <Pagination fx:id="pagination" layoutX="78.0" layoutY="2.0" maxPageIndicatorCount="5" pageCount="10" prefHeight="432.0" prefWidth="704.0" stylesheets="@css/bootstrap3.css" AnchorPane.bottomAnchor="13.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="50.0" />
+            <GridPane fx:id="listeCat" alignment="CENTER" hgap="5.0" layoutX="23.0" layoutY="50.0" prefHeight="345.0" prefWidth="664.0" style="-fx-background-color: #e1e4ef;" vgap="5.0" AnchorPane.bottomAnchor="90.0" AnchorPane.leftAnchor="40.0" AnchorPane.rightAnchor="40.0" AnchorPane.topAnchor="60.0">
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="444.0" minWidth="10.0" prefWidth="351.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="534.0" minWidth="10.0" prefWidth="348.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="534.0" minWidth="10.0" prefWidth="348.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <padding>
+                  <Insets bottom="15.0" left="30.0" right="30.0" top="35.0" />
+               </padding>
+               <effect>
+                  <DropShadow />
+               </effect>
+            </GridPane>
+            <JFXButton contentDisplay="GRAPHIC_ONLY" defaultButton="true" focusTraversable="false" layoutX="686.0" layoutY="2.0" onAction="#onSearch" prefHeight="41.0" style="-fx-background-color: #222c3a;" AnchorPane.rightAnchor="40.0" AnchorPane.topAnchor="2.0">
+               <graphic>
+                  <FontAwesomeIcon fill="#4ecc99" iconName="SEARCH" size="30" />
+               </graphic>
+            </JFXButton>
+            <JFXTextField fx:id="categorieField" alignment="CENTER" focusColor="#222c3a" layoutX="509.0" layoutY="2.0" prefHeight="41.0" prefWidth="193.0" promptText="Entrer nom catégorie" style="-fx-background-size: 14px; -fx-background-color: rgba(34,44,58,0.2);" AnchorPane.rightAnchor="85.0" AnchorPane.topAnchor="2.0">
+               <font>
+                  <Font name="System Bold" size="13.0" />
+               </font>
+            </JFXTextField>
+            <JFXButton buttonType="RAISED" layoutX="50.0" layoutY="2.0" onAction="#onCatalogue" prefHeight="41.0" prefWidth="114.0" style="-fx-background-color: rgba(34,44,58,0.2);" text="Catalogue" textFill="#222c3a" AnchorPane.leftAnchor="40.0" AnchorPane.topAnchor="2.0">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </JFXButton>
+            <ImageView fx:id="loaderImg" fitHeight="33.0" fitWidth="51.0" layoutX="40.0" layoutY="430.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="32.0" AnchorPane.leftAnchor="40.0">
+               <image>
+                  <Image url="@../../../images/chargement2.gif" />
+               </image>
+            </ImageView>
+         </children>
+      </AnchorPane>
+      <JFXButton fx:id="newCategorBtn" buttonType="RAISED" contentDisplay="GRAPHIC_ONLY" layoutX="248.0" layoutY="-3.0" onAction="#onNewCategorie" prefHeight="25.0" prefWidth="33.0" AnchorPane.leftAnchor="248.0" AnchorPane.topAnchor="-3.0">
+         <graphic>
+            <FontAwesomeIcon fill="#252364" iconName="PLUS" size="25" />
+         </graphic>
+      </JFXButton>
+      <JFXButton layoutX="14.0" onAction="#onHome" prefHeight="25.0" prefWidth="98.0">
+         <font>
+            <Font size="1.0" />
+         </font>
+      </JFXButton>
+   </children>
+</AnchorPane>

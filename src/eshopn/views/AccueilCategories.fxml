@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="581.0" prefWidth="744.0" style="-fx-background-color: #222c3a;" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eshopn.controllers.AdminStorekeeperController">
+   <center>
+      <AnchorPane prefHeight="462.0" prefWidth="744.0" style="-fx-background-color: white;" BorderPane.alignment="CENTER">
+         <children>
+            <Rectangle fx:id="rect" arcHeight="5.0" arcWidth="5.0" fill="#1fff7e" height="510.0" opacity="0.2" stroke="BLACK" strokeType="INSIDE" width="744.0" />
+            <ImageView fx:id="fondImgView" fitHeight="511.0" fitWidth="744.0" layoutX="-1.0" layoutY="-2.0" opacity="0.61" pickOnBounds="true">
+               <image>
+                  <Image url="@../../../images/fond.jpg" />
+               </image>
+            </ImageView>
+           
+   
+            <JFXButton contentDisplay="GRAPHIC_ONLY" focusTraversable="false" layoutX="246.0" layoutY="45.0" onAction="#onAdd" prefHeight="37.0" prefWidth="39.0" ripplerFill="#2422bc" AnchorPane.leftAnchor="246.0" AnchorPane.topAnchor="45.0" />
+            <AnchorPane layoutX="8.0" layoutY="70.0" prefHeight="442.0" prefWidth="744.0" stylesheets="@css/style.css" AnchorPane.bottomAnchor="34.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="70.0">
+               <children>
+                  <FontAwesomeIcon fill="#222c3a" layoutX="32.0" layoutY="344.0" size="1.5em" />
+               </children>
+            </AnchorPane>
+            <HBox layoutX="1.0" layoutY="-1.0" prefHeight="64.0" prefWidth="744.0" spacing="72.0" AnchorPane.bottomAnchor="483.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+               <children>
+                  <JFXButton alignment="BOTTOM_CENTER" buttonType="RAISED" prefHeight="34.0" prefWidth="131.0" ripplerFill="WHITE" style="-fx-font-weight: bold;" styleClass="buttons" stylesheets="@css/magasinier.css" text="Accueil" textFill="WHITE">
+                     <font>
+                        <Font size="15.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets top="17.0" />
+                     </HBox.margin>
+                     <graphic>
+                        <FontAwesomeIcon fill="#222c3a" iconName="HOME" size="1.5em" />
+                     </graphic>
+                  </JFXButton>
+                  <JFXButton alignment="BOTTOM_CENTER" buttonType="RAISED" layoutX="10.0" layoutY="27.0" prefHeight="34.0" prefWidth="131.0" ripplerFill="WHITE" style="-fx-font-weight: bold;" styleClass="buttons" stylesheets="@css/magasinier.css" text="Catégories" textFill="WHITE">
+                     <font>
+                        <Font size="15.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets top="17.0" />
+                     </HBox.margin>
+                     <graphic>
+                        <FontAwesomeIcon fill="#222c3a" iconName="LIST_UL" size="1.5em" />
+                     </graphic>
+                  </JFXButton>
+                  <JFXButton alignment="BOTTOM_CENTER" buttonType="RAISED" layoutX="272.0" layoutY="10.0" prefHeight="34.0" prefWidth="131.0" ripplerFill="WHITE" style="-fx-font-weight: bold;" styleClass="buttons" stylesheets="@css/magasinier.css" text="Produits" textFill="WHITE">
+                     <font>
+                        <Font size="15.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets top="17.0" />
+                     </HBox.margin>
+                     
+                  </JFXButton>
+                  <JFXButton alignment="BOTTOM_CENTER" buttonType="RAISED" layoutX="213.0" layoutY="27.0" prefHeight="34.0" prefWidth="131.0" ripplerFill="WHITE" style="-fx-font-weight: bold;" styleClass="buttons" stylesheets="@css/magasinier.css" text="A Propos" textFill="WHITE">
+                     <font>
+                        <Font size="15.0" />
+                     </font>
+                     <graphic>
+                        <FontAwesomeIcon fill="#222c3a" iconName="QUESTION" size="1.5em" />
+                     </graphic>
+                     <HBox.margin>
+                        <Insets top="17.0" />
+                     </HBox.margin>
+                  </JFXButton>
+               </children>
+            </HBox>
+         </children>
+      </AnchorPane>
+   </center>
+   <top>
+      <AnchorPane minHeight="-Infinity" prefHeight="35.0" prefWidth="744.0" style="-fx-background-color: #222c3a;" BorderPane.alignment="CENTER">
+         <effect>
+            <DropShadow height="58.62" radius="14.155" width="0.0" />
+         </effect>
+         <children>
+            <Label layoutX="47.0" layoutY="2.0" prefHeight="32.0" prefWidth="106.0" style="-fx-font-size: 16; -fx-font-weight: bold;" text="FranniChoco" textFill="WHITE" textOverrun="CLIP" AnchorPane.leftAnchor="47.0">
+               <effect>
+                  <DropShadow />
+               </effect>
+            </Label>
+            <Label layoutX="585.0" layoutY="1.0" prefHeight="32.0" prefWidth="119.0" style="-fx-font-weight: bold; -fx-font-size: 16;" text="Deconnexion" textAlignment="RIGHT" textFill="WHITE" AnchorPane.rightAnchor="40.0" />
+            <JFXButton contentDisplay="GRAPHIC_ONLY" focusTraversable="false" layoutX="687.0" layoutY="13.0" onAction="#onLogOut" AnchorPane.rightAnchor="3.0" />
+            <FontAwesomeIcon fill="#00ba9b" iconName="USER" layoutX="14.0" layoutY="28.0" size="30" wrappingWidth="17.0" AnchorPane.leftAnchor="14.0" />
+            <FontAwesomeIcon fill="#00ba9b" glyphStyleClass="" iconName="SIGN_OUT" layoutX="690.0" layoutY="31.0" size="30" />
+         </children></AnchorPane>
+   </top>
+</BorderPane>

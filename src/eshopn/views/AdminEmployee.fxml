@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Pagination?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="581.0" prefWidth="744.0" style="-fx-background-color: #222c3a;" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eshopn.controllers.AdminEmployeesController">
+   <center>
+      <AnchorPane prefHeight="462.0" prefWidth="744.0" style="-fx-background-color: white;" BorderPane.alignment="CENTER">
+         <children>
+            <Rectangle fx:id="rect" arcHeight="5.0" arcWidth="5.0" fill="#1fff7e" height="510.0" opacity="0.2" stroke="BLACK" strokeType="INSIDE" width="744.0" />
+            <ImageView fx:id="fondImgView" fitHeight="511.0" fitWidth="744.0" layoutX="-1.0" layoutY="-2.0" opacity="0.61" pickOnBounds="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+               <image>
+                  <Image url="@../../../images/fond.jpg" />
+               </image>
+            </ImageView>
+            <ImageView fx:id="arrowsImg" fitHeight="25.0" fitWidth="98.0" layoutX="9.0" layoutY="9.0" pickOnBounds="true" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="50.0">
+               <image>
+                  <Image url="@../../../images/arrow.png" />
+               </image>
+               <effect>
+                  <DropShadow height="3.21" radius="5.5525" />
+               </effect>
+            </ImageView>
+            <Label layoutX="32.0" layoutY="10.0" style="-fx-font-size: 15; -fx-font-weight: bold;" text="Accueil" textFill="WHITE" AnchorPane.leftAnchor="32.0" AnchorPane.topAnchor="52.0" />
+            <ImageView fx:id="arrowsSelected" fitHeight="25.0" fitWidth="138.0" layoutX="104.0" layoutY="50.0" pickOnBounds="true" AnchorPane.leftAnchor="104.0" AnchorPane.topAnchor="50.0">
+               <image>
+                  <Image url="@../../../images/arrow_selected.png" />
+               </image>
+               <effect>
+                  <DropShadow height="3.21" radius="5.5525" />
+               </effect>
+            </ImageView>
+            <Label fx:id="employeeLabel" layoutX="128.0" layoutY="51.0" style="-fx-font-size: 15; -fx-font-weight: bold;" text="Magasinier" textFill="WHITE" />
+            <JFXButton contentDisplay="GRAPHIC_ONLY" focusTraversable="false" layoutX="246.0" layoutY="45.0" onAction="#onAdd" prefHeight="37.0" prefWidth="39.0" ripplerFill="#2422bc" AnchorPane.leftAnchor="246.0" AnchorPane.topAnchor="45.0">
+               <graphic>
+                  <FontAwesomeIcon fill="#252364" iconName="PLUS" size="25" />
+               </graphic>
+            </JFXButton>
+            <AnchorPane layoutX="8.0" layoutY="77.0" prefHeight="433.0" prefWidth="744.0" stylesheets="@css/style.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="77.0">
+               <children>
+                  <Label fx:id="listEmployeeLabel" prefHeight="41.0" prefWidth="231.0" style="-fx-font-size: 18; -fx-font-weight: bold;" text="Liste des maganisiers" textFill="WHITE" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="498.0" AnchorPane.topAnchor="0.0">
+                     <effect>
+                        <DropShadow />
+                     </effect>
+                     <padding>
+                        <Insets left="15.0" />
+                     </padding>
+                  </Label>
+                  <Pagination fx:id="pagination" maxPageIndicatorCount="4" pageCount="10" prefHeight="390.0" prefWidth="744.0" stylesheets="@css/bootstrap3.css" AnchorPane.bottomAnchor="44.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                  <TableView fx:id="table" fixedCellSize="40.0" layoutX="14.0" layoutY="31.0" prefHeight="278.0" prefWidth="714.0" tableMenuButtonVisible="true" AnchorPane.bottomAnchor="111.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="45.0">
+                    <columns>
+                      <TableColumn fx:id="nameColumn" prefWidth="150.0" text="Nom" />
+                        <TableColumn fx:id="usernameColumn" prefWidth="150.0" text="Nom d'utilisateur" />
+                        <TableColumn fx:id="statusColumn" prefWidth="75.0" text="Statut" />
+                        <TableColumn fx:id="ActionsColumn" prefWidth="150.0" text="Actions" />
+                    </columns>
+                     <columnResizePolicy>
+                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                     </columnResizePolicy>
+                  </TableView>
+                  <JFXTextField fx:id="searchField" alignment="CENTER" focusColor="#222c3a" layoutX="454.0" onKeyPressed="#onSearchEnter" prefHeight="41.0" prefWidth="174.0" promptText="Entrer Nom ou Login" style="-fx-background-size: 14px; -fx-background-color: rgba(34,44,58,0.2);" AnchorPane.rightAnchor="59.0" AnchorPane.topAnchor="0.0">
+                     <font>
+                        <Font name="System Bold" size="13.0" />
+                     </font></JFXTextField>
+                  <JFXButton contentDisplay="GRAPHIC_ONLY" focusTraversable="false" layoutX="686.0" layoutY="2.0" onAction="#onSearch" prefHeight="41.0" style="-fx-background-color: #222c3a;" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="0.0">
+                     <graphic>
+                        <FontAwesomeIcon fill="#4ecc99" iconName="SEARCH" size="30" />
+                     </graphic>
+                  </JFXButton>
+               </children>
+            </AnchorPane>
+            <JFXButton buttonType="RAISED" layoutX="10.0" layoutY="51.0" onAction="#onHome" prefHeight="25.0" prefWidth="94.0">
+               <font>
+                  <Font size="1.0" />
+               </font>
+            </JFXButton>
+            <StackPane fx:id="stack" prefHeight="150.0" prefWidth="200.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+         </children>
+      </AnchorPane>
+   </center>
+   <top>
+      <AnchorPane prefHeight="73.0" prefWidth="744.0" style="-fx-background-color: #222c3a;" BorderPane.alignment="CENTER">
+         <effect>
+            <DropShadow height="58.62" radius="14.155" width="0.0" />
+         </effect>
+         <children>
+            <Label layoutX="59.0" layoutY="21.0" prefHeight="32.0" prefWidth="167.0" style="-fx-font-size: 22; -fx-font-weight: bold;" text="Administrateur" textFill="WHITE" AnchorPane.leftAnchor="59.0">
+               <effect>
+                  <DropShadow />
+               </effect>
+            </Label>
+            <Label layoutX="578.0" layoutY="20.0" prefHeight="32.0" prefWidth="119.0" style="-fx-font-weight: bold; -fx-font-size: 18;" text="Deconnexion" textAlignment="RIGHT" textFill="WHITE" AnchorPane.rightAnchor="47.0" />
+            <JFXButton contentDisplay="GRAPHIC_ONLY" focusTraversable="false" layoutX="687.0" layoutY="13.0" onAction="#onLogOut" AnchorPane.rightAnchor="3.0">
+               <graphic>
+                  <FontAwesomeIcon fill="#00ba9b" glyphStyleClass="" iconName="SIGN_OUT" size="40" />
+               </graphic>
+            </JFXButton>
+            <FontAwesomeIcon fill="#00ba9b" iconName="USER" layoutX="14.0" layoutY="53.0" size="45" wrappingWidth="24.0" AnchorPane.leftAnchor="14.0" />
+         </children></AnchorPane>
+   </top>
+</BorderPane>

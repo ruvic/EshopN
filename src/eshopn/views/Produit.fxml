@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.effect.InnerShadow?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="193.0" prefWidth="198.0" style="-fx-background-color: white; -fx-background-radius: 12px;" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eshopn.controllers.ProduitController">
+   <children>
+      <ImageView fx:id="photo" fitHeight="109.0" fitWidth="196.0" layoutY="40.0" pickOnBounds="true">
+         <image>
+            <Image url="@../../../images/Produits/robe.jpg" />
+         </image></ImageView>
+      <Label fx:id="numberProduct" layoutX="14.0" layoutY="186.0" text="450" AnchorPane.bottomAnchor="12.0" AnchorPane.leftAnchor="14.0">
+         <font>
+            <Font name="System Bold" size="15.0" />
+         </font>
+      </Label>
+      <JFXButton contentDisplay="GRAPHIC_ONLY" layoutX="154.0" layoutY="180.0" onAction="#onShowProductDetails" prefHeight="32.0" prefWidth="33.0" AnchorPane.bottomAnchor="7.0" AnchorPane.rightAnchor="6.0">
+         <graphic>
+            <FontAwesomeIcon iconName="SEARCH_PLUS" opacity="0.75" size="1.9em" />
+         </graphic></JFXButton>
+      <JFXButton fx:id="addBtn" contentDisplay="GRAPHIC_ONLY" layoutX="118.0" layoutY="180.0" onAction="#onAddStock" prefHeight="32.0" prefWidth="33.0" AnchorPane.bottomAnchor="7.0">
+         <graphic>
+            <FontAwesomeIcon iconName="PLUS" opacity="0.75" size="1.9em" />
+         </graphic>
+      </JFXButton>
+      <JFXButton fx:id="reduceBtn" contentDisplay="GRAPHIC_ONLY" layoutX="82.0" layoutY="155.0" onAction="#onReduceStock" prefHeight="32.0" prefWidth="33.0">
+         <graphic>
+            <FontAwesomeIcon iconName="MINUS" opacity="0.75" size="1.9em" />
+         </graphic>
+      </JFXButton>
+      <Label fx:id="codeProduct" alignment="CENTER" layoutY="3.0" prefHeight="32.0" prefWidth="198.0" text="Robettes" wrapText="true" AnchorPane.bottomAnchor="158.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="3.0">
+         <font>
+            <Font name="System Bold" size="15.0" />
+         </font></Label>
+   </children>
+   <effect>
+      <DropShadow height="23.97" radius="10.7425">
+         <input>
+            <InnerShadow choke="0.11" />
+         </input>
+      </DropShadow>
+   </effect>
+</AnchorPane>
