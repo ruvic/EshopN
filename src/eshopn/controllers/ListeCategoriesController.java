@@ -10,6 +10,7 @@ import com.jfoenix.controls.JFXTextField;
 import eshopn.entities.Categorie;
 import eshopn.entities.controllers.CategorieJpaController;
 import eshopn.entities.controllers.ProduitJpaController;
+import eshopn.models.GlobalNotifications;
 import eshopn.models.Res;
 import eshopn.models.Tasks;
 import java.net.URL;
@@ -83,32 +84,58 @@ public class ListeCategoriesController extends Controllers implements Initializa
     @Override
     public void init() {
         
-        CategorieJpaController cont=new CategorieJpaController(Res.emf);
-        ProduitJpaController contPro=new ProduitJpaController(Res.emf);
-        listes=contPro.findCategoriesByDescProductsCount();
-        List<Categorie> list1=cont.findCategorieEntities();
-        
-        for (Categorie categorie : list1) {
-            if(listes.indexOf(categorie)<0){
-                listes.add(categorie);
+        try {
+            
+            CategorieJpaController cont=new CategorieJpaController(Res.emf);
+            ProduitJpaController contPro=new ProduitJpaController(Res.emf);
+            listes=contPro.findCategoriesByDescProductsCount();
+            List<Categorie> list1=cont.findCategorieEntities();
+
+            for (Categorie categorie : list1) {
+                if(listes.indexOf(categorie)<0){
+                    listes.add(categorie);
+                }
             }
+
+            setPaginationProperties(Res.NbreEltParLigne*2,listes);
+
+            listesGen=listes;
+
+            getScene().widthProperty().addListener(new ChangeListener<Number>(){
+                @Override
+                public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                    setPaginationProperties(Res.NbreEltParLigne*2, listesGen);
+                }
+
+            });
+
+            getStage().setMinWidth(STAGE_MIN_WIDTH);
+            getStage().setMinHeight(STAGE_MIN_HEIGHT);
+            
+        } catch (Exception e) {
+            
+            Res.not.showNotifications("Echec", 
+                        "Impossible de se connecter au serveur."
+                        , GlobalNotifications.ECHEC_NOT, 2, false);
+            
         }
         
-        setPaginationProperties(Res.NbreEltParLigne*2,listes);
+    }
+    
+    @FXML
+    void onRefresh(ActionEvent event) {
         
-        listesGen=listes;
-        
-        getScene().widthProperty().addListener(new ChangeListener<Number>(){
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                setPaginationProperties(Res.NbreEltParLigne*2, listesGen);
-            }
-            
-        });
-        
-        getStage().setMinWidth(STAGE_MIN_WIDTH);
-        getStage().setMinHeight(STAGE_MIN_HEIGHT);
-        
+        Res.not.showLoader(Res.stackPane);
+
+        FXMLLoader loader = getMain().replace("ListeCategories.fxml",content);
+        ListeCategoriesController cat = loader.getController();
+        cat.setMain(this.getMain());
+        cat.setContent(content);
+        cat.setScene(getScene());
+        cat.setStage(getStage());
+        cat.init();
+
+        Res.stackPane.setVisible(false);
     }
     
     public void setPaginationProperties(int itemPerPage, List<Categorie> listC){

@@ -62,14 +62,8 @@ public class Tasks implements Runnable {
         CategorieJpaController cont=new CategorieJpaController(Res.emf);
         ProduitJpaController contPro=new ProduitJpaController(Res.emf);
         this.allCategorie=contPro.findCategoriesByDescProductsCount();
-//        List<Categorie> list1=cont.findCategorieEntities();
         
         removeZeroProduits();
-//        
-//        for (Categorie categorie : allCategorie) {
-//            String chaine=categorie.getNomCat()+" : "+categorie.getProduitCollection().size();
-//            System.out.println(chaine);
-//        }
         
         
         for (Categorie categorie : allCategorie) {

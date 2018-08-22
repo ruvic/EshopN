@@ -13,6 +13,7 @@ import eshopn.entities.Photo;
 import eshopn.entities.controllers.GestionstockJpaController;
 import eshopn.entities.controllers.PhotoJpaController;
 import eshopn.entities.controllers.ProduitJpaController;
+import eshopn.models.GlobalNotifications;
 import eshopn.models.MFacture;
 import eshopn.models.MStocks;
 import eshopn.models.PDFStock;
@@ -189,237 +190,260 @@ public class StocksController extends Controllers implements Initializable {
     
     @Override
     public void init() {
-        GestionstockJpaController cont=new GestionstockJpaController(Res.emf);
-        listStocks=cont.findGestionstockEntities(true);
-        for (Gestionstock stock : listStocks) {
-            MStocks stocks=new MStocks(stock);
-            allStocks.add(new MStocks(stock));
-            table.getItems().add(stocks);
-        }
         
-        stocksGen=allStocks;
-        showDatasOnTableView(allStocks, pagination, table,Res.itermPerPage);
-       
-        
-        // 1. Wrap the ObservableList in a FilteredList (initially display all data).
-        FilteredList<MStocks> filteredData = new FilteredList<>(allStocks, p -> true);
+        try {
+            GestionstockJpaController cont=new GestionstockJpaController(Res.emf);
+            listStocks=cont.findGestionstockEntities(true);
 
-        // 2. Set the filter Predicate whenever the filter changes.
-        codeProField.textProperty().addListener((observable, oldValue, newValue) -> {
-            filteredData.setPredicate(mStock -> {
-                // If filter text is empty, display all persons.
-                if (newValue == null || newValue.isEmpty()) {
-                    
-                    if(anneeBox.getValue()==null){
-                        if(moisBox.getValue()==null){
-                            return true;
-                        }else{
-                            if(year(new Date()).equals(anneeBox.getValue())
-                                    && mStock.getDate().split("-")[1].toLowerCase().equals(moisBox.getValue()) ){
-                                System.out.println("passage");
-                                return true;
-                            }else return false;
-                        }
-                    }else{
-                        if(moisBox.getValue()==null){
-                            return true;
-                        }else{
-                            if(mStock.getDate().split("-")[0].equals(anneeBox.getValue())
-                                    && mStock.getDate().split("-")[1].toLowerCase().equals(moisBox.getValue()) ){
-                                return true;
-                            }else return false;
-                        }
-                    }
-                    
-                }
+            for (Gestionstock stock : listStocks) {
+                MStocks stocks=new MStocks(stock);
+                allStocks.add(new MStocks(stock));
+                table.getItems().add(stocks);
+            }
 
-                // Compare first name and last name of every person with filter text.
-                String lowerCaseFilter = newValue.toLowerCase();
-                
-                if (mStock.getCodeProduit().toLowerCase().contains(lowerCaseFilter)) {
-                    
-                    if(anneeBox.getValue()!=null){
-                        if(moisBox.getValue()!=null){
-                            if(mStock.getDate().split("-")[1].toLowerCase().equals(moisBox.getValue())
-                                  && mStock.getDate().split("-")[0].toLowerCase().equals(anneeBox.getValue())){
-                                return true;
-                            }else return false;
-                        }else{
-                            if(mStock.getDate().split("-")[1].toLowerCase().equals(anneeBox.getValue())){
-                                return true;
-                            }else return false;
-                        }
-                    }else{
-                        if(moisBox.getValue()!=null){
-                            if(mStock.getDate().split("-")[1].toLowerCase().equals(moisBox.getValue())
-                                    && year(new Date()).equals(anneeBox.getValue())){
-                                return true;
-                            }else return false;
-                        }else return true;
-                    }
-                } 
-                return false; // Does not match.
-            });
-            
-            // 3. Wrap the FilteredList in a SortedList.
-            SortedList<MStocks> sortedData = new SortedList<>(filteredData);
+            stocksGen=allStocks;
+            showDatasOnTableView(allStocks, pagination, table,Res.itermPerPage);
 
-            // 4. Bind the SortedList comparator to the TableView comparator.
-            sortedData.comparatorProperty().bind(table.comparatorProperty());
 
-            // 5. Add sorted (and filtered) data to the table.
-            table.setItems(sortedData);
-            
-            stocksGen=observableFromSortedList(sortedData);
-            showDatasOnTableView(observableFromSortedList(sortedData), pagination, table,Res.itermPerPage);
-        });
-        
-        moisBox.valueProperty().addListener((observable, oldValue, newValue) -> {
-            filteredData.setPredicate(mStock -> {
-                // If filter text is empty, display all persons.
-                if (newValue == null || newValue.isEmpty()) {
-                    if(anneeBox.getValue()==null){
-                        if(codeProField.getText().isEmpty()){
-                            return true;
-                        }else{
-                            if(mStock.getCodeProduit().contains(codeProField.getText().trim())){
+            // 1. Wrap the ObservableList in a FilteredList (initially display all data).
+            FilteredList<MStocks> filteredData = new FilteredList<>(allStocks, p -> true);
+
+            // 2. Set the filter Predicate whenever the filter changes.
+            codeProField.textProperty().addListener((observable, oldValue, newValue) -> {
+                filteredData.setPredicate(mStock -> {
+                    // If filter text is empty, display all persons.
+                    if (newValue == null || newValue.isEmpty()) {
+
+                        if(anneeBox.getValue()==null){
+                            if(moisBox.getValue()==null){
                                 return true;
                             }else{
+                                if(year(new Date()).equals(anneeBox.getValue())
+                                        && mStock.getDate().split("-")[1].toLowerCase().equals(moisBox.getValue()) ){
+                                    System.out.println("passage");
+                                    return true;
+                                }else return false;
+                            }
+                        }else{
+                            if(moisBox.getValue()==null){
+                                return true;
+                            }else{
+                                if(mStock.getDate().split("-")[0].equals(anneeBox.getValue())
+                                        && mStock.getDate().split("-")[1].toLowerCase().equals(moisBox.getValue()) ){
+                                    return true;
+                                }else return false;
+                            }
+                        }
+
+                    }
+
+                    // Compare first name and last name of every person with filter text.
+                    String lowerCaseFilter = newValue.toLowerCase();
+
+                    if (mStock.getCodeProduit().toLowerCase().contains(lowerCaseFilter)) {
+
+                        if(anneeBox.getValue()!=null){
+                            if(moisBox.getValue()!=null){
+                                if(mStock.getDate().split("-")[1].toLowerCase().equals(moisBox.getValue())
+                                      && mStock.getDate().split("-")[0].toLowerCase().equals(anneeBox.getValue())){
+                                    return true;
+                                }else return false;
+                            }else{
+                                if(mStock.getDate().split("-")[1].toLowerCase().equals(anneeBox.getValue())){
+                                    return true;
+                                }else return false;
+                            }
+                        }else{
+                            if(moisBox.getValue()!=null){
+                                if(mStock.getDate().split("-")[1].toLowerCase().equals(moisBox.getValue())
+                                        && year(new Date()).equals(anneeBox.getValue())){
+                                    return true;
+                                }else return false;
+                            }else return true;
+                        }
+                    } 
+                    return false; // Does not match.
+                });
+
+                // 3. Wrap the FilteredList in a SortedList.
+                SortedList<MStocks> sortedData = new SortedList<>(filteredData);
+
+                // 4. Bind the SortedList comparator to the TableView comparator.
+                sortedData.comparatorProperty().bind(table.comparatorProperty());
+
+                // 5. Add sorted (and filtered) data to the table.
+                table.setItems(sortedData);
+
+                stocksGen=observableFromSortedList(sortedData);
+                showDatasOnTableView(observableFromSortedList(sortedData), pagination, table,Res.itermPerPage);
+            });
+
+            moisBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+                filteredData.setPredicate(mStock -> {
+                    // If filter text is empty, display all persons.
+                    if (newValue == null || newValue.isEmpty()) {
+                        if(anneeBox.getValue()==null){
+                            if(codeProField.getText().isEmpty()){
+                                return true;
+                            }else{
+                                if(mStock.getCodeProduit().contains(codeProField.getText().trim())){
+                                    return true;
+                                }else{
+                                    return false;
+                                }
+                            }
+                        }else{
+                            if(codeProField.getText().isEmpty()){
+                                if(mStock.getDate().split("-")[0].equals(anneeBox.getValue())){
+                                    return true;
+                                }else return false;
+                            }else{
+                                if(mStock.getDate().split("-")[0].equals(anneeBox.getValue())
+                                        && mStock.getCodeProduit().contains(codeProField.getText().trim())){
+                                    return true;
+                                }else return false;
+                            }
+                        }
+                    }
+
+                    // Compare first name and last name of every person with filter text.
+                    String lowerCaseFilter = newValue.toLowerCase();
+
+                    if (mStock.getDate().split("-")[1].toLowerCase().contains(lowerCaseFilter)) {
+
+                        if(anneeBox.getValue()==null){
+                            if(codeProField.getText().isEmpty()){
+                                return true;
+                            }else{
+                                if(mStock.getCodeProduit().contains(codeProField.getText().trim())){
+                                    return true;
+                                }else return  false;
+                            }
+                        }else{
+                            if(codeProField.getText().isEmpty()){
+                                if(mStock.getDate().split("-")[0].equals(anneeBox.getValue())){
+                                    return true;
+                                }else return  false;
+                            }else{
+                                if(mStock.getDate().split("-")[0].equals(anneeBox.getValue())
+                                        && mStock.getCodeProduit().contains(codeProField.getText().trim())){
+                                    return true;
+                                }else return  false;
+                            }
+                        }
+                    } 
+                    return false; // Does not match.
+                });
+
+                // 3. Wrap the FilteredList in a SortedList.
+                SortedList<MStocks> sortedData = new SortedList<>(filteredData);
+
+                // 4. Bind the SortedList comparator to the TableView comparator.
+                sortedData.comparatorProperty().bind(table.comparatorProperty());
+
+                // 5. Add sorted (and filtered) data to the table.
+                table.setItems(sortedData);
+
+                stocksGen=observableFromSortedList(sortedData);
+                showDatasOnTableView(observableFromSortedList(sortedData), pagination, table,Res.itermPerPage);
+
+            });
+
+            anneeBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+                filteredData.setPredicate(mStock -> {
+                    // If filter text is empty, display all persons.
+                    if (newValue == null || newValue.isEmpty()) {
+                        if(moisBox.getValue()==null){
+                            if(codeProField.getText().isEmpty()){
+                                return true;
+                            }else{
+                                if(mStock.getCodeProduit().contains(codeProField.getText().trim())){
+                                    return true;
+                                }else return false;
+                            }
+                        }else{
+                            if(codeProField.getText().isEmpty()){
+                                if(mStock.getDate().split("-")[1].equals(moisBox.getValue())
+                                        && year(new Date()).equals(mStock.getDate().split("-")[0]))
+                                    return true;
+                                return false;
+                            }else{
+                                if(mStock.getDate().split("-")[1].equals(moisBox.getValue())
+                                        && year(new Date()).equals(anneeBox.getValue())
+                                        && mStock.getCodeProduit().contains(codeProField.getText().trim()))
+                                    return true;
                                 return false;
                             }
                         }
-                    }else{
-                        if(codeProField.getText().isEmpty()){
-                            if(mStock.getDate().split("-")[0].equals(anneeBox.getValue())){
-                                return true;
-                            }else return false;
-                        }else{
-                            if(mStock.getDate().split("-")[0].equals(anneeBox.getValue())
-                                    && mStock.getCodeProduit().contains(codeProField.getText().trim())){
-                                return true;
-                            }else return false;
-                        }
                     }
-                }
 
-                // Compare first name and last name of every person with filter text.
-                String lowerCaseFilter = newValue.toLowerCase();
+                    // Compare first name and last name of every person with filter text.
+                    String lowerCaseFilter = newValue.toLowerCase();
 
-                if (mStock.getDate().split("-")[1].toLowerCase().contains(lowerCaseFilter)) {
-                    
-                    if(anneeBox.getValue()==null){
-                        if(codeProField.getText().isEmpty()){
-                            return true;
+                    if (mStock.getDate().split("-")[0].toLowerCase().contains(lowerCaseFilter)) {
+
+                        if(moisBox.getValue()==null){
+                            if(codeProField.getText().isEmpty()){
+                                return true;
+                            }else {
+                                if(mStock.getCodeProduit().contains(codeProField.getText().trim())){
+                                    return true;
+                                }else return false;
+                            }
                         }else{
-                            if(mStock.getCodeProduit().contains(codeProField.getText().trim())){
-                                return true;
-                            }else return  false;
+                            if(codeProField.getText().isEmpty()){
+                                if(mStock.getDate().split("-")[1].equals(moisBox.getValue())){
+                                    return true;
+                                }else return false;
+                            }else {
+                                if(mStock.getCodeProduit().contains(codeProField.getText().trim())
+                                        && mStock.getDate().split("-")[1].equals(moisBox.getValue())){
+                                    return true;
+                                }else return false;
+                            }
                         }
-                    }else{
-                        if(codeProField.getText().isEmpty()){
-                            if(mStock.getDate().split("-")[0].equals(anneeBox.getValue())){
-                                return true;
-                            }else return  false;
-                        }else{
-                            if(mStock.getDate().split("-")[0].equals(anneeBox.getValue())
-                                    && mStock.getCodeProduit().contains(codeProField.getText().trim())){
-                                return true;
-                            }else return  false;
-                        }
-                    }
-                } 
-                return false; // Does not match.
+
+                    } 
+                    return false; // Does not match.
+                });
+
+                // 3. Wrap the FilteredList in a SortedList.
+                SortedList<MStocks> sortedData = new SortedList<>(filteredData);
+
+                // 4. Bind the SortedList comparator to the TableView comparator.
+                sortedData.comparatorProperty().bind(table.comparatorProperty());
+
+                // 5. Add sorted (and filtered) data to the table.
+                table.setItems(sortedData);
+
+                stocksGen=observableFromSortedList(sortedData);
+                showDatasOnTableView(observableFromSortedList(sortedData), pagination, table,Res.itermPerPage);
             });
-            
-            // 3. Wrap the FilteredList in a SortedList.
-            SortedList<MStocks> sortedData = new SortedList<>(filteredData);
-
-            // 4. Bind the SortedList comparator to the TableView comparator.
-            sortedData.comparatorProperty().bind(table.comparatorProperty());
-
-            // 5. Add sorted (and filtered) data to the table.
-            table.setItems(sortedData);
-            
-            stocksGen=observableFromSortedList(sortedData);
-            showDatasOnTableView(observableFromSortedList(sortedData), pagination, table,Res.itermPerPage);
-            
-        });
-        
-        anneeBox.valueProperty().addListener((observable, oldValue, newValue) -> {
-            filteredData.setPredicate(mStock -> {
-                // If filter text is empty, display all persons.
-                if (newValue == null || newValue.isEmpty()) {
-                    if(moisBox.getValue()==null){
-                        if(codeProField.getText().isEmpty()){
-                            return true;
-                        }else{
-                            if(mStock.getCodeProduit().contains(codeProField.getText().trim())){
-                                return true;
-                            }else return false;
-                        }
-                    }else{
-                        if(codeProField.getText().isEmpty()){
-                            if(mStock.getDate().split("-")[1].equals(moisBox.getValue())
-                                    && year(new Date()).equals(mStock.getDate().split("-")[0]))
-                                return true;
-                            return false;
-                        }else{
-                            if(mStock.getDate().split("-")[1].equals(moisBox.getValue())
-                                    && year(new Date()).equals(anneeBox.getValue())
-                                    && mStock.getCodeProduit().contains(codeProField.getText().trim()))
-                                return true;
-                            return false;
-                        }
-                    }
-                }
-
-                // Compare first name and last name of every person with filter text.
-                String lowerCaseFilter = newValue.toLowerCase();
-
-                if (mStock.getDate().split("-")[0].toLowerCase().contains(lowerCaseFilter)) {
-                    
-                    if(moisBox.getValue()==null){
-                        if(codeProField.getText().isEmpty()){
-                            return true;
-                        }else {
-                            if(mStock.getCodeProduit().contains(codeProField.getText().trim())){
-                                return true;
-                            }else return false;
-                        }
-                    }else{
-                        if(codeProField.getText().isEmpty()){
-                            if(mStock.getDate().split("-")[1].equals(moisBox.getValue())){
-                                return true;
-                            }else return false;
-                        }else {
-                            if(mStock.getCodeProduit().contains(codeProField.getText().trim())
-                                    && mStock.getDate().split("-")[1].equals(moisBox.getValue())){
-                                return true;
-                            }else return false;
-                        }
-                    }
-                    
-                } 
-                return false; // Does not match.
-            });
-            
-            // 3. Wrap the FilteredList in a SortedList.
-            SortedList<MStocks> sortedData = new SortedList<>(filteredData);
-
-            // 4. Bind the SortedList comparator to the TableView comparator.
-            sortedData.comparatorProperty().bind(table.comparatorProperty());
-
-            // 5. Add sorted (and filtered) data to the table.
-            table.setItems(sortedData);
-            
-            stocksGen=observableFromSortedList(sortedData);
-            showDatasOnTableView(observableFromSortedList(sortedData), pagination, table,Res.itermPerPage);
-        });
-        
+        } catch (Exception e) {
+            Res.not.showNotifications("Echec de l'ajout", 
+                        "Impossible de se connecter au serveur."
+                        , GlobalNotifications.ECHEC_NOT, 2, false);
+        }
         
         
     }
 
+    @FXML
+    void onRefresh(ActionEvent event) {
+        
+        if(Res.connected_storekeeper.getTypeGest()){
+            
+            FXMLLoader loader = getMain().replace("Stocks.fxml", content);
+            StocksController cat = loader.getController();
+            cat.setMain(this.getMain());
+            cat.setContent(content);
+            cat.setScene(getScene());
+            cat.setStage(getStage());
+            cat.init();
+        }
+        
+    }
+    
     @Override
     protected void setImagesToImageViews() {
         Image arrow=new Image("arrow.png");

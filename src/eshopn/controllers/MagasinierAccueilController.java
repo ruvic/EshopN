@@ -200,7 +200,6 @@ public class MagasinierAccueilController extends Controllers implements Initiali
     @FXML
     void onShowCategories(ActionEvent event) {
         
-
         Res.not.showLoader(Res.stackPane);
 
         loader = getMain().replace("ListeCategories.fxml",content);
@@ -213,8 +212,6 @@ public class MagasinierAccueilController extends Controllers implements Initiali
 
         Res.stackPane.setVisible(false);
 
-
-        
     }
 
     @FXML

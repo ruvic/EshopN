@@ -72,6 +72,7 @@ public class CategorieController extends Controllers implements Initializable {
         cat.setStage(getStage());
         cat.setCurrent_categorie(categorie);
         cat.init();
+        
     }
 
     @Override

@@ -105,20 +105,27 @@ public class AdminAjoutGestionnaireController extends Controllers implements Ini
                                     AdminEmployeesController.isStoreKeeper 
                             );
 
-                    cont.create(new_gest);
-                    AdminEmployeesController.list_Gestionnaires.add(new MGestionnaire(new_gest));
-                    
-                    if(isStorekeeper){
-                        getMain().showAdminEmployeeView(true);
-                    }else{
-                        getMain().showAdminEmployeeView(false);
+                    try {
+                        cont.create(new_gest);
+                        AdminEmployeesController.list_Gestionnaires.add(new MGestionnaire(new_gest));
+
+                        if(isStorekeeper){
+                            getMain().showAdminEmployeeView(true);
+                        }else{
+                            getMain().showAdminEmployeeView(false);
+                        }
+
+                        getStage().close();
+
+                        Res.not.showNotifications("Confirmation Ajout", 
+                                    "Le nouvelle employé a été ajouté avec succès", 
+                                    GlobalNotifications.SUCCESS_NOT, 2, false);
+                    } catch (Exception e) {
+                        Res.not.showNotifications("Echec", 
+                            "Impossible de se connecter au serveur."
+                            , GlobalNotifications.ECHEC_NOT, 2, false);
                     }
                     
-                    getStage().close();
-
-                    Res.not.showNotifications("Confirmation Ajout", 
-                                "Le nouvelle employé a été ajouté avec succès", 
-                                GlobalNotifications.SUCCESS_NOT, 2, false);
                 }else{
                     Res.not.showNotifications("Confirmation Ajout", 
                             "Les mots de passe ne doivent pas dépasser 20 caractères", 

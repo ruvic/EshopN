@@ -72,7 +72,6 @@ public class ConnexionController extends Controllers implements Initializable {
     public final double STAGE_MIN_WIDTH=685;
     public final double STAGE_MIN_HEIGHT=529;
    
-   
     
     /**
      * Initializes the controller class.

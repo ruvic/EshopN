@@ -139,79 +139,85 @@ public class DétailsProduitController extends Controllers implements Initializa
         
         /** Récupération d'une image du produit **/
         PhotoJpaController cont=new PhotoJpaController(Res.emf);
-//        listPhotos=cont.findPhotosEntities(produit);
-        listPhotos=(new ArrayList<>(produit.getPhotoCollection()));
         
         try {
+            
+            listPhotos=(new ArrayList<>(produit.getPhotoCollection()));
+            
+            
             URL url = new URL(lienAbsolueImage(listPhotos.get(0)));
             InputStream is = url.openStream();
             photoVue.setImage(new Image(is));
             is.close();
             
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(ProduitController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(DétailsProduitController.class.getName()).log(Level.SEVERE, null, ex);
+            for (int i = 0; i < listPhotos.size(); i++) {
+                Photo pht=listPhotos.get(i);
+                String photo=lienAbsolueImage(pht);
+                photos.add(photo);
+
+                File fil=new File(photo);
+                sourceFiles.add(fil);
+
+                try {
+                    URL url2 = new URL(lienAbsolueImage(pht));
+                    InputStream is2 = url2.openStream();
+                    final ImageView img = new ImageView(new Image(is2));
+                    img.setFitWidth(97);
+                    img.setFitHeight(84);
+
+                    final ContextMenu contextMenu=new ContextMenu();
+                    final MenuItem item=new MenuItem("Supprimer");
+                    final int index=i;
+                    contextMenu.getItems().addAll(item);
+
+                    if(Res.connected_storekeeper.getTypeGest()){
+
+                        img.setOnContextMenuRequested(new EventHandler<ContextMenuEvent>(){
+                            @Override
+                            public void handle(ContextMenuEvent e) {
+                                contextMenu.show(img, e.getScreenX(), e.getScreenY());
+                            }
+                        });
+
+                        item.setOnAction(new EventHandler<ActionEvent>() {
+                            @Override
+                            public void handle(ActionEvent event) {
+                                ((HBox)(pane.getContent())).getChildren().remove(img);
+                                aRetirer.add(index);
+                                photosAsupprimer.add(pht.getLienPhoto());
+                            }
+                        });
+                    }
+
+                    img.setOnMouseClicked(new EventHandler<MouseEvent>(){
+                        @Override
+                        public void handle(MouseEvent event) {
+                            photoVue.setImage(img.getImage());
+                        }
+                    });
+
+                    ((HBox)(pane.getContent())).setSpacing(5);
+                    ((HBox)(pane.getContent())).getChildren().add(img);
+
+                    is.close();
+                } catch(Exception e){
+                    Res.not.showNotifications("Echec de l'ajout", 
+                        "Impossible de se connecter au serveur."
+                        , GlobalNotifications.ECHEC_NOT, 2, false);
+                }
+            }
+            
+            this.getStage().show();
+            
+        } catch (Exception e) {
+            Res.not.showNotifications("Echec de l'ajout", 
+                        "Impossible de se connecter au serveur."
+                        , GlobalNotifications.ECHEC_NOT, 2, false);
         }
         
-        for (int i = 0; i < listPhotos.size(); i++) {
-            Photo pht=listPhotos.get(i);
-            String photo=lienAbsolueImage(pht);
-            photos.add(photo);
-            
-            File fil=new File(photo);
-            sourceFiles.add(fil);
-            
-            try {
-                URL url = new URL(lienAbsolueImage(pht));
-                InputStream is = url.openStream();
-                final ImageView img = new ImageView(new Image(is));
-                img.setFitWidth(97);
-                img.setFitHeight(84);
-
-                final ContextMenu contextMenu=new ContextMenu();
-                final MenuItem item=new MenuItem("Supprimer");
-                final int index=i;
-                contextMenu.getItems().addAll(item);
-
-                if(Res.connected_storekeeper.getTypeGest()){
-                    
-                    img.setOnContextMenuRequested(new EventHandler<ContextMenuEvent>(){
-                        @Override
-                        public void handle(ContextMenuEvent e) {
-                            contextMenu.show(img, e.getScreenX(), e.getScreenY());
-                        }
-                    });
-                    
-                    item.setOnAction(new EventHandler<ActionEvent>() {
-                        @Override
-                        public void handle(ActionEvent event) {
-                            ((HBox)(pane.getContent())).getChildren().remove(img);
-                            aRetirer.add(index);
-                            photosAsupprimer.add(pht.getLienPhoto());
-                        }
-                    });
-                }
-                
-                img.setOnMouseClicked(new EventHandler<MouseEvent>(){
-                    @Override
-                    public void handle(MouseEvent event) {
-                        photoVue.setImage(img.getImage());
-                    }
-                });
-                
-                
-
-                ((HBox)(pane.getContent())).setSpacing(5);
-                ((HBox)(pane.getContent())).getChildren().add(img);
-                
-                is.close();
-            } catch (FileNotFoundException ex) {
-                Logger.getLogger(DétailsProduitController.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IOException ex) {
-                Logger.getLogger(DétailsProduitController.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
+        
+        
+        
         
     }
     
@@ -308,11 +314,12 @@ public class DétailsProduitController extends Controllers implements Initializa
 
                         listProCont.init();
 
-                    } catch (NonexistentEntityException ex) {
-                        Logger.getLogger(DétailsProduitController.class.getName()).log(Level.SEVERE, null, ex);
                     } catch (Exception ex) {
-                        Logger.getLogger(DétailsProduitController.class.getName()).log(Level.SEVERE, null, ex);
+                        Res.not.showNotifications("Echec", 
+                                "Impossible de se connecter au serveur."
+                                , GlobalNotifications.ECHEC_NOT, 3, false);
                     }  
+                    
                 } catch (Exception e) {
                     Res.not.showNotifications("Echec de l'ajout", 
                         "Le prix doit être un réel"

@@ -88,61 +88,6 @@ public final class MGestionnaire {
         
         MGestionnaire mGestionnaire=this;
         
-//        deleteBtn.setOnAction(new EventHandler<ActionEvent>() {
-//            @Override
-//            public void handle(ActionEvent event) {
-//                Gestionnaire gest=cont.findGestionnaire(getGest().getLogin());
-//                isValidated=new SimpleBooleanProperty(false);
-//                
-//                if(getId()!=0){
-//                    stack.setVisible(true);
-//                    
-//                    String ms="Etes vous sûr de vouloir supprimer l'employé :\n'"
-//                            + getGest().getNomGest()+"' ?";
-//                    Res.not.showDialog(stack,
-//                            "Confirmation", 
-//                            ms,
-//                            isValidated);
-//
-//                    isValidated.addListener(new ChangeListener<Boolean>(){
-//                        @Override
-//                        public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-//                            if(newValue.booleanValue()!=oldValue.booleanValue()){
-//                                if(newValue.booleanValue()){
-//                                    try {
-//                                        cont.destroy(getId());
-//                                        AdminEmployeesController.list_Gestionnaires.remove(mGestionnaire);
-//                                        
-//                                        String msg="La suppression de l'employé : \n'"
-//                                                +getGest().getNomGest()+"' s'est effectuée avec succès";
-//                                        
-//                                        Res.not.showNotifications("Confirmation de la suppression",
-//                                                msg,
-//                                                GlobalNotifications.SUCCESS_NOT, 2,false);
-//                                        
-//                                    } catch (Exception ex) {
-//                                        Res.not.showNotifications("Erreur de suppression",
-//                                                ex.getMessage(), 
-//                                                GlobalNotifications.ECHEC_NOT, 2, false);
-//                                    }
-//                                    
-//                                }
-//                            }
-//                        }
-//
-//                    });
-//
-//                } 
-//                else {
-//                    Res.not.showNotifications("Erreur de suppression",
-//                            "L'application a rencontré un problème lors "
-//                          + "de la connection à la base de donnée", 
-//                            GlobalNotifications.ECHEC_NOT, 3, false);
-//                }
-//
-//            }
-//        });
-        
         editBtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -160,9 +105,9 @@ public final class MGestionnaire {
                     statusProperty().setValue((getGest().getActif())?ACTIVE:DESACTIVE);
                     toggle.setText((getGest().getActif())?ACTIVE:DESACTIVE);
                 } catch (Exception e) {
-                    Res.not.showNotifications("Erreur de modification", 
-                            "Erreur lors de la connection avec la base de donnée", 
-                            GlobalNotifications.ECHEC_NOT, 3, false);
+                    Res.not.showNotifications("Echec", 
+                            "Impossible de se connecter au serveur."
+                            , GlobalNotifications.ECHEC_NOT, 2, false);
                 }
             }
         });

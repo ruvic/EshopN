@@ -96,6 +96,7 @@ public class AlterStockController extends Controllers implements Initializable {
             ProduitJpaController proCont=new ProduitJpaController(Res.emf);
             
             if(isOperation()){
+                
                 try {
                     Gestionstock stock=new Gestionstock(newQte,
                             (new GregorianCalendar()).getTime(),
@@ -104,26 +105,29 @@ public class AlterStockController extends Controllers implements Initializable {
                             ,isOperation());
 
                     current_produit.setQte(currentQte+newQte);
+                    
                     proCont.edit(current_produit);
                     gestCont.create(stock);
-                    
+
                     listProdCont.init();
-            
+
                     getStage().close();
-                    
+
                     Res.not.showNotifications("Confirmation de l'approvisionnement", 
                             "Le produit "+current_produit.getNomPro()+" a été approvisionné avec succès"
                             , GlobalNotifications.SUCCESS_NOT, 3, false);
                     
-
                 } catch (Exception ex) {
-                    Logger.getLogger(AlterStockController.class.getName()).log(Level.SEVERE, null, ex);
+                    Res.not.showNotifications("Echec", 
+                            "Impossible de se connecter au serveur."
+                            , GlobalNotifications.ECHEC_NOT, 3, false);
                 }
 
             }else{
                 if(newQte<=currentQte){
                     
                     try {
+                        
                         Gestionstock stock=new Gestionstock(newQte,
                                 (new GregorianCalendar()).getTime(),
                                 Res.connected_storekeeper,
@@ -145,13 +149,12 @@ public class AlterStockController extends Controllers implements Initializable {
                             , GlobalNotifications.SUCCESS_NOT, 3, false);
                         
                         
-                    } catch (NonexistentEntityException ex) {
-                        Logger.getLogger(AlterStockController.class.getName()).log(Level.SEVERE, null, ex);
                     } catch (Exception ex) {
-                        Logger.getLogger(AlterStockController.class.getName()).log(Level.SEVERE, null, ex);
+                        Res.not.showNotifications("Echec",
+                            "Impossible de se connecter au serveur."
+                            , GlobalNotifications.ECHEC_NOT, 3, false);
                     }
                 }else{
-                    System.out.println("passge5");
                     Res.not.showNotifications("Echec du retrait", 
                             "La quantité à retirer doit être inférieure à la quantité actuelle"
                             , GlobalNotifications.ECHEC_NOT, 3, false);

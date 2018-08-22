@@ -52,6 +52,7 @@ public class AllCategoriesController extends Controllers{
 
     @Override
     public void init() {
+        
         dateLabel.setText(" "+dateActuelle());
         adresseLabel.setText(" "+Res.config.getAdresse());
         telLabel.setText(" "+Res.config.getTel());
@@ -59,6 +60,7 @@ public class AllCategoriesController extends Controllers{
         for (Categorie categorie : allCategorie) {
             content.getChildren().add(getMain().getCategoriePDF(allCategorie, page));
         }
+        
     }
     
     public String dateActuelle(){

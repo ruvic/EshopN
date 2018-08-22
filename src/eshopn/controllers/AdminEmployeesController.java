@@ -117,25 +117,39 @@ public class AdminEmployeesController extends Controllers implements Initializab
         statusColumn.setCellValueFactory(cellData->cellData.getValue().statusProperty());
         ActionsColumn.setCellValueFactory(cellData->cellData.getValue().actionsProperty());
         
-        list_Gestionnaires=getElements();
-        table.setItems(list_Gestionnaires);
         
-        genGest=list_Gestionnaires;
-        allGest=list_Gestionnaires;
-        showDatasOnTableView(list_Gestionnaires, pagination, table,Res.itermPerPage);
-        
-        
-        /** Trie suivant la colonne des noms par ordre alphabétique **/
-        table.getSortOrder().add(nameColumn);
-        
-        search();
-        
-        MGestionnaire.stack=stack;
         
     }    
 
     @Override
     public void init() {
+        
+        try {
+            
+            list_Gestionnaires=getElements();
+            table.setItems(list_Gestionnaires);
+
+            genGest=list_Gestionnaires;
+            allGest=list_Gestionnaires;
+            showDatasOnTableView(list_Gestionnaires, pagination, table,Res.itermPerPage);
+
+
+            /** Trie suivant la colonne des noms par ordre alphabétique **/
+            table.getSortOrder().add(nameColumn);
+
+            search();
+
+            MGestionnaire.stack=stack;
+            
+        } catch (Exception e) {
+            
+            Res.not.showNotifications("Echec", 
+                        "Impossible de se connecter au serveur."
+                        , GlobalNotifications.ECHEC_NOT, 2, false);
+            
+        }
+        
+        
         getScene().widthProperty().addListener(new ChangeListener<Number>(){
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {

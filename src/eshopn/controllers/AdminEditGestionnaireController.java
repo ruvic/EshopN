@@ -96,6 +96,7 @@ public class AdminEditGestionnaireController extends Controllers implements Init
             if(pwdField.getText().equals(confirmpwdField.getText())){
                 if(pwdField.getText().length()<=20){
                     try {
+                        
                         GestionnaireJpaController cont = new GestionnaireJpaController(Res.emf);
 
                         Gestionnaire gest=current_gestionnaire.getGest();
@@ -104,18 +105,25 @@ public class AdminEditGestionnaireController extends Controllers implements Init
                         gest.setPwd(pwdField.getText());
                         gest.setActif(actifToogleBtn.isSelected());
 
-                        cont.edit(gest);
+                        try {
+                            cont.edit(gest);
 
-                        /**Mise à jour de la table**/
-                        current_gestionnaire.nameProperty().setValue(gest.getNomGest());
-                        current_gestionnaire.usernameProperty().setValue(gest.getLogin());
-                        current_gestionnaire.statusProperty().setValue((gest.getActif())?"Activé":"Désactivé");
+                            /**Mise à jour de la table**/
+                            current_gestionnaire.nameProperty().setValue(gest.getNomGest());
+                            current_gestionnaire.usernameProperty().setValue(gest.getLogin());
+                            current_gestionnaire.statusProperty().setValue((gest.getActif())?"Activé":"Désactivé");
 
-                        getStage().close();
+                            getStage().close();
 
-                        Res.not.showNotifications("Confirmation modification", 
-                                "Les informations ont été modifiées avec succès", 
-                                GlobalNotifications.SUCCESS_NOT, 2, false);
+                            Res.not.showNotifications("Confirmation modification", 
+                                    "Les informations ont été modifiées avec succès", 
+                                    GlobalNotifications.SUCCESS_NOT, 2, false);
+                        } catch (Exception e) {
+                            Res.not.showNotifications("Echec", 
+                                "Impossible de se connecter au serveur."
+                                , GlobalNotifications.ECHEC_NOT, 2, false);
+                        }
+                        
                     } catch (Exception e) {
 
                         Res.not.showNotifications("Confirmation modification", 

@@ -113,37 +113,57 @@ public class NouveauProduitController extends Controllers implements Initializab
                     "La description doit avoir 100 caractères au maximum"
                     , GlobalNotifications.ECHEC_NOT, 2, false);
                 }else{
-                    int codePro=generateCode();
-                    Produit pr=new Produit(codePro,
-                            nomProduitField.getText().trim()
-                            , BigDecimal.valueOf(Double.valueOf(prixUnitField.getText())), 0
-                            , descriptField.getText()
-                            , codeFourfield.getText().trim(), categorie,true);
-
-                    /** Insertion des photos dans la base de donnée **/
-                    maj();
                     
-                    /** Insertion proprement dite dans la base de donnée **/
-                    ProduitJpaController contPro=new ProduitJpaController(Res.emf);
-                    PhotoJpaController contPhoto=new PhotoJpaController(Res.emf);
-
-                    // Insertion du produit dans la base de donnée
-                    contPro.create(pr);
-
-                    //Insertion des images dans la base de donnée
-                    for (File photo_file : sourceFiles) {
-                        Photo ph=new Photo(photo_file.getName(), pr);
-                        contPhoto.create(ph);
+                    if(codeFourfield.getText().trim().length()>12){
                         
-                        (new HTTPRequest(Res.config.getUploadPhp())).appendParam("id", Res.config.getDossierPhotsRelative()+codePro)
-                                   .appendParam("img", photo_file)
-                                   .post();
+                        Res.not.showNotifications("Echec de l'ajout", 
+                            "Le code Fournisseur doit avoir 12 caractères au maximum"
+                            , GlobalNotifications.ECHEC_NOT, 2, false);
                         
+                    }else{
+                        
+                        try {
+                            
+                            int codePro=generateCode();
+                            Produit pr=new Produit(codePro,
+                                    nomProduitField.getText().trim()
+                                    , BigDecimal.valueOf(Double.valueOf(prixUnitField.getText())), 0
+                                    , descriptField.getText()
+                                    , codeFourfield.getText().trim(), categorie,true);
+
+                            /** Insertion des photos dans la base de donnée **/
+                            maj();
+
+                            /** Insertion proprement dite dans la base de donnée **/
+                            ProduitJpaController contPro=new ProduitJpaController(Res.emf);
+                            PhotoJpaController contPhoto=new PhotoJpaController(Res.emf);
+
+                            // Insertion du produit dans la base de donnée
+
+
+                            contPro.create(pr);
+
+                            //Insertion des images dans la base de donnée
+                            for (File photo_file : sourceFiles) {
+                                Photo ph=new Photo(photo_file.getName(), pr);
+                                contPhoto.create(ph);
+
+                                (new HTTPRequest(Res.config.getUploadPhp())).appendParam("id", Res.config.getDossierPhotsRelative()+codePro)
+                                           .appendParam("img", photo_file)
+                                           .post();
+
+                            }
+
+                            listProdCont.init();
+
+                            getStage().close();
+                            
+                        } catch (Exception e) {
+                            Res.not.showNotifications("Echec de l'ajout", 
+                                "Impossible de se connecter au serveur."
+                                , GlobalNotifications.ECHEC_NOT, 5, false);
+                        }
                     }
-                    
-                    listProdCont.init();
-
-                    getStage().close();
                     
                 }
                 

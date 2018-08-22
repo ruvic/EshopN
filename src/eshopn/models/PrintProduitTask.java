@@ -7,6 +7,7 @@ package eshopn.models;
 
 import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.DocumentException;
+import com.jfoenix.controls.JFXButton;
 import eshopn.entities.Photo;
 import eshopn.entities.Produit;
 import java.awt.Desktop;

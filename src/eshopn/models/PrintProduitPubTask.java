@@ -7,6 +7,7 @@ package eshopn.models;
 
 import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.DocumentException;
+import com.jfoenix.controls.JFXButton;
 import eshopn.entities.Photo;
 import eshopn.entities.Produit;
 import java.awt.Desktop;
@@ -34,7 +35,7 @@ public class PrintProduitPubTask implements  Runnable {
     public PrintProduitPubTask(List<Produit> listGen, ImageView loaderImg) {
         this.listesGen = listGen;
         this.loader=loaderImg;
-    }    
+    }   
     
     @Override
     public void run() {

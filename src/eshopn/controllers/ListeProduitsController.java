@@ -118,6 +118,7 @@ public class ListeProduitsController extends Controllers implements Initializabl
     public final double STAGE_MIN_WIDTH=800;
     public final double STAGE_MIN_HEIGHT=700;
    
+    
 
     /**
      * Initializes the controller class.
@@ -130,9 +131,24 @@ public class ListeProduitsController extends Controllers implements Initializabl
         Res.reset();
         
         if( !Res.connected_storekeeper.getTypeGest()){
-            newProductBtn.setVisible(false);
+            newProductBtn.setVisible(true);
         }
-    }    
+        
+    }
+
+    @FXML
+    void onRefresh(ActionEvent event) {
+        
+        loader=getMain().replace("ListeProduits.fxml", content);
+        ListeProduitsController cat = loader.getController();
+        cat.setMain(this.getMain());
+        cat.setContent(content);
+        cat.setScene(getScene());
+        cat.setStage(getStage());
+        cat.setCurrent_categorie(current_categorie);
+        cat.init();
+        
+    }
 
     @FXML
     void onCategorie(ActionEvent event) {
@@ -260,96 +276,112 @@ public class ListeProduitsController extends Controllers implements Initializabl
 
     @Override
     public void init() {
-        ProduitJpaController cont=new ProduitJpaController(Res.emf);
-        listes=cont.findProduitEntitiesOrder();
         
-        if(current_categorie!=null){
-            nomCat.setText(current_categorie.getNomCat());
-            List<Produit> list=new ArrayList<>();
+        try {
             
-            if(!Res.connected_storekeeper.getTypeGest()){
-                printBtn.setText("Imprimer Pub");
-                printPubBtn.setVisible(false);
-                AnchorPane.setLeftAnchor(nomCat, 165.0);
-                printBtn.setOnAction(new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent event) {
-                        try {
-                            onPrintPub(event);
-                        } catch (IOException ex) {
-                            Logger.getLogger(ListeProduitsController.class.getName()).log(Level.SEVERE, null, ex);
-                        } catch (DocumentException ex) {
-                            Logger.getLogger(ListeProduitsController.class.getName()).log(Level.SEVERE, null, ex);
+            ProduitJpaController cont=new ProduitJpaController(Res.emf);
+            listes=cont.findProduitEntitiesOrder();
+
+            if(current_categorie!=null){
+
+                nomCat.setText(current_categorie.getNomCat());
+                List<Produit> list=new ArrayList<>();
+
+                if(!Res.connected_storekeeper.getTypeGest()){
+                    printBtn.setText("Imprimer Pub");
+                    printPubBtn.setVisible(false);
+                    AnchorPane.setLeftAnchor(nomCat, 165.0);
+                    printBtn.setOnAction(new EventHandler<ActionEvent>() {
+                        @Override
+                        public void handle(ActionEvent event) {
+                            try {
+                                onPrintPub(event);
+                            } catch (IOException ex) {
+                                Logger.getLogger(ListeProduitsController.class.getName()).log(Level.SEVERE, null, ex);
+                            } catch (DocumentException ex) {
+                                Logger.getLogger(ListeProduitsController.class.getName()).log(Level.SEVERE, null, ex);
+                            }
                         }
-                    }
-                });
-            }
-            
-            for (Produit pr : listes) {
-                if(!pr.getIdCategorie().getIdCat().equals(current_categorie.getIdCat())){
-                    list.add(pr);
+                    });
                 }
-            }
-            
-            for (Produit pr : list) {
-                listes.remove(pr);
-            }
-            
-        }else{
-            nomCat.setText("");
-            newProductBtn.setVisible(false);
-            if(!Res.connected_storekeeper.getTypeGest()){
-                printBtn.setText("Imprimer Pub");
-                printPubBtn.setVisible(false);
-                printBtn.setOnAction(new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent event) {
-                        try {
-                            onPrintPub(event);
-                        } catch (IOException ex) {
-                            Logger.getLogger(ListeProduitsController.class.getName()).log(Level.SEVERE, null, ex);
-                        } catch (DocumentException ex) {
-                            Logger.getLogger(ListeProduitsController.class.getName()).log(Level.SEVERE, null, ex);
-                        }
+
+                for (Produit pr : listes) {
+                    if(!pr.getIdCategorie().getIdCat().equals(current_categorie.getIdCat())){
+                        list.add(pr);
                     }
-                });
+                }
+
+                for (Produit pr : list) {
+                    listes.remove(pr);
+                }
+
+            }else{
+                nomCat.setText("");
+                newProductBtn.setVisible(false);
+                if(!Res.connected_storekeeper.getTypeGest()){
+                    printBtn.setText("Imprimer Pub");
+                    printPubBtn.setVisible(false);
+                    printBtn.setOnAction(new EventHandler<ActionEvent>() {
+                        @Override
+                        public void handle(ActionEvent event) {
+                            try {
+                                onPrintPub(event);
+                            } catch (IOException ex) {
+                                Logger.getLogger(ListeProduitsController.class.getName()).log(Level.SEVERE, null, ex);
+                            } catch (DocumentException ex) {
+                                Logger.getLogger(ListeProduitsController.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
+                    });
+                }
+
+                prod1Img.setVisible(true);
+                prod1Text.setVisible(true);
+                prod2Img.setVisible(false);
+                prod2Text.setVisible(false);
+                categorieBtn.setVisible(false);
+                categorieImg.setVisible(false);
+                categorieText.setVisible(false);
             }
 
-            prod1Img.setVisible(true);
-            prod1Text.setVisible(true);
-            prod2Img.setVisible(false);
-            prod2Text.setVisible(false);
-            categorieBtn.setVisible(false);
-            categorieImg.setVisible(false);
-            categorieText.setVisible(false);
+            setPaginationProperties(Res.NbreEltParLigne*2, listes);
+
+            listesGen=listes;
+
+            getScene().widthProperty().addListener(new ChangeListener<Number>(){
+                @Override
+                public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                    setPaginationProperties(Res.NbreEltParLigne*2, listesGen);
+                    getStage().centerOnScreen();
+                }   
+            });
+            
+        } catch (Exception e) {
+            
+            Res.not.showNotifications("Echec", 
+                        "Impossible de se connecter au serveur."
+                        , GlobalNotifications.ECHEC_NOT, 2, false);
         }
-        
-        setPaginationProperties(Res.NbreEltParLigne*2, listes);
-        
-        listesGen=listes;
-        
-        getScene().widthProperty().addListener(new ChangeListener<Number>(){
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                setPaginationProperties(Res.NbreEltParLigne*2, listesGen);
-                getStage().centerOnScreen();
-            }   
-        });
         
     }
     
     @FXML
     void onPrint(ActionEvent event) throws IOException, DocumentException {
+        
+        
         PrintProduitTask task=new PrintProduitTask(listesGen, loaderImg);
         Thread t=new Thread(task);
         t.start();
+        
     }
     
     @FXML
     void onPrintPub(ActionEvent event) throws IOException, DocumentException {
+        
         PrintProduitPubTask task=new PrintProduitPubTask(listesGen, loaderImg);
         Thread t=new Thread(task);
         t.start();
+        
     }
     
     public void setPaginationProperties(int itemPerPage, List<Produit> listP){

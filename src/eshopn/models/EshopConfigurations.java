@@ -44,19 +44,20 @@ public class EshopConfigurations {
 
     public EshopConfigurations(String admin, String adminPwd,
             String adresse,String tel, 
-            String bd,String server, 
-            String port ,String user, 
+            String bd,String server, String serverBD,
+            String port , String portBD , String user, 
             String password, String dossierApp,
             String dossierPhotos, String dossierLogos,
             String requestController,String logoApp,
             String logoPdf, String logoConn,double remise,
             String nro, String rc,
             String factures, String produits, String stocks) throws IOException {
+        
         this.admin = admin;
         this.adminPwd = adminPwd;
         this.adresse=adresse;
         this.tel=tel;
-        this.url = "jdbc:mysql://"+server.substring(7)+":3306/"+bd+"?zeroDateTimeBehavior=convertToNull";
+        this.url = "jdbc:mysql://"+serverBD+":"+portBD+"/"+bd+"?zeroDateTimeBehavior=convertToNull";
         this.user = user;
         this.password = password;
         this.dossierPhotos=server+":"+port+"/"+dossierApp+"/"+dossierPhotos+"/";

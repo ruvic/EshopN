@@ -49,7 +49,7 @@ public class GlobalNotifications {
                 .title(title)
                 .text("  "+msg)
                 .graphic(img)
-                .hideAfter(Duration.seconds(time))
+                .hideAfter(Duration.seconds(6))
                 .position(Pos.TOP_RIGHT);
         if(dark_style) notBuilder.darkStyle();
         

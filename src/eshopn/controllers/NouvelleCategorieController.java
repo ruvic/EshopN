@@ -63,25 +63,45 @@ public class NouvelleCategorieController extends Controllers implements Initiali
                 
                 if(isNew){
                     Categorie cat=new Categorie(categorieField.getText().trim());
-                    cont.create(cat);
+                    try {
+                        cont.create(cat);
+                        
+                        listCatCont.init();
+
+                        getStage().close();
+
+                        Res.not.showNotifications("Confirmation Création Nouvelle catégorie", 
+                                            "La catégorie "+categorieField.getText().trim()+" a été crée avec succès"
+                                            , GlobalNotifications.SUCCESS_NOT, 3, false);
+                        
+                    } catch (Exception e) {
+                        Res.not.showNotifications("Echec ", 
+                                    "Impossible de se connecter au serveur."
+                                    , GlobalNotifications.ECHEC_NOT, 3, false);
+                    }
                 }else{
+                    
                     current_categorie.setNomCat(categorieField.getText().trim());
+                    
                     try {
                         cont.edit(current_categorie);
-                    } catch (NonexistentEntityException ex) {
-                        Logger.getLogger(NouvelleCategorieController.class.getName()).log(Level.SEVERE, null, ex);
+                        
+                        listCatCont.init();
+
+                        getStage().close();
+
+                        Res.not.showNotifications("Confirmation Création Nouvelle catégorie", 
+                                            "La catégorie "+categorieField.getText().trim()+" a été crée avec succès"
+                                            , GlobalNotifications.SUCCESS_NOT, 3, false);
+                        
                     } catch (Exception ex) {
-                        Logger.getLogger(NouvelleCategorieController.class.getName()).log(Level.SEVERE, null, ex);
+                        Res.not.showNotifications("Echec", 
+                                    "Impossible de se connecter au serveur."
+                                    , GlobalNotifications.ECHEC_NOT, 3, false);
                     }
                 }
 
-                listCatCont.init();
-
-                getStage().close();
-
-                Res.not.showNotifications("Confirmation Création Nouvelle catégorie", 
-                                    "La catégorie "+categorieField.getText().trim()+" a été crée avec succès"
-                                    , GlobalNotifications.SUCCESS_NOT, 3, false);
+                
                 
             }else{
                 Res.not.showNotifications("Echec de création de la nouvelle catégorie", 

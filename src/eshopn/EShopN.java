@@ -139,6 +139,7 @@ public class EShopN extends Application {
             stage.setMaximized(true);
             stage.setTitle("EShop");
             stage.show();
+            
         } catch (Exception e) {
             System.out.println("Erreur d'affichage de la page de connexion");
             e.printStackTrace();
@@ -445,7 +446,6 @@ public class EShopN extends Application {
             controller.setStage(new_stage);
             controller.setListProCont(cont);
             controller.setProduit(prod);
-            controller.init();
             
             new_stage.setScene(new_scene);
             new_stage.setResizable(false);
@@ -453,7 +453,9 @@ public class EShopN extends Application {
             new_stage.centerOnScreen();
             new_stage.setTitle("EShop - Ajouter un nouveau produit");
             new_stage.initModality(Modality.APPLICATION_MODAL);
-            new_stage.show();
+            
+            controller.init();
+
             
         } catch (Exception e) {
             e.printStackTrace();
@@ -629,7 +631,9 @@ public class EShopN extends Application {
         String user=prop.getProperty("user");
         String password=prop.getProperty("password");
         String server=prop.getProperty("server");
+        String serverBD=prop.getProperty("serverBD");
         String port=prop.getProperty("port");
+        String portBD=prop.getProperty("portBD");
         String dossierApp=prop.getProperty("dossierApp");
         String dossierphotos=prop.getProperty("dossierphotos");
         String dossierLogos=prop.getProperty("dossierLogos");
@@ -646,7 +650,7 @@ public class EShopN extends Application {
         
         Res.config=new EshopConfigurations(
                 admin, adminpwd, adresse, tel,
-                bd, server, port, user, password, 
+                bd, server, serverBD, port,portBD, user, password, 
                 dossierApp, dossierphotos,dossierLogos,requestController 
                 ,logoApp, logoPdf,logoCon ,remise,nro,rc,
                 dossierFacturesPdf, dossierProduitsPdf, dossierStocksPdf);

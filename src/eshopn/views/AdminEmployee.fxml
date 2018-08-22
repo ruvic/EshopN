@@ -45,10 +45,13 @@
                </effect>
             </ImageView>
             <Label fx:id="employeeLabel" layoutX="128.0" layoutY="51.0" style="-fx-font-size: 15; -fx-font-weight: bold;" text="Magasinier" textFill="WHITE" />
-            <JFXButton contentDisplay="GRAPHIC_ONLY" focusTraversable="false" layoutX="246.0" layoutY="45.0" onAction="#onAdd" prefHeight="37.0" prefWidth="39.0" ripplerFill="#2422bc" AnchorPane.leftAnchor="246.0" AnchorPane.topAnchor="45.0">
+            <JFXButton focusTraversable="false" graphicTextGap="8.0" layoutX="246.0" layoutY="45.0" onAction="#onAdd" prefHeight="37.0" prefWidth="172.0" ripplerFill="#2422bc" text="Creer Magasinier" AnchorPane.leftAnchor="246.0" AnchorPane.topAnchor="45.0">
                <graphic>
                   <FontAwesomeIcon fill="#252364" iconName="PLUS" size="25" />
                </graphic>
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
             </JFXButton>
             <AnchorPane layoutX="8.0" layoutY="77.0" prefHeight="433.0" prefWidth="744.0" stylesheets="@css/style.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="77.0">
                <children>

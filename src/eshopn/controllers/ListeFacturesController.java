@@ -16,6 +16,7 @@ import eshopn.entities.Produit;
 import eshopn.entities.controllers.FactureJpaController;
 import eshopn.entities.controllers.LignefactureJpaController;
 import eshopn.entities.controllers.PhotoJpaController;
+import eshopn.models.GlobalNotifications;
 import eshopn.models.MFact;
 import eshopn.models.MFacture;
 import eshopn.models.PrintFacture;
@@ -182,58 +183,66 @@ public class ListeFacturesController extends Controllers implements Initializabl
     @FXML
     void onPrint(ActionEvent event) throws IOException, DocumentException, FileNotFoundException, BadElementException, PrinterException {
         
-        LignefactureJpaController contLignFact=new LignefactureJpaController(Res.emf);
-        PhotoJpaController cont=new PhotoJpaController(Res.emf);
-        
-        MFacture factSel=table.getSelectionModel().getSelectedItem();
-        
-        if(factSel!=null){
-            loaderImg.setVisible(true);
-        }
-        
-        PrintFacture printer=new PrintFacture();
-        Facture facture=factSel.getFacture();
-        ObservableList<MFact> listeFact=FXCollections.observableArrayList();
-        List<Lignefacture> liste1=contLignFact.findLignefactureEntities(facture);
-        
-        
-        
-        for (Lignefacture lFact : liste1) {
-            Photo pht=cont.findPhotosEntities(lFact.getProduit()).get(0);
-            Image img=null;
-            
-            try {
-                URL url = new URL(lienAbsolueImage(pht));
-                InputStream is = url.openStream();
-                img=new Image(is);
-                is.close();
-            } catch (MalformedURLException ex) {
-                Logger.getLogger(FacturationController.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IOException ex) {
-                Logger.getLogger(FacturationController.class.getName()).log(Level.SEVERE, null, ex);
+        try {
+            LignefactureJpaController contLignFact=new LignefactureJpaController(Res.emf);
+            PhotoJpaController cont=new PhotoJpaController(Res.emf);
+
+            MFacture factSel=table.getSelectionModel().getSelectedItem();
+
+            if(factSel!=null){
+                loaderImg.setVisible(true);
             }
-            
-            
-            MFact mfact=new MFact(formatCode(""+lFact.getProduit().getCodePro())
-                    , lFact.getPrix().doubleValue()
-                    , (int)lFact.getQte()
-                    , lFact.getQte()*lFact.getPrix().doubleValue()
-                    , lFact.getProduit()
+
+            PrintFacture printer=new PrintFacture();
+            Facture facture=factSel.getFacture();
+            ObservableList<MFact> listeFact=FXCollections.observableArrayList();
+            List<Lignefacture> liste1=contLignFact.findLignefactureEntities(facture);
+
+
+
+            for (Lignefacture lFact : liste1) {
+                Photo pht=cont.findPhotosEntities(lFact.getProduit()).get(0);
+                Image img=null;
+
+                try {
+                    URL url = new URL(lienAbsolueImage(pht));
+                    InputStream is = url.openStream();
+                    img=new Image(is);
+                    is.close();
+                } catch (MalformedURLException ex) {
+                    Logger.getLogger(FacturationController.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IOException ex) {
+                    Logger.getLogger(FacturationController.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+
+                MFact mfact=new MFact(formatCode(""+lFact.getProduit().getCodePro())
+                        , lFact.getPrix().doubleValue()
+                        , (int)lFact.getQte()
+                        , lFact.getQte()*lFact.getPrix().doubleValue()
+                        , lFact.getProduit()
+                );
+
+                listeFact.add(mfact);
+            }
+
+            File file=printer.print(
+                    facture, listeFact,
+                    facture.getMontant().doubleValue(),
+                    facture.getRemise().doubleValue(),
+                    ((facture.getTypeFac())?"Cash":"EMoney"),
+                    facture.getIdFac().toString()
             );
+
+            Desktop.getDesktop().open(file);
+            loaderImg.setVisible(false);
+        } catch (Exception e) {
             
-            listeFact.add(mfact);
+            Res.not.showNotifications("Echec", 
+                        "Impossible de se connecter au serveur."
+                        , GlobalNotifications.ECHEC_NOT, 2, false);
+            
         }
-        
-        File file=printer.print(
-                facture, listeFact,
-                facture.getMontant().doubleValue(),
-                facture.getRemise().doubleValue(),
-                ((facture.getTypeFac())?"Cash":"EMoney"),
-                facture.getIdFac().toString()
-        );
-        
-        Desktop.getDesktop().open(file);
-        loaderImg.setVisible(false);
     }
 
     @FXML
@@ -291,15 +300,6 @@ public class ListeFacturesController extends Controllers implements Initializabl
     
     @Override
     public void init() {
-        FactureJpaController contFact=new FactureJpaController(Res.emf);
-        List<Facture> listFact=contFact.findFactureEntities(true);
-        
-        for (Facture facture : listFact) {
-            MFacture fact=new MFacture(facture);
-            allFactures.add(fact);
-            table.getItems().add(fact);
-        }
-        
         
         getScene().widthProperty().addListener(new ChangeListener<Number>(){
             @Override
@@ -308,494 +308,513 @@ public class ListeFacturesController extends Controllers implements Initializabl
                 fondImgView.setFitWidth(newValue.doubleValue());
             } 
         });
-        
+
         getScene().heightProperty().addListener(new ChangeListener<Number>(){
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 rect.setHeight(newValue.doubleValue()-73);
                 fondImgView.setFitHeight(newValue.doubleValue()-73);
-                
+
                 double new_val=newValue.doubleValue();
-                
+
                 if(new_val<=548) Res.itermPerPage=8;
                 else if(new_val<=599) Res.itermPerPage=9;
                 else if (new_val<=631) Res.itermPerPage=10;
                 else if(new_val<=665) Res.itermPerPage=11;
                 else Res.itermPerPage=12;
-                
+
                 showDatasOnTableView(listGen, pagination, table, Res.itermPerPage);
             }
         });
         
-        listGen=allFactures;
-        showDatasOnTableView(allFactures, pagination, table, Res.itermPerPage);
+        getStage().setMinWidth(STAGE_MIN_WIDTH);
+        getStage().setMinHeight(STAGE_MIN_HEIGHT);
         
-        // 1. Wrap the ObservableList in a FilteredList (initially display all data).
-        FilteredList<MFacture> filteredData = new FilteredList<>(allFactures, p -> true);
+        try {
+            FactureJpaController contFact=new FactureJpaController(Res.emf);
+            List<Facture> listFact=contFact.findFactureEntities(true);
 
-        // 2. Set the filter Predicate whenever the filter changes.
-        numFactField.textProperty().addListener((observable, oldValue, newValue) -> {
-            filteredData.setPredicate(mFact -> {
-                // If filter text is empty, display all persons.
-                if (newValue == null || newValue.isEmpty()) {
-                    
-                    return true;
-                }
-
-                // Compare first name and last name of every person with filter text.
-                String lowerCaseFilter = newValue.toLowerCase();
-                
-                if (mFact.getNumFact().toLowerCase().contains(lowerCaseFilter)) {
-                    
-                    if(anneeBox.getValue()!=null){
-                        if(moisBox.getValue()!=null){
-                            if(jourBox.getValue()!=null){
-                                if(day(mFact.getFacture().getDateFac()).equals(jourBox.getValue())
-                                      && month(mFact.getFacture().getDateFac()).equals(moisBox.getValue())
-                                      && year(mFact.getFacture().getDateFac()).equals(anneeBox.getValue())){
-                                    return true;
-                                }else return false;
-                            }else{
-                                if(month(mFact.getFacture().getDateFac()).equals(moisBox.getValue())
-                                      && year(mFact.getFacture().getDateFac()).equals(anneeBox.getValue())){
-                                    
-                                    return true;
-                                }else return false;
-                            }
-                        }else{
-
-                            if(jourBox.getValue()!=null){
-                                if(day(mFact.getFacture().getDateFac()).equals(jourBox.getValue())
-                                      && year(mFact.getFacture().getDateFac()).equals(anneeBox.getValue())){
-                                    
-                                    return true;
-                                }else return false;
-                            }else{
-                                if(year(mFact.getFacture().getDateFac()).equals(anneeBox.getValue())){
-                                    
-                                    return true;
-                                }else return false;
-                            }
-                        }
-                    }else{
-                        if(moisBox.getValue()!=null){
-                            if(jourBox.getValue()!=null){
-                                if(month(mFact.getFacture().getDateFac()).equals(moisBox.getValue())
-                                        && day(mFact.getFacture().getDateFac()).equals(jourBox.getValue())){
-                                    
-                                    return true;
-                                }else return false;
-                            }else{
-                                if(month(mFact.getFacture().getDateFac()).equals(moisBox.getValue())){
-                                    
-                                    return true;
-                                }else return false;
-                            }
-                        }else{
-                            if(jourBox.getValue()!=null){
-                                if(day(mFact.getFacture().getDateFac()).equals(jourBox.getValue())){
-                                    
-                                    return true;
-                                }else return false;
-                            }else return true;
-                        }
-                    }
-                } 
-                return false; // Does not match.
-            });
-            
-            // 3. Wrap the FilteredList in a SortedList.
-            SortedList<MFacture> sortedData = new SortedList<>(filteredData);
-
-            // 4. Bind the SortedList comparator to the TableView comparator.
-            sortedData.comparatorProperty().bind(table.comparatorProperty());
-
-            // 5. Add sorted (and filtered) data to the table.
-            table.setItems(sortedData);
-            
-        });
-        
-        moisBox.valueProperty().addListener((observable, oldValue, newValue) -> {
-            
-            /** Reset Days  **/
-            jourBox.getItems().clear();
-            
-            int year=0;
-            int month=0;
-            
-            if(anneeBox.getValue()!=null && !anneeBox.getValue().isEmpty()){
-                year=Integer.parseInt(anneeBox.getValue());
-                if(moisBox.getValue()!=null && !moisBox.getValue().isEmpty()){
-                    month=Integer.parseInt(moisBox.getValue());
-                    resetJourBox(year, month);
-                }
-            }else{
-                year=Integer.parseInt(year(new Date()));
-                if(moisBox.getValue()!=null){
-                    month=Integer.parseInt(moisBox.getValue());
-                    resetJourBox(year, month);
-                }
+            for (Facture facture : listFact) {
+                MFacture fact=new MFacture(facture);
+                allFactures.add(fact);
+                table.getItems().add(fact);
             }
-            
-            filteredData.setPredicate(mFact -> {
-                // If filter text is empty, display all persons.
-                if (newValue == null || newValue.isEmpty()) {
-                     
-                    if(anneeBox.getValue()!=null){
-                        if(!numFactField.getText().trim().isEmpty()){
-                            if(year(mFact.getFacture().getDateFac()).equals(anneeBox.getValue())
-                                    && mFact.getNumFact().equals(numFactField.getText().trim())){
-                                return true;
-                            }else{
-                                return false;
-                            }   
-                        }else{
-                            if(year(mFact.getFacture().getDateFac()).equals(anneeBox.getValue())){
-                                
-                                return true;
-                            }else{
-                                
-                                return false;
-                            }   
-                        }
-                    }else{
-                        
+
+            listGen=allFactures;
+            showDatasOnTableView(allFactures, pagination, table, Res.itermPerPage);
+
+            // 1. Wrap the ObservableList in a FilteredList (initially display all data).
+            FilteredList<MFacture> filteredData = new FilteredList<>(allFactures, p -> true);
+
+            // 2. Set the filter Predicate whenever the filter changes.
+            numFactField.textProperty().addListener((observable, oldValue, newValue) -> {
+                filteredData.setPredicate(mFact -> {
+                    // If filter text is empty, display all persons.
+                    if (newValue == null || newValue.isEmpty()) {
+
                         return true;
                     }
 
-                }
+                    // Compare first name and last name of every person with filter text.
+                    String lowerCaseFilter = newValue.toLowerCase();
 
-                // Compare first name and last name of every person with filter text.
-                String lowerCaseFilter = newValue.toLowerCase();
-                
-                if (month(mFact.getFacture().getDateFac()).contains(lowerCaseFilter)) {
-                    
-                    if(anneeBox.getValue()==null){
-                        
-                        if(jourBox.getValue()==null){
-                            if(numFactField.getText().isEmpty()){
-                                return true;
+                    if (mFact.getNumFact().toLowerCase().contains(lowerCaseFilter)) {
+
+                        if(anneeBox.getValue()!=null){
+                            if(moisBox.getValue()!=null){
+                                if(jourBox.getValue()!=null){
+                                    if(day(mFact.getFacture().getDateFac()).equals(jourBox.getValue())
+                                          && month(mFact.getFacture().getDateFac()).equals(moisBox.getValue())
+                                          && year(mFact.getFacture().getDateFac()).equals(anneeBox.getValue())){
+                                        return true;
+                                    }else return false;
+                                }else{
+                                    if(month(mFact.getFacture().getDateFac()).equals(moisBox.getValue())
+                                          && year(mFact.getFacture().getDateFac()).equals(anneeBox.getValue())){
+
+                                        return true;
+                                    }else return false;
+                                }
                             }else{
-                                if(mFact.getNumFact().contains(numFactField.getText().trim())){
-                                    
-                                    return true;
-                                }else return  false;
+
+                                if(jourBox.getValue()!=null){
+                                    if(day(mFact.getFacture().getDateFac()).equals(jourBox.getValue())
+                                          && year(mFact.getFacture().getDateFac()).equals(anneeBox.getValue())){
+
+                                        return true;
+                                    }else return false;
+                                }else{
+                                    if(year(mFact.getFacture().getDateFac()).equals(anneeBox.getValue())){
+
+                                        return true;
+                                    }else return false;
+                                }
                             }
                         }else{
-                            if(numFactField.getText().isEmpty()){
-                                if(day(mFact.getFacture().getDateFac()).contains(jourBox.getValue())){
-                                     return true;
-                                }else return false;
-                            }else{
-                                if(mFact.getNumFact().contains(numFactField.getText().trim())
-                                        && day(mFact.getFacture().getDateFac()).contains(jourBox.getValue())){
-                                    
-                                    return true;
-                                }else return  false;
-                            }
-                        }
+                            if(moisBox.getValue()!=null){
+                                if(jourBox.getValue()!=null){
+                                    if(month(mFact.getFacture().getDateFac()).equals(moisBox.getValue())
+                                            && day(mFact.getFacture().getDateFac()).equals(jourBox.getValue())){
 
-                    }else{
-                        // on a l'année et le mois
-                        if(jourBox.getValue()==null){
-                            if(numFactField.getText().isEmpty()){
-                                if(year(mFact.getFacture().getDateFac()).equals(anneeBox.getValue())){
-                                    return true;
-                                }else return  false;
+                                        return true;
+                                    }else return false;
+                                }else{
+                                    if(month(mFact.getFacture().getDateFac()).equals(moisBox.getValue())){
+
+                                        return true;
+                                    }else return false;
+                                }
                             }else{
-                                if(year(mFact.getFacture().getDateFac()).equals(anneeBox.getValue())
-                                        && mFact.getNumFact().contains(numFactField.getText().trim())){
-                                    return true;
-                                }else return  false;
-                            }
-                        }else{
-                            //on a le jour, l'année et le mois                            
-                            if(numFactField.getText().isEmpty()){
-                                if(year(mFact.getFacture().getDateFac()).equals(anneeBox.getValue())
-                                        && day(mFact.getFacture().getDateFac()).equals(jourBox.getValue())){
-                                    return true;
-                                }else return  false;
-                            }else{
-                                if(year(mFact.getFacture().getDateFac()).equals(anneeBox.getValue())
-                                        && day(mFact.getFacture().getDateFac()).equals(jourBox.getValue())
-                                        && mFact.getNumFact().contains(numFactField.getText().trim())){
-                                    return true;
-                                }else return  false;
+                                if(jourBox.getValue()!=null){
+                                    if(day(mFact.getFacture().getDateFac()).equals(jourBox.getValue())){
+
+                                        return true;
+                                    }else return false;
+                                }else return true;
                             }
                         }
-                        
-                    }
-                } 
-                return false; // Does not match.
+                    } 
+                    return false; // Does not match.
+                });
+
+                // 3. Wrap the FilteredList in a SortedList.
+                SortedList<MFacture> sortedData = new SortedList<>(filteredData);
+
+                // 4. Bind the SortedList comparator to the TableView comparator.
+                sortedData.comparatorProperty().bind(table.comparatorProperty());
+
+                // 5. Add sorted (and filtered) data to the table.
+                table.setItems(sortedData);
+
             });
-            
-            /** Calcul de la recette **/
-            calculRecette(anneeBox.getValue(), moisBox.getValue(), jourBox.getValue());
-            
-            // 3. Wrap the FilteredList in a SortedList.
-            SortedList<MFacture> sortedData = new SortedList<>(filteredData);
 
-            // 4. Bind the SortedList comparator to the TableView comparator.
-            sortedData.comparatorProperty().bind(table.comparatorProperty());
+            moisBox.valueProperty().addListener((observable, oldValue, newValue) -> {
 
-            // 5. Add sorted (and filtered) data to the table.
-            table.setItems(sortedData);
-            
-            listGen=observableFromSortedList(sortedData);
-            showDatasOnTableView(observableFromSortedList(sortedData), pagination, table,Res.itermPerPage);
-            
-        });
-        
-        anneeBox.valueProperty().addListener((observable, oldValue, newValue) -> {
-            
-            /** Reset Days  **/
-            if(moisBox.getValue()==null || moisBox.getValue().isEmpty()){
+                /** Reset Days  **/
                 jourBox.getItems().clear();
-            }else{
-                int year;
-                try {
-                    year=Integer.parseInt(newValue.toLowerCase());
-                } catch (NumberFormatException e) {
-                    year=Integer.parseInt(year(new Date()));
-                }
-                int month=Integer.parseInt(moisBox.getValue());
-                resetJourBox(year, month);
-            }
-                    
-                    
-            filteredData.setPredicate((MFacture mFact) -> {
-                // If filter text is empty, display all persons.
-                if (newValue == null || newValue.isEmpty()) {
-                    
+
+                int year=0;
+                int month=0;
+
+                if(anneeBox.getValue()!=null && !anneeBox.getValue().isEmpty()){
+                    year=Integer.parseInt(anneeBox.getValue());
                     if(moisBox.getValue()!=null && !moisBox.getValue().isEmpty()){
-                        
-                        if(jourBox.getValue()!=null && !jourBox.getValue().isEmpty()){
-                            
+                        month=Integer.parseInt(moisBox.getValue());
+                        resetJourBox(year, month);
+                    }
+                }else{
+                    year=Integer.parseInt(year(new Date()));
+                    if(moisBox.getValue()!=null){
+                        month=Integer.parseInt(moisBox.getValue());
+                        resetJourBox(year, month);
+                    }
+                }
+
+                filteredData.setPredicate(mFact -> {
+                    // If filter text is empty, display all persons.
+                    if (newValue == null || newValue.isEmpty()) {
+
+                        if(anneeBox.getValue()!=null){
                             if(!numFactField.getText().trim().isEmpty()){
-                                
-                                if(year(mFact.getFacture().getDateFac()).equals(year(new Date()))
-                                        && month(mFact.getFacture().getDateFac()).equals(moisBox.getValue())
-                                        && day(mFact.getFacture().getDateFac()).equals(jourBox.getValue())
+                                if(year(mFact.getFacture().getDateFac()).equals(anneeBox.getValue())
                                         && mFact.getNumFact().equals(numFactField.getText().trim())){
-                                
                                     return true;
-                                }
+                                }else{
+                                    return false;
+                                }   
                             }else{
-                                if(year(mFact.getFacture().getDateFac()).equals(year(new Date()))
-                                        && month(mFact.getFacture().getDateFac()).equals(moisBox.getValue())
-                                        && day(mFact.getFacture().getDateFac()).equals(jourBox.getValue())){
-                                
+                                if(year(mFact.getFacture().getDateFac()).equals(anneeBox.getValue())){
+
                                     return true;
-                                }
+                                }else{
+
+                                    return false;
+                                }   
                             }
                         }else{
-                            if(!numFactField.getText().isEmpty()){
-                                if(year(mFact.getFacture().getDateFac()).equals(year(new Date()))
-                                        && month(mFact.getFacture().getDateFac()).equals(moisBox.getValue())
-                                        && numFactField.getText().trim().equals(mFact.getNumFact())){
-                                
-                                    return true;
-                                }
-                            }else{
-                                if(year(mFact.getFacture().getDateFac()).equals(year(new Date()))
-                                        && month(mFact.getFacture().getDateFac()).equals(moisBox.getValue())){
-                                
-                                    return true;
-                                }
-                            }
-                        }
-                    }else{
-                        if(jourBox.getValue()!=null){
-                            if(year(mFact.getFacture().getDateFac()).equals(year(new Date()))
-                                    && month(mFact.getFacture().getDateFac()).equals(new Date())
-                                    && day(mFact.getFacture().getDateFac()).equals(jourBox.getValue())){
-                                
-                                return true;
-                            }
-                        }else{
+
                             return true;
                         }
-                        
+
                     }
-                    
-                    return false;
+
+                    // Compare first name and last name of every person with filter text.
+                    String lowerCaseFilter = newValue.toLowerCase();
+
+                    if (month(mFact.getFacture().getDateFac()).contains(lowerCaseFilter)) {
+
+                        if(anneeBox.getValue()==null){
+
+                            if(jourBox.getValue()==null){
+                                if(numFactField.getText().isEmpty()){
+                                    return true;
+                                }else{
+                                    if(mFact.getNumFact().contains(numFactField.getText().trim())){
+
+                                        return true;
+                                    }else return  false;
+                                }
+                            }else{
+                                if(numFactField.getText().isEmpty()){
+                                    if(day(mFact.getFacture().getDateFac()).contains(jourBox.getValue())){
+                                         return true;
+                                    }else return false;
+                                }else{
+                                    if(mFact.getNumFact().contains(numFactField.getText().trim())
+                                            && day(mFact.getFacture().getDateFac()).contains(jourBox.getValue())){
+
+                                        return true;
+                                    }else return  false;
+                                }
+                            }
+
+                        }else{
+                            // on a l'année et le mois
+                            if(jourBox.getValue()==null){
+                                if(numFactField.getText().isEmpty()){
+                                    if(year(mFact.getFacture().getDateFac()).equals(anneeBox.getValue())){
+                                        return true;
+                                    }else return  false;
+                                }else{
+                                    if(year(mFact.getFacture().getDateFac()).equals(anneeBox.getValue())
+                                            && mFact.getNumFact().contains(numFactField.getText().trim())){
+                                        return true;
+                                    }else return  false;
+                                }
+                            }else{
+                                //on a le jour, l'année et le mois                            
+                                if(numFactField.getText().isEmpty()){
+                                    if(year(mFact.getFacture().getDateFac()).equals(anneeBox.getValue())
+                                            && day(mFact.getFacture().getDateFac()).equals(jourBox.getValue())){
+                                        return true;
+                                    }else return  false;
+                                }else{
+                                    if(year(mFact.getFacture().getDateFac()).equals(anneeBox.getValue())
+                                            && day(mFact.getFacture().getDateFac()).equals(jourBox.getValue())
+                                            && mFact.getNumFact().contains(numFactField.getText().trim())){
+                                        return true;
+                                    }else return  false;
+                                }
+                            }
+
+                        }
+                    } 
+                    return false; // Does not match.
+                });
+
+                /** Calcul de la recette **/
+                calculRecette(anneeBox.getValue(), moisBox.getValue(), jourBox.getValue());
+
+                // 3. Wrap the FilteredList in a SortedList.
+                SortedList<MFacture> sortedData = new SortedList<>(filteredData);
+
+                // 4. Bind the SortedList comparator to the TableView comparator.
+                sortedData.comparatorProperty().bind(table.comparatorProperty());
+
+                // 5. Add sorted (and filtered) data to the table.
+                table.setItems(sortedData);
+
+                listGen=observableFromSortedList(sortedData);
+                showDatasOnTableView(observableFromSortedList(sortedData), pagination, table,Res.itermPerPage);
+
+            });
+
+            anneeBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+
+                /** Reset Days  **/
+                if(moisBox.getValue()==null || moisBox.getValue().isEmpty()){
+                    jourBox.getItems().clear();
+                }else{
+                    int year;
+                    try {
+                        year=Integer.parseInt(newValue.toLowerCase());
+                    } catch (NumberFormatException e) {
+                        year=Integer.parseInt(year(new Date()));
+                    }
+                    int month=Integer.parseInt(moisBox.getValue());
+                    resetJourBox(year, month);
                 }
 
-                // Compare first name and last name of every person with filter text.
-                String lowerCaseFilter = newValue.toLowerCase();
-                
-                if (year(mFact.getFacture().getDateFac()).contains(lowerCaseFilter)) {
-                    
-                    if(moisBox.getValue()==null){
-                        
-                        if(jourBox.getValue()==null){
-                            
-                            if(numFactField.getText().isEmpty()){
-                                
-                                return true;
-                            }else {
-                                if(mFact.getNumFact().contains(numFactField.getText().trim())){
-                                    return true;
-                                }else return false;
+
+                filteredData.setPredicate((MFacture mFact) -> {
+                    // If filter text is empty, display all persons.
+                    if (newValue == null || newValue.isEmpty()) {
+
+                        if(moisBox.getValue()!=null && !moisBox.getValue().isEmpty()){
+
+                            if(jourBox.getValue()!=null && !jourBox.getValue().isEmpty()){
+
+                                if(!numFactField.getText().trim().isEmpty()){
+
+                                    if(year(mFact.getFacture().getDateFac()).equals(year(new Date()))
+                                            && month(mFact.getFacture().getDateFac()).equals(moisBox.getValue())
+                                            && day(mFact.getFacture().getDateFac()).equals(jourBox.getValue())
+                                            && mFact.getNumFact().equals(numFactField.getText().trim())){
+
+                                        return true;
+                                    }
+                                }else{
+                                    if(year(mFact.getFacture().getDateFac()).equals(year(new Date()))
+                                            && month(mFact.getFacture().getDateFac()).equals(moisBox.getValue())
+                                            && day(mFact.getFacture().getDateFac()).equals(jourBox.getValue())){
+
+                                        return true;
+                                    }
+                                }
+                            }else{
+                                if(!numFactField.getText().isEmpty()){
+                                    if(year(mFact.getFacture().getDateFac()).equals(year(new Date()))
+                                            && month(mFact.getFacture().getDateFac()).equals(moisBox.getValue())
+                                            && numFactField.getText().trim().equals(mFact.getNumFact())){
+
+                                        return true;
+                                    }
+                                }else{
+                                    if(year(mFact.getFacture().getDateFac()).equals(year(new Date()))
+                                            && month(mFact.getFacture().getDateFac()).equals(moisBox.getValue())){
+
+                                        return true;
+                                    }
+                                }
                             }
                         }else{
-                            if(numFactField.getText().isEmpty()){
-                                return true;
-                            }else {
-                                if(mFact.getNumFact().contains(numFactField.getText().trim())
+                            if(jourBox.getValue()!=null){
+                                if(year(mFact.getFacture().getDateFac()).equals(year(new Date()))
+                                        && month(mFact.getFacture().getDateFac()).equals(new Date())
                                         && day(mFact.getFacture().getDateFac()).equals(jourBox.getValue())){
-                                    return true;
-                                }else return false;
-                            }
-                        }
-                    }else{
-                        //on a le mois
-                        
-                        if(jourBox.getValue()==null){
-                            if(numFactField.getText().isEmpty()){
-                                if(month(mFact.getFacture().getDateFac()).equals(moisBox.getValue())){
-                                    return true;
-                                }else return false;
-                            }else {
-                                if(mFact.getNumFact().contains(numFactField.getText().trim())
-                                        && month(mFact.getFacture().getDateFac()).equals(moisBox.getValue())){
-                                    return true;
-                                }else return false;
-                            }
-                        }else{
-                            // on a le mois et le jour
-                            if(numFactField.getText().isEmpty()){
-                                if(month(mFact.getFacture().getDateFac()).equals(moisBox.getValue())
-                                        && day(mFact.getFacture().getDateFac()).equals(jourBox.getValue())){
-                                    return true;
-                                }else return false;
-                            }else {
-                                if(month(mFact.getFacture().getDateFac()).equals(moisBox.getValue())
-                                        && day(mFact.getFacture().getDateFac()).equals(jourBox.getValue())
-                                        && mFact.getNumFact().contains(numFactField.getText().trim())){
-                                    return true;
-                                }else return false;
-                            }
-                        }
-                        
-                    }
-                    
-                } 
-                
-                return false; // Does not match.
-            });
-            
-            /** Calcul de la recette **/
-            calculRecette(anneeBox.getValue(), moisBox.getValue(), jourBox.getValue());
-           
-            // 3. Wrap the FilteredList in a SortedList.
-            SortedList<MFacture> sortedData = new SortedList<>(filteredData);
 
-            // 4. Bind the SortedList comparator to the TableView comparator.
-            sortedData.comparatorProperty().bind(table.comparatorProperty());
-
-            // 5. Add sorted (and filtered) data to the table.
-            table.setItems(sortedData);
-            listGen=observableFromSortedList(sortedData);
-            showDatasOnTableView(observableFromSortedList(sortedData), pagination, table,Res.itermPerPage);
-            
-        });
-        
-        jourBox.valueProperty().addListener((observable, oldValue, newValue) -> {
-            filteredData.setPredicate(mFact -> {
-                // If filter text is empty, display all persons.
-                if (newValue == null || newValue.isEmpty()) {
-                    
-                    if(anneeBox.getValue()!=null){
-                        if(moisBox.getValue()!=null){
-                            if(!numFactField.getText().trim().isEmpty()){
-                                if(year(mFact.getFacture().getDateFac()).equals(anneeBox.getValue())
-                                        && month(mFact.getFacture().getDateFac()).equals(moisBox.getValue())
-                                        && numFactField.getText().trim().equals(mFact.getNumFact())){
                                     return true;
                                 }
                             }else{
-                                if(year(mFact.getFacture().getDateFac()).equals(anneeBox.getValue())
-                                        && month(mFact.getFacture().getDateFac()).equals(moisBox.getValue())){
+                                return true;
+                            }
+
+                        }
+
+                        return false;
+                    }
+
+                    // Compare first name and last name of every person with filter text.
+                    String lowerCaseFilter = newValue.toLowerCase();
+
+                    if (year(mFact.getFacture().getDateFac()).contains(lowerCaseFilter)) {
+
+                        if(moisBox.getValue()==null){
+
+                            if(jourBox.getValue()==null){
+
+                                if(numFactField.getText().isEmpty()){
+
                                     return true;
+                                }else {
+                                    if(mFact.getNumFact().contains(numFactField.getText().trim())){
+                                        return true;
+                                    }else return false;
+                                }
+                            }else{
+                                if(numFactField.getText().isEmpty()){
+                                    return true;
+                                }else {
+                                    if(mFact.getNumFact().contains(numFactField.getText().trim())
+                                            && day(mFact.getFacture().getDateFac()).equals(jourBox.getValue())){
+                                        return true;
+                                    }else return false;
                                 }
                             }
                         }else{
-                            if(anneeBox.getValue()!=null){
-                                if(!numFactField.getText().trim().equals(mFact.getNumFact())){
+                            //on a le mois
+
+                            if(jourBox.getValue()==null){
+                                if(numFactField.getText().isEmpty()){
+                                    if(month(mFact.getFacture().getDateFac()).equals(moisBox.getValue())){
+                                        return true;
+                                    }else return false;
+                                }else {
+                                    if(mFact.getNumFact().contains(numFactField.getText().trim())
+                                            && month(mFact.getFacture().getDateFac()).equals(moisBox.getValue())){
+                                        return true;
+                                    }else return false;
+                                }
+                            }else{
+                                // on a le mois et le jour
+                                if(numFactField.getText().isEmpty()){
+                                    if(month(mFact.getFacture().getDateFac()).equals(moisBox.getValue())
+                                            && day(mFact.getFacture().getDateFac()).equals(jourBox.getValue())){
+                                        return true;
+                                    }else return false;
+                                }else {
+                                    if(month(mFact.getFacture().getDateFac()).equals(moisBox.getValue())
+                                            && day(mFact.getFacture().getDateFac()).equals(jourBox.getValue())
+                                            && mFact.getNumFact().contains(numFactField.getText().trim())){
+                                        return true;
+                                    }else return false;
+                                }
+                            }
+
+                        }
+
+                    } 
+
+                    return false; // Does not match.
+                });
+
+                /** Calcul de la recette **/
+                calculRecette(anneeBox.getValue(), moisBox.getValue(), jourBox.getValue());
+
+                // 3. Wrap the FilteredList in a SortedList.
+                SortedList<MFacture> sortedData = new SortedList<>(filteredData);
+
+                // 4. Bind the SortedList comparator to the TableView comparator.
+                sortedData.comparatorProperty().bind(table.comparatorProperty());
+
+                // 5. Add sorted (and filtered) data to the table.
+                table.setItems(sortedData);
+                listGen=observableFromSortedList(sortedData);
+                showDatasOnTableView(observableFromSortedList(sortedData), pagination, table,Res.itermPerPage);
+
+            });
+
+            jourBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+                filteredData.setPredicate(mFact -> {
+                    // If filter text is empty, display all persons.
+                    if (newValue == null || newValue.isEmpty()) {
+
+                        if(anneeBox.getValue()!=null){
+                            if(moisBox.getValue()!=null){
+                                if(!numFactField.getText().trim().isEmpty()){
                                     if(year(mFact.getFacture().getDateFac()).equals(anneeBox.getValue())
+                                            && month(mFact.getFacture().getDateFac()).equals(moisBox.getValue())
                                             && numFactField.getText().trim().equals(mFact.getNumFact())){
                                         return true;
                                     }
                                 }else{
-                                    if(year(mFact.getFacture().getDateFac()).equals(anneeBox.getValue())){
+                                    if(year(mFact.getFacture().getDateFac()).equals(anneeBox.getValue())
+                                            && month(mFact.getFacture().getDateFac()).equals(moisBox.getValue())){
                                         return true;
                                     }
                                 }
                             }else{
-                                if(!numFactField.getText().trim().equals(mFact.getNumFact())){
-                                    if(numFactField.getText().trim().equals(mFact.getNumFact())){
-                                        return true;
+                                if(anneeBox.getValue()!=null){
+                                    if(!numFactField.getText().trim().equals(mFact.getNumFact())){
+                                        if(year(mFact.getFacture().getDateFac()).equals(anneeBox.getValue())
+                                                && numFactField.getText().trim().equals(mFact.getNumFact())){
+                                            return true;
+                                        }
+                                    }else{
+                                        if(year(mFact.getFacture().getDateFac()).equals(anneeBox.getValue())){
+                                            return true;
+                                        }
                                     }
                                 }else{
+                                    if(!numFactField.getText().trim().equals(mFact.getNumFact())){
+                                        if(numFactField.getText().trim().equals(mFact.getNumFact())){
+                                            return true;
+                                        }
+                                    }else{
+                                        return true;
+                                    }
+
+                                }
+                            }
+                        }
+
+                        return false;
+                    }
+
+                    // Compare first name and last name of every person with filter text.
+                    String lowerCaseFilter = newValue.toLowerCase();
+
+                    if (day(mFact.getFacture().getDateFac()).equals(lowerCaseFilter)) {                    
+
+                        if(anneeBox.getValue()!=null && !anneeBox.getValue().isEmpty()){
+                            if(moisBox.getValue()!=null && !moisBox.getValue().isEmpty()){
+                                if(year(mFact.getFacture().getDateFac()).equals(anneeBox.getValue())
+                                        && month(mFact.getFacture().getDateFac()).equals(moisBox.getValue())){
                                     return true;
                                 }
-                                
-                            }
-                        }
-                    }
-                    
-                    return false;
-                }
-
-                // Compare first name and last name of every person with filter text.
-                String lowerCaseFilter = newValue.toLowerCase();
-
-                if (day(mFact.getFacture().getDateFac()).equals(lowerCaseFilter)) {                    
-                    
-                    if(anneeBox.getValue()!=null && !anneeBox.getValue().isEmpty()){
-                        if(moisBox.getValue()!=null && !moisBox.getValue().isEmpty()){
-                            if(year(mFact.getFacture().getDateFac()).equals(anneeBox.getValue())
-                                    && month(mFact.getFacture().getDateFac()).equals(moisBox.getValue())){
-                                return true;
-                            }
-                        }
-                    }else{
-                        if(moisBox.getValue()!=null && !moisBox.getValue().isEmpty()){
-                            if(year(new Date()).equals(year(mFact.getFacture().getDateFac()))
-                                    && month(mFact.getFacture().getDateFac()).equals(moisBox.getValue())){
-                                return true;
                             }
                         }else{
-                            if(year(mFact.getFacture().getDateFac()).equals(year(new Date()))
-                                    && month(mFact.getFacture().getDateFac()).equals(month(new Date()) )){
-                                return true;
+                            if(moisBox.getValue()!=null && !moisBox.getValue().isEmpty()){
+                                if(year(new Date()).equals(year(mFact.getFacture().getDateFac()))
+                                        && month(mFact.getFacture().getDateFac()).equals(moisBox.getValue())){
+                                    return true;
+                                }
+                            }else{
+                                if(year(mFact.getFacture().getDateFac()).equals(year(new Date()))
+                                        && month(mFact.getFacture().getDateFac()).equals(month(new Date()) )){
+                                    return true;
+                                }
                             }
                         }
-                    }
-                } 
-                
-                return false; // Does not match.
+                    } 
+
+                    return false; // Does not match.
+                });
+
+                /** Calcul de la recette **/
+                calculRecette(anneeBox.getValue(), moisBox.getValue(), jourBox.getValue());
+
+                // 3. Wrap the FilteredList in a SortedList.
+                SortedList<MFacture> sortedData = new SortedList<>(filteredData);
+
+                // 4. Bind the SortedList comparator to the TableView comparator.
+                sortedData.comparatorProperty().bind(table.comparatorProperty());
+
+                // 5. Add sorted (and filtered) data to the table.
+                table.setItems(sortedData);
+                listGen=observableFromSortedList(sortedData);
+                showDatasOnTableView(observableFromSortedList(sortedData), pagination, table,Res.itermPerPage);
+
             });
-            
-            /** Calcul de la recette **/
-            calculRecette(anneeBox.getValue(), moisBox.getValue(), jourBox.getValue());
-            
-            // 3. Wrap the FilteredList in a SortedList.
-            SortedList<MFacture> sortedData = new SortedList<>(filteredData);
 
-            // 4. Bind the SortedList comparator to the TableView comparator.
-            sortedData.comparatorProperty().bind(table.comparatorProperty());
-
-            // 5. Add sorted (and filtered) data to the table.
-            table.setItems(sortedData);
-            listGen=observableFromSortedList(sortedData);
-            showDatasOnTableView(observableFromSortedList(sortedData), pagination, table,Res.itermPerPage);
             
-        });
-        
-        getStage().setMinWidth(STAGE_MIN_WIDTH);
-        getStage().setMinHeight(STAGE_MIN_HEIGHT);
+        } catch (Exception e) {
+            
+            Res.not.showNotifications("Echec", 
+                        "Impossible de se connecter au serveur."
+                        , GlobalNotifications.ECHEC_NOT, 2, false);
+            
+        }
         
     }
 

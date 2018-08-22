@@ -80,7 +80,7 @@
                         <Insets />
                      </HBox.margin>
                   </FontAwesomeIcon>
-                  <JFXTextField fx:id="codeFourfield" prefHeight="25.0" prefWidth="200.0" promptText="Code du Fournisseur">
+                  <JFXTextField fx:id="codeFourfield" prefHeight="25.0" prefWidth="200.0" promptText="Code du Four.  (max 12 carac.)">
                      <font>
                         <Font size="15.0" />
                      </font>
