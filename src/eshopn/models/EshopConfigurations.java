@@ -40,7 +40,7 @@ public class EshopConfigurations {
     private String dossierFacturePdf;
     private String dossierProduitsPdf;
     private String dossierStocksPdf;
-    
+    private String dossierImagesLocal;
 
     public EshopConfigurations(String admin, String adminPwd,
             String adresse,String tel, 
@@ -51,7 +51,7 @@ public class EshopConfigurations {
             String requestController,String logoApp,
             String logoPdf, String logoConn,double remise,
             String nro, String rc,
-            String factures, String produits, String stocks) throws IOException {
+            String factures, String produits, String stocks, String dossierImagesLocal) throws IOException {
         
         this.admin = admin;
         this.adminPwd = adminPwd;
@@ -81,6 +81,7 @@ public class EshopConfigurations {
         this.dossierFacturePdf=factures+"/";
         this.dossierProduitsPdf=produits+"/";
         this.dossierStocksPdf=stocks+"/";
+        this.dossierImagesLocal=dossierImagesLocal+"/";
         
         is.close();
     }
@@ -383,6 +384,20 @@ public class EshopConfigurations {
      */
     public void setRc(String rc) {
         this.rc = rc;
+    }
+
+    /**
+     * @return the dossierImagesLocal
+     */
+    public String getDossierImagesLocal() {
+        return dossierImagesLocal;
+    }
+
+    /**
+     * @param dossierImagesLocal the dossierImagesLocal to set
+     */
+    public void setDossierImagesLocal(String dossierImagesLocal) {
+        this.dossierImagesLocal = dossierImagesLocal;
     }
     
     

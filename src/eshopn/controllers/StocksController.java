@@ -167,17 +167,19 @@ public class StocksController extends Controllers implements Initializable {
            public void changed(ObservableValue<? extends MStocks> observable, MStocks oldValue, MStocks newValue) {
                 
                 if(newValue!=null && newValue!=oldValue){
-//                    PhotoJpaController cont=new PhotoJpaController(Res.emf);
+
                     Photo pht=(new ArrayList<>(newValue.getProduit().getPhotoCollection())).get(0);
+                    
                     try {
 
-                        URL url = new URL(lienAbsolueImage(pht));
+                        /*URL url = new URL(lienAbsolueImage(pht));
                         InputStream is = url.openStream();
                         ImgView.setImage(new Image(is));
-                        is.close();
-                    } catch (FileNotFoundException ex) {
-                        Logger.getLogger(ProduitController.class.getName()).log(Level.SEVERE, null, ex);
-                    } catch (IOException ex) {
+                        is.close();*/
+                        
+                        loadImage(newValue.getProduit().getCodePro().toString(), pht.getLienPhoto(), ImgView);
+
+                    } catch (Exception ex) {
                         Logger.getLogger(ProduitController.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }

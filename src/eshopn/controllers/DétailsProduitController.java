@@ -144,11 +144,12 @@ public class DétailsProduitController extends Controllers implements Initializa
             
             listPhotos=(new ArrayList<>(produit.getPhotoCollection()));
             
+            loadImage(produit.getCodePro().toString(), listPhotos.get(0).getLienPhoto(), photoVue);
             
-            URL url = new URL(lienAbsolueImage(listPhotos.get(0)));
+            /*URL url = new URL(lienAbsolueImage(listPhotos.get(0)));
             InputStream is = url.openStream();
             photoVue.setImage(new Image(is));
-            is.close();
+            is.close();*/
             
             for (int i = 0; i < listPhotos.size(); i++) {
                 Photo pht=listPhotos.get(i);
@@ -159,9 +160,14 @@ public class DétailsProduitController extends Controllers implements Initializa
                 sourceFiles.add(fil);
 
                 try {
-                    URL url2 = new URL(lienAbsolueImage(pht));
+                    
+                    /*URL url2 = new URL(lienAbsolueImage(pht));
                     InputStream is2 = url2.openStream();
-                    final ImageView img = new ImageView(new Image(is2));
+                    final ImageView img = new ImageView(new Image(is2));*/
+                    
+                    final ImageView img = new ImageView();
+                    loadImage(produit.getCodePro().toString(), pht.getLienPhoto(), img);
+                    
                     img.setFitWidth(97);
                     img.setFitHeight(84);
 
@@ -199,7 +205,7 @@ public class DétailsProduitController extends Controllers implements Initializa
                     ((HBox)(pane.getContent())).setSpacing(5);
                     ((HBox)(pane.getContent())).getChildren().add(img);
 
-                    is.close();
+                    //is2.close();
                 } catch(Exception e){
                     Res.not.showNotifications("Echec de l'ajout", 
                         "Impossible de se connecter au serveur."

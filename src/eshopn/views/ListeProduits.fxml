@@ -52,7 +52,10 @@
             <Font name="System Bold" size="14.0" />
          </font>
       </JFXButton>
-      <Label fx:id="nomCat" alignment="CENTER_RIGHT" contentDisplay="RIGHT" layoutX="527.0" layoutY="2.0" prefHeight="27.0" prefWidth="209.0" style="-fx-font-size: 16; -fx-font-weight: bold; -fx-border-color: green; -fx-alignment: right;" AnchorPane.leftAnchor="527.0" AnchorPane.rightAnchor="31.0" />
+      <Label fx:id="nomCat" alignment="CENTER_RIGHT" contentDisplay="RIGHT" layoutX="527.0" layoutY="2.0" prefHeight="27.0" prefWidth="209.0" style="-fx-font-size: 16; -fx-font-weight: bold; -fx-border-color: green; -fx-alignment: right; -fx-padding: 0 5 0 0;" text="hgfhgf" AnchorPane.leftAnchor="527.0" AnchorPane.rightAnchor="31.0">
+         <opaqueInsets>
+            <Insets />
+         </opaqueInsets></Label>
       <AnchorPane fx:id="anchor" layoutY="44.0" prefHeight="474.0" prefWidth="767.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="44.0">
          <children>
             <JFXTextField fx:id="codeProdField" alignment="CENTER" focusColor="#222c3a" layoutX="537.0" onAction="#onSearch" prefHeight="41.0" prefWidth="146.0" promptText="Code du produit" style="-fx-background-size: 14px; -fx-background-color: rgba(34,44,58,0.2);" AnchorPane.rightAnchor="85.0" AnchorPane.topAnchor="0.0">
@@ -119,7 +122,7 @@
                   <Image url="@../../../images/chargement2.gif" />
                </image>
             </ImageView>
-            <JFXButton buttonType="RAISED" layoutX="287.0" layoutY="2.0" onAction="#onRefresh" prefHeight="41.0" prefWidth="114.0" style="-fx-background-color: rgba(34,44,58,0.2);" text="Rafraichir" textFill="#222c3a" AnchorPane.leftAnchor="287.0" AnchorPane.topAnchor="2.0">
+            <JFXButton fx:id="refreshBtn" buttonType="RAISED" layoutX="287.0" layoutY="2.0" onAction="#onRefresh" prefHeight="41.0" prefWidth="114.0" style="-fx-background-color: rgba(34,44,58,0.2);" text="Rafraichir" textFill="#222c3a" AnchorPane.leftAnchor="287.0" AnchorPane.topAnchor="2.0">
                <font>
                   <Font name="System Bold" size="14.0" />
                </font>

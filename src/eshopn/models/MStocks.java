@@ -35,6 +35,7 @@ public class MStocks {
         actions=((stock.getOperation())?"Ajout":"Retrait");
         date=Res.sdf.format(stock.getDateStock());
         produit=stock.getCodePro();
+        
     }
    
     

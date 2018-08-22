@@ -8,6 +8,8 @@ package eshopn.controllers;
 import eshopn.EShopN;
 import eshopn.entities.Photo;
 import eshopn.models.Res;
+import java.io.File;
+import java.net.MalformedURLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
@@ -17,6 +19,8 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Pagination;
 import javafx.scene.control.TableView;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.util.Callback;
@@ -44,6 +48,12 @@ public abstract class Controllers {
                 + ph.getCodePro().getCodePro()
                 + "/"+ph.getLienPhoto();
         return str;
+    }
+    
+    public void loadImage(String code, String nom , ImageView imageView) throws MalformedURLException{
+       
+        File file=new File(Res.config.getDossierImagesLocal()+code+"/"+nom);
+        imageView.setImage(new Image(file.toURI().toURL().toExternalForm()));
     }
     
     public String year(Date date){

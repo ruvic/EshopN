@@ -53,6 +53,9 @@ public class ListeProduitsController extends Controllers implements Initializabl
     
      @FXML
     private ImageView arrowsImg;
+     
+     @FXML
+    private JFXButton refreshBtn;
 
     @FXML
     private ImageView prod2Img;
@@ -131,7 +134,8 @@ public class ListeProduitsController extends Controllers implements Initializabl
         Res.reset();
         
         if( !Res.connected_storekeeper.getTypeGest()){
-            newProductBtn.setVisible(true);
+            newProductBtn.setVisible(false);
+            AnchorPane.setLeftAnchor(refreshBtn, 165.0);
         }
         
     }
@@ -314,9 +318,11 @@ public class ListeProduitsController extends Controllers implements Initializabl
                 for (Produit pr : list) {
                     listes.remove(pr);
                 }
+                
+                AnchorPane.setLeftAnchor(nomCat, 527.0);
 
             }else{
-                nomCat.setText("");
+                nomCat.setText("Toutes les catégories");
                 newProductBtn.setVisible(false);
                 if(!Res.connected_storekeeper.getTypeGest()){
                     printBtn.setText("Imprimer Pub");

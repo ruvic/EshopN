@@ -647,13 +647,14 @@ public class EShopN extends Application {
         String dossierFacturesPdf=prop.getProperty("dossierFactures");
         String dossierProduitsPdf=prop.getProperty("dossierProduits");
         String dossierStocksPdf=prop.getProperty("dossierStocks");
+        String dossierImagesLocal=prop.getProperty("dossierImagesLocal");
         
         Res.config=new EshopConfigurations(
                 admin, adminpwd, adresse, tel,
                 bd, server, serverBD, port,portBD, user, password, 
                 dossierApp, dossierphotos,dossierLogos,requestController 
                 ,logoApp, logoPdf,logoCon ,remise,nro,rc,
-                dossierFacturesPdf, dossierProduitsPdf, dossierStocksPdf);
+                dossierFacturesPdf, dossierProduitsPdf, dossierStocksPdf, dossierImagesLocal);
         
     }
     

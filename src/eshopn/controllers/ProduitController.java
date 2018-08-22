@@ -10,9 +10,11 @@ import eshopn.entities.Photo;
 import eshopn.entities.Produit;
 import eshopn.entities.controllers.PhotoJpaController;
 import eshopn.models.Res;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
@@ -72,15 +74,27 @@ public class ProduitController extends Controllers implements Initializable {
         /** Récupération d'une image du produit **/
         PhotoJpaController cont=new PhotoJpaController(Res.emf);
         Photo pht=(new ArrayList<>(current_product.getPhotoCollection())).get(0);
+        
+        
         try {
+        
+            File file=new File(Res.config.getDossierImagesLocal()
+                +current_product.getCodePro()+"/"+pht.getLienPhoto());
+        
+            photo.setImage(new Image(file.toURI().toURL().toExternalForm()));
+            
+            /*try {
             
             URL url = new URL(lienAbsolueImage(pht));
             InputStream is = url.openStream();
             photo.setImage(new Image(is));
             is.close();
-        } catch (FileNotFoundException ex) {
+            } catch (FileNotFoundException ex) {
             Logger.getLogger(ProduitController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
+            } catch (IOException ex) {
+            Logger.getLogger(ProduitController.class.getName()).log(Level.SEVERE, null, ex);
+            }*/
+        } catch (MalformedURLException ex) {
             Logger.getLogger(ProduitController.class.getName()).log(Level.SEVERE, null, ex);
         }
         

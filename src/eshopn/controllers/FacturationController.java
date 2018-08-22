@@ -471,7 +471,7 @@ public class FacturationController extends Controllers implements Initializable 
             }   
         }else{
             Res.not.showNotifications("Facture vide"
-                        , "Aucune contenu à imprimer, veuillez remplir la facture.",
+                        , "Aucun contenu à imprimer, veuillez remplir la facture.",
                         GlobalNotifications.ECHEC_NOT, 3, false);
         }
         
@@ -480,87 +480,107 @@ public class FacturationController extends Controllers implements Initializable 
 
     @FXML
     void onValider(ActionEvent event) throws DocumentException, BadElementException, IOException, Exception {
+        
         loader.setVisible(true);
-        FactureJpaController contFact=new FactureJpaController(Res.emf);
-        LignefactureJpaController contListFact=new LignefactureJpaController(Res.emf);
-        ProduitJpaController contPro=new ProduitJpaController(Res.emf);
+
+        try {
         
-        /** Insertion de la facture dans la base de donnée **/
-        File file=print(true, null);
-        
-        contFact.create(facture);
-        Facture facture2=contFact.findFacture(facture.getDateFac());
-        
-        
-        /** Insertion des données dans la table ligneFacture **/
-        for (MFact item : table.getItems()) {
+            FactureJpaController contFact=new FactureJpaController(Res.emf);
+            LignefactureJpaController contListFact=new LignefactureJpaController(Res.emf);
+            ProduitJpaController contPro=new ProduitJpaController(Res.emf);
+
+            /** Insertion de la facture dans la base de donnée **/
+            File file=print(true, null);
+
+            contFact.create(facture);
+            Facture facture2=contFact.findFacture(facture.getDateFac());
+
+
+            /** Insertion des données dans la table ligneFacture **/
+            for (MFact item : table.getItems()) {
+
+                Integer codePro=Integer.parseInt(item.getCodeProduit().replace("-", ""));
+
+                LignefacturePK pk=new LignefacturePK(
+                        codePro, 
+                        facture2.getIdFac().intValue()
+                );
+
+                /** Mise à jour de la quantité du produit courant dans la BD **/
+                Produit pr=contPro.findProduit(codePro);
+                pr.setQte(pr.getQte()-item.getQte());
+                contPro.edit(pr);
+
+                Lignefacture lign=new Lignefacture(
+                        pk, BigDecimal.valueOf(item.getPrixUnitaire()), 
+                        (short)item.getQte(), pr,  
+                        facture2
+                );
+
+                contListFact.create(lign);
+
+            }
+
+            file.delete();
+
+            File file1=print(false, facture2.getIdFac());
+
+            /** Remise des champs à jour **/
+            clear();
+
+            prinTicketPDF(file1.getAbsolutePath(), file1.getName().substring(0, file1.getName().indexOf(".pdf")));
             
-            Integer codePro=Integer.parseInt(item.getCodeProduit().replace("-", ""));
-            
-            LignefacturePK pk=new LignefacturePK(
-                    codePro, 
-                    facture2.getIdFac().intValue()
-            );
-            
-            /** Mise à jour de la quantité du produit courant dans la BD **/
-            Produit pr=contPro.findProduit(codePro);
-            pr.setQte(pr.getQte()-item.getQte());
-            contPro.edit(pr);
-            
-            Lignefacture lign=new Lignefacture(
-                    pk, BigDecimal.valueOf(item.getPrixUnitaire()), 
-                    (short)item.getQte(), pr,  
-                    facture2
-            );
-            
-            contListFact.create(lign);
-            
+        } catch (Exception e) {
+            Res.not.showNotifications("Echec", 
+                        "Impossible de se connecter au serveur."
+                        , GlobalNotifications.ECHEC_NOT, 2, false);
         }
         
-        file.delete();
-        
-        File file1=print(false, facture2.getIdFac());
-        
-        /** Remise des champs à jour **/
-        clear();
-        
-        prinTicketPDF(file1.getAbsolutePath(), file1.getName().substring(0, file1.getName().indexOf(".pdf")));
         loader.setVisible(false);
+
     }
     
      @FXML
     void onRecette(ActionEvent event) {
         double recette=0.0;
         
-        FactureJpaController cont=new FactureJpaController(Res.emf);
-        List<Facture> listFact=cont.findFactureEntities();
-        
-        Date today=new Date();
-        
-        
-        for (Facture fact : listFact) {
-            if(fact.getIdCaissiere().equals(Res.connected_storekeeper)){
-                Date date=fact.getDateFac();
-                
-                if(year(date).equals(year(today))
-                        && month(date).equals(month(today))
-                        && day(date).equals(day(today))){
-                    
-                    double somme=(1-(fact.getRemise().doubleValue()/100))*fact.getMontant().doubleValue();
-                    recette+=somme;
-                }
-            }
+         try {
             
-        }
-        
-        Res.stackPane.setVisible(true);
-        
-        Res.not.showDialog(Res.stackPane, "Recette Journalière"
-                , "Votre recette journalière est de :   "+Res.formatNumber(recette)+" Fcfa", null,false);
+            FactureJpaController cont=new FactureJpaController(Res.emf);
+            List<Facture> listFact=cont.findFactureEntities();
+
+            Date today=new Date();
+
+
+            for (Facture fact : listFact) {
+                if(fact.getIdCaissiere().equals(Res.connected_storekeeper)){
+                    Date date=fact.getDateFac();
+
+                    if(year(date).equals(year(today))
+                            && month(date).equals(month(today))
+                            && day(date).equals(day(today))){
+
+                        double somme=(1-(fact.getRemise().doubleValue()/100))*fact.getMontant().doubleValue();
+                        recette+=somme;
+                    }
+                }
+
+            }
+
+            Res.stackPane.setVisible(true);
+
+            Res.not.showDialog(Res.stackPane, "Recette Journalière"
+                    , "Votre recette journalière est de :   "+Res.formatNumber(recette)+" Fcfa", null,false);
+         } catch (Exception e) {
+            Res.not.showNotifications("Echec", 
+                       "Impossible de se connecter au serveur."
+                       , GlobalNotifications.ECHEC_NOT, 2, false);
+         }
     }
 
     @Override
     public void init() {
+        
         ProduitJpaController cont=new ProduitJpaController(Res.emf);
         listesPro=cont.findProduitEntities();
         HBox imagesBox=new HBox(10);
@@ -577,36 +597,52 @@ public class FacturationController extends Controllers implements Initializable 
                 if(newValue.trim().length()==7){
                     
                     for (Produit produit : listesPro) {
+                        
                         if(produit.getCodePro().toString().equals(newValue.replace("-", ""))){
-//                            PhotoJpaController cont=new PhotoJpaController(Res.emf);
-                            ArrayList<Photo> listPhotos=(new ArrayList<>(produit.getPhotoCollection()));
                             
-                            qteStockProperty.setValue(stocks.get(produit.getCodePro()+""));
+                            try{
+                                
+                                ArrayList<Photo> listPhotos=(new ArrayList<>(produit.getPhotoCollection()));
                             
-                            try {
-                                ((HBox)ImagesPane.getContent()).getChildren().clear();
-                            } catch (Exception e) {}
-                            
-                            for (int i = 0; i < listPhotos.size(); i++) {
-                                Photo pht=listPhotos.get(i);
+                                qteStockProperty.setValue(stocks.get(produit.getCodePro()+""));
+
                                 try {
-                                    URL url = new URL(lienAbsolueImage(pht));
-                                    InputStream is = url.openStream();
-                                    ImageView img = new ImageView(new Image(is));
-                                    img.setFitWidth(200);
-                                    img.setFitHeight(120);
-                                    
-                                    imagesBox.getChildren().add(img);
-                                    is.close();
-                                } catch (MalformedURLException ex) {
-                                    Logger.getLogger(FacturationController.class.getName()).log(Level.SEVERE, null, ex);
-                                } catch (IOException ex) {
-                                    Logger.getLogger(FacturationController.class.getName()).log(Level.SEVERE, null, ex);
+                                    ((HBox)ImagesPane.getContent()).getChildren().clear();
+                                } catch (Exception e) {}
+
+                                for (int i = 0; i < listPhotos.size(); i++) {
+                                    Photo pht=listPhotos.get(i);
+                                    try {
+
+                                        /*URL url = new URL(lienAbsolueImage(pht));
+                                        InputStream is = url.openStream();
+                                        ImageView img = new ImageView(new Image(is));*/
+                                        
+                                        ImageView img = new ImageView();
+                                        loadImage(produit.getCodePro().toString(), pht.getLienPhoto(), img);
+                                        
+                                        img.setFitWidth(200);
+                                        img.setFitHeight(120);
+
+                                        imagesBox.getChildren().add(img);
+                                        
+                                        //is.close();
+                                    } catch (MalformedURLException ex) {
+                                        Logger.getLogger(FacturationController.class.getName()).log(Level.SEVERE, null, ex);
+                                    } catch (IOException ex) {
+                                        Logger.getLogger(FacturationController.class.getName()).log(Level.SEVERE, null, ex);
+                                    }
                                 }
+
+                                ImagesPane.setContent(imagesBox);
+                                break;
+                            }catch(Exception e){
+                                
+                                Res.not.showNotifications("Echec", 
+                                    "Impossible de se connecter au serveur."
+                                    , GlobalNotifications.ECHEC_NOT, 2, false);
+                                
                             }
-                            
-                            ImagesPane.setContent(imagesBox);
-                            break;
                         }
                     }
                     

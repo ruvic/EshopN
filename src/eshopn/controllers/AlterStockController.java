@@ -17,6 +17,7 @@ import eshopn.entities.controllers.ProduitJpaController;
 import eshopn.entities.controllers.exceptions.NonexistentEntityException;
 import eshopn.models.GlobalNotifications;
 import eshopn.models.Res;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -192,15 +193,19 @@ public class AlterStockController extends Controllers implements Initializable {
         Photo pht=(new ArrayList<>(current_produit.getPhotoCollection())).get(0);
         try {
 
-            URL url = new URL(lienAbsolueImage(pht));
+            /*URL url = new URL(lienAbsolueImage(pht));
             InputStream is = url.openStream();
             imgView.setImage(new Image(is));
-            is.close();
-        } catch (FileNotFoundException ex) {
+            is.close();*/
+            
+            File file=new File(Res.config.getDossierImagesLocal()
+                +current_produit.getCodePro()+"/"+pht.getLienPhoto());
+        
+            imgView.setImage(new Image(file.toURI().toURL().toExternalForm()));
+            
+        } catch (Exception ex) {
             Logger.getLogger(ProduitController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(ProduitController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        } 
         
     }
     
