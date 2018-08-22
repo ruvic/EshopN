@@ -153,9 +153,13 @@ public class DétailsProduitController extends Controllers implements Initializa
             
             for (int i = 0; i < listPhotos.size(); i++) {
                 Photo pht=listPhotos.get(i);
-                String photo=lienAbsolueImage(pht);
+                //String photo=lienAbsolueImage(pht);
+                
+                //photos.add(photo);
+                
+                String photo=Res.config.getDossierImagesLocal()+produit.getCodePro().toString()+"/"+pht.getLienPhoto();
                 photos.add(photo);
-
+                    
                 File fil=new File(photo);
                 sourceFiles.add(fil);
 
@@ -276,22 +280,21 @@ public class DétailsProduitController extends Controllers implements Initializa
                         //Suppression de toutes les photos à supprimer dans la base de donnée
                         int compteur=0;
                         for (Photo ph : listPhotos) {
-                            System.out.println("=> "+ph.getLienPhoto());
+                            
                             for (String phS : photosAsupprimer) {
                                 if(phS.equals(ph.getLienPhoto())){
                                     try {
                                         compteur++;
-                                        System.out.println(compteur +" :  => delete : " +ph.getIdPhoto());
                                         contPht.destroy(ph.getIdPhoto());
                                     } catch (NonexistentEntityException ex) {
                                         Logger.getLogger(DétailsProduitController.class.getName()).log(Level.SEVERE, null, ex);
                                     }
                                 }
                             }
+                            
                         }
 
-                        //Suppression des images présent sur le serveur et qui ont été supprimer
-                        deleteContainDirectory(Res.config.getDossierImagesLocal()+produit.getCodePro());
+                        
                         /*for (String string : photosAsupprimer) {
 
                             (new HTTPRequest(Res.config.getUploadPhp())).appendParam("id", Res.config.getDossierPhotsRelative()+produit.getCodePro())
@@ -302,18 +305,27 @@ public class DétailsProduitController extends Controllers implements Initializa
                         //Insertion des images dans la base de donnée
                         for (File photo_file : sourceFiles) {
 
-                            if(!photo_file.getAbsolutePath().contains("http:")){
+                            /*if(!photo_file.getAbsolutePath().contains("http:")){
                                 Photo ph=new Photo(photo_file.getName(), produit);
                                 contPht.create(ph);
 
-                                /*(new HTTPRequest(Res.config.getUploadPhp())).appendParam("id", Res.config.getDossierPhotsRelative()+produit.getCodePro())
+                                (new HTTPRequest(Res.config.getUploadPhp())).appendParam("id", Res.config.getDossierPhotsRelative()+produit.getCodePro())
                                    .appendParam("img", photo_file)
-                                   .post();*/
+                                   .post();
+                               
+                            }*/
+                            
+                            
+                            if(!photo_file.getAbsolutePath().contains(Res.config.getDossierImagesLocal().replace('/', '\\'))){
                                 
-                                File dest=new File(Res.config.getDossierImagesLocal()+produit.getCodePro()+"/"+ph.getLienPhoto());
+                                Photo ph=new Photo(photo_file.getName(), produit);
+                                contPht.create(ph);
+                                
+                                File dest=new File(Res.config.getDossierImagesLocal()+produit.getCodePro()+"/"+photo_file.getName());
                                 copyFileUsingStream(photo_file, dest);
-
+                                
                             }
+                            
                         }
 
                         getStage().close();
@@ -346,6 +358,7 @@ public class DétailsProduitController extends Controllers implements Initializa
     
     @FXML
     void onBrowse(ActionEvent event) throws FileNotFoundException, MalformedURLException, IOException {
+        
         FileChooser fileChooser = new FileChooser();
         
         FileChooser.ExtensionFilter extFilterJPG = new FileChooser.ExtensionFilter("JPG files (*.JPG)", "*.JPG");
@@ -371,7 +384,7 @@ public class DétailsProduitController extends Controllers implements Initializa
             
             String photo=photos.get(i);
             
-            InputStream is=null;
+            /*InputStream is=null;
             URL url=null;
             if(photo.contains("http:/")){
                 url = new URL(photo);
@@ -380,7 +393,12 @@ public class DétailsProduitController extends Controllers implements Initializa
                 is=new FileInputStream(photo);
             }
             
-            ImageView img = new ImageView(new Image(is));
+            ImageView img = new ImageView(new Image(is));*/
+            
+            File file=new File(photo);
+            ImageView img = new ImageView();
+            img.setImage(new Image(file.toURI().toURL().toExternalForm()));
+            
             img.setFitWidth(97);
             img.setFitHeight(84);
             
@@ -414,7 +432,7 @@ public class DétailsProduitController extends Controllers implements Initializa
             ((HBox)(pane.getContent())).setSpacing(5);
             ((HBox)(pane.getContent())).getChildren().add(img);
             
-            is.close();
+            //is.close();
         }
         
     }
@@ -423,8 +441,10 @@ public class DétailsProduitController extends Controllers implements Initializa
         
         aRetirer.sort(null);
         for (int i = aRetirer.size()-1; i >= 0; i--) {
-            photos.remove(aRetirer.get(i).intValue());
-            sourceFiles.remove(aRetirer.get(i).intValue());
+            if(sourceFiles.get(aRetirer.get(i).intValue()).delete()){
+                photos.remove(aRetirer.get(i).intValue());
+                sourceFiles.remove(aRetirer.get(i).intValue());
+            }
         }
         aRetirer.clear();
         
