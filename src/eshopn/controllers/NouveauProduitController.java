@@ -138,25 +138,39 @@ public class NouveauProduitController extends Controllers implements Initializab
                             ProduitJpaController contPro=new ProduitJpaController(Res.emf);
                             PhotoJpaController contPhoto=new PhotoJpaController(Res.emf);
 
-                            // Insertion du produit dans la base de donnée
+                            
 
+                            //création du dossier
+                            File fileFolder=new File(Res.config.getDossierImagesLocal()+pr.getCodePro());
+                            if(fileFolder.mkdir()){
+                                // Insertion du produit dans la base de donnée
+                                contPro.create(pr);
 
-                            contPro.create(pr);
+                                //Insertion des images dans la base de donnée
+                                for (File photo_file : sourceFiles) {
 
-                            //Insertion des images dans la base de donnée
-                            for (File photo_file : sourceFiles) {
-                                Photo ph=new Photo(photo_file.getName(), pr);
-                                contPhoto.create(ph);
+                                    Photo ph=new Photo(photo_file.getName(), pr);
+                                    contPhoto.create(ph);
 
-                                (new HTTPRequest(Res.config.getUploadPhp())).appendParam("id", Res.config.getDossierPhotsRelative()+codePro)
-                                           .appendParam("img", photo_file)
-                                           .post();
+                                    /*(new HTTPRequest(Res.config.getUploadPhp())).appendParam("id", Res.config.getDossierPhotsRelative()+codePro)
+                                               .appendParam("img", photo_file)
+                                               .post();*/
 
+                                    File dest=new File(Res.config.getDossierImagesLocal()+pr.getCodePro()+"/"+ph.getLienPhoto());
+
+                                    copyFileUsingStream(photo_file, dest);
+
+                                }
+
+                                listProdCont.init();
+
+                                getStage().close();
+                            }else{
+                                Res.not.showNotifications("Echec de l'ajout", 
+                                    "Erreur de création du dossier image."
+                                    , GlobalNotifications.ECHEC_NOT, 5, false);
                             }
-
-                            listProdCont.init();
-
-                            getStage().close();
+                            
                             
                         } catch (Exception e) {
                             Res.not.showNotifications("Echec de l'ajout", 

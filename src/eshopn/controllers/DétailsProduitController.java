@@ -261,6 +261,7 @@ public class DétailsProduitController extends Controllers implements Initializa
                     BigDecimal bg=BigDecimal.valueOf(Double.valueOf(prixProd.getText().trim()));
 
                     try {
+                       
                         produit.setNomPro(nomProd.getText().trim());
                         produit.setPrix(BigDecimal.valueOf(Double.valueOf(prixProd.getText().trim())));
                         produit.setQte(Integer.valueOf(qteProd.getText()));
@@ -290,12 +291,13 @@ public class DétailsProduitController extends Controllers implements Initializa
                         }
 
                         //Suppression des images présent sur le serveur et qui ont été supprimer
-                        for (String string : photosAsupprimer) {
+                        deleteContainDirectory(Res.config.getDossierImagesLocal()+produit.getCodePro());
+                        /*for (String string : photosAsupprimer) {
 
                             (new HTTPRequest(Res.config.getUploadPhp())).appendParam("id", Res.config.getDossierPhotsRelative()+produit.getCodePro())
                                    .appendParam("file_to_delete", string)
                                    .post();
-                        }
+                        }*/
 
                         //Insertion des images dans la base de donnée
                         for (File photo_file : sourceFiles) {
@@ -304,9 +306,12 @@ public class DétailsProduitController extends Controllers implements Initializa
                                 Photo ph=new Photo(photo_file.getName(), produit);
                                 contPht.create(ph);
 
-                                (new HTTPRequest(Res.config.getUploadPhp())).appendParam("id", Res.config.getDossierPhotsRelative()+produit.getCodePro())
+                                /*(new HTTPRequest(Res.config.getUploadPhp())).appendParam("id", Res.config.getDossierPhotsRelative()+produit.getCodePro())
                                    .appendParam("img", photo_file)
-                                   .post();
+                                   .post();*/
+                                
+                                File dest=new File(Res.config.getDossierImagesLocal()+produit.getCodePro()+"/"+ph.getLienPhoto());
+                                copyFileUsingStream(photo_file, dest);
 
                             }
                         }
