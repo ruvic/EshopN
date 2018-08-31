@@ -14,15 +14,18 @@ import eshopn.entities.controllers.GestionnaireJpaController;
 import eshopn.entities.controllers.PhotoJpaController;
 import eshopn.models.GlobalNotifications;
 import eshopn.models.Res;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -92,16 +95,40 @@ public class ConnexionController extends Controllers implements Initializable {
             bSize)));
         
         /** Définition du Logo **/
-         try {
-            
-            InputStream is = Res.config.getLogoConnexion().openStream();
-            logoImg.setImage(new Image(is));
-            is.close();
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(ProduitController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(ProduitController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if(Res.config.getModeStockageImage()==1){
+
+                    File file=new File(Res.config.getLogoConnexionLocal());
+
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                logoImg.setImage(new Image(file.toURI().toURL().toExternalForm()));
+                            } catch (MalformedURLException ex) {
+                                Logger.getLogger(ConnexionController.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
+                    });
+
+                 }else{
+
+                    try {
+                        InputStream is = Res.config.getLogoConnexion().openStream();
+                    
+                        logoImg.setImage(new Image(is));
+
+
+                        is.close();
+                        
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                 }
+            }
+        }).start();
         
     }
     
@@ -142,11 +169,13 @@ public class ConnexionController extends Controllers implements Initializable {
         String pwd=passwordField.getText();
         
         if(checkConnectInformation(username, pwd)){
+            
             if(adminCheckBox.isSelected()){
                 getMain().showAdminAcceuilView();
             }else{
                 getMain().showMagasinierAccueilView();
             }
+            
         }
         
     }

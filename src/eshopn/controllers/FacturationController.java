@@ -67,6 +67,8 @@ import java.io.FileNotFoundException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javax.print.PrintService;
@@ -153,8 +155,10 @@ public class FacturationController extends Controllers implements Initializable 
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        
         setImagesToImageViews();
         loader.setVisible(false);
+        
         typePaiementToggle.selectedProperty().addListener(new ChangeListener<Boolean>(){
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
@@ -241,18 +245,57 @@ public class FacturationController extends Controllers implements Initializable 
            @Override
            public void changed(ObservableValue<? extends MFact> observable, MFact oldValue, MFact newValue) {
                 if(newValue!=null && newValue!=oldValue){
-//                    PhotoJpaController cont=new PhotoJpaController(Res.emf);
                     Photo pht=(new ArrayList<>(newValue.getProduit().getPhotoCollection())).get(0);
-                    try {
+                    
+                    if(Res.config.getModeStockageImage()==1){
+                        
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
 
-                        URL url = new URL(lienAbsolueImage(pht));
-                        InputStream is = url.openStream();
-                        imgView.setImage(new Image(is));
-                        is.close();
-                    } catch (FileNotFoundException ex) {
-                        Logger.getLogger(ProduitController.class.getName()).log(Level.SEVERE, null, ex);
-                    } catch (IOException ex) {
-                        Logger.getLogger(ProduitController.class.getName()).log(Level.SEVERE, null, ex);
+                                File file=new File(Res.config.getDossierImagesLocal()
+                                        +newValue.getProduit().getCodePro().toString()
+                                        +"/"+pht.getLienPhoto());
+
+                                Platform.runLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            imgView.setImage(new Image(file.toURI().toURL().toExternalForm()));
+                                        } catch (MalformedURLException ex) {
+                                            Logger.getLogger(StocksController.class.getName()).log(Level.SEVERE, null, ex);
+                                        }
+                                    }
+                                });
+
+                            }
+                        }).start();
+
+
+                    }else{
+
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                try {
+                                    URL url = new URL(lienAbsolueImage(pht));
+                                    InputStream is = url.openStream();
+
+
+                                    imgView.setImage(new Image(is));
+
+
+                                    is.close();
+
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+
+
+                            }
+                        }).start();
+
                     }
                 }
            }   
@@ -483,60 +526,78 @@ public class FacturationController extends Controllers implements Initializable 
         
         loader.setVisible(true);
 
-        try {
-        
-            FactureJpaController contFact=new FactureJpaController(Res.emf);
-            LignefactureJpaController contListFact=new LignefactureJpaController(Res.emf);
-            ProduitJpaController contPro=new ProduitJpaController(Res.emf);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                
+                try {
 
-            /** Insertion de la facture dans la base de donnée **/
-            File file=print(true, null);
+                    FactureJpaController contFact=new FactureJpaController(Res.emf);
+                    LignefactureJpaController contListFact=new LignefactureJpaController(Res.emf);
+                    ProduitJpaController contPro=new ProduitJpaController(Res.emf);
 
-            contFact.create(facture);
-            Facture facture2=contFact.findFacture(facture.getDateFac());
+                    /** Insertion de la facture dans la base de donnée **/
+                    File file=print(true, null);
+
+                    contFact.create(facture);
+                    Facture facture2=contFact.findFacture(facture.getDateFac());
 
 
-            /** Insertion des données dans la table ligneFacture **/
-            for (MFact item : table.getItems()) {
+                    /** Insertion des données dans la table ligneFacture **/
+                    for (MFact item : table.getItems()) {
 
-                Integer codePro=Integer.parseInt(item.getCodeProduit().replace("-", ""));
+                        Integer codePro=Integer.parseInt(item.getCodeProduit().replace("-", ""));
 
-                LignefacturePK pk=new LignefacturePK(
-                        codePro, 
-                        facture2.getIdFac().intValue()
-                );
+                        LignefacturePK pk=new LignefacturePK(
+                                codePro, 
+                                facture2.getIdFac().intValue()
+                        );
 
-                /** Mise à jour de la quantité du produit courant dans la BD **/
-                Produit pr=contPro.findProduit(codePro);
-                pr.setQte(pr.getQte()-item.getQte());
-                contPro.edit(pr);
+                        /** Mise à jour de la quantité du produit courant dans la BD **/
+                        Produit pr=contPro.findProduit(codePro);
+                        pr.setQte(pr.getQte()-item.getQte());
+                        contPro.edit(pr);
 
-                Lignefacture lign=new Lignefacture(
-                        pk, BigDecimal.valueOf(item.getPrixUnitaire()), 
-                        (short)item.getQte(), pr,  
-                        facture2
-                );
+                        Lignefacture lign=new Lignefacture(
+                                pk, BigDecimal.valueOf(item.getPrixUnitaire()), 
+                                (short)item.getQte(), pr,  
+                                facture2
+                        );
 
-                contListFact.create(lign);
+                        contListFact.create(lign);
 
+                    }
+
+                    file.delete();
+
+                    File file1=print(false, facture2.getIdFac());
+
+                    /** Remise des champs à jour **/
+                    clear();
+
+                    prinTicketPDF(file1.getAbsolutePath(), file1.getName().substring(0, file1.getName().indexOf(".pdf")));
+
+                } catch (Exception e) {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            loader.setVisible(false);
+                            Res.not.showNotifications("Echec", 
+                                        "Impossible de se connecter au serveur."
+                                        , GlobalNotifications.ECHEC_NOT, 2, false);
+                        }
+                    });
+                }
+
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        loader.setVisible(false);
+                    }
+                });
+                
             }
-
-            file.delete();
-
-            File file1=print(false, facture2.getIdFac());
-
-            /** Remise des champs à jour **/
-            clear();
-
-            prinTicketPDF(file1.getAbsolutePath(), file1.getName().substring(0, file1.getName().indexOf(".pdf")));
-            
-        } catch (Exception e) {
-            Res.not.showNotifications("Echec", 
-                        "Impossible de se connecter au serveur."
-                        , GlobalNotifications.ECHEC_NOT, 2, false);
-        }
-        
-        loader.setVisible(false);
+        }).start();
 
     }
     
@@ -585,104 +646,174 @@ public class FacturationController extends Controllers implements Initializable 
     @Override
     public void init() {
         
-        ProduitJpaController cont=new ProduitJpaController(Res.emf);
-        listesPro=cont.findProduitEntities();
-        HBox imagesBox=new HBox(10);
-        stocks=new HashMap<>();
+        BooleanProperty okProperty=new SimpleBooleanProperty(false);
         
-        for (Produit produit : listesPro) {
-            stocks.put(produit.getCodePro()+"", Integer.valueOf(produit.getQte()));
-        }
-        
-        codeProField.textProperty().addListener(new ChangeListener<String>(){
+        new Thread(new Runnable() {
             @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                
-                if(newValue.trim().length()==7){
-                    
-                    for (Produit produit : listesPro) {
+            public void run() {
+                try {
+                    ProduitJpaController cont=new ProduitJpaController(Res.emf);
+                    listesPro=cont.findProduitEntities();
+                    okProperty.setValue(true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+        
+        okProperty.addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
                         
-                        if(produit.getCodePro().toString().equals(newValue.replace("-", ""))){
-                            
-                            try{
-                                
-                                ArrayList<Photo> listPhotos=(new ArrayList<>(produit.getPhotoCollection()));
-                            
-                                qteStockProperty.setValue(stocks.get(produit.getCodePro()+""));
+                        HBox imagesBox=new HBox(10);
+                        stocks=new HashMap<>();
 
-                                try {
-                                    ((HBox)ImagesPane.getContent()).getChildren().clear();
-                                } catch (Exception e) {}
+                        for (Produit produit : listesPro) {
+                            stocks.put(produit.getCodePro()+"", Integer.valueOf(produit.getQte()));
+                        }
 
-                                for (int i = 0; i < listPhotos.size(); i++) {
-                                    Photo pht=listPhotos.get(i);
-                                    try {
+                        codeProField.textProperty().addListener(new ChangeListener<String>(){
+                            @Override
+                            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
 
-                                        /*URL url = new URL(lienAbsolueImage(pht));
-                                        InputStream is = url.openStream();
-                                        ImageView img = new ImageView(new Image(is));*/
-                                        
-                                        ImageView img = new ImageView();
-                                        loadImage(produit.getCodePro().toString(), pht.getLienPhoto(), img);
-                                        
-                                        img.setFitWidth(200);
-                                        img.setFitHeight(120);
+                                if(newValue.trim().length()==7){
+                                    
+                                    for (Produit produit : listesPro) {
 
-                                        imagesBox.getChildren().add(img);
-                                        
-                                        //is.close();
-                                    } catch (MalformedURLException ex) {
-                                        Logger.getLogger(FacturationController.class.getName()).log(Level.SEVERE, null, ex);
-                                    } catch (IOException ex) {
-                                        Logger.getLogger(FacturationController.class.getName()).log(Level.SEVERE, null, ex);
+                                        if(produit.getCodePro().toString().equals(newValue.replace("-", ""))){
+
+                                            try{
+
+                                                ArrayList<Photo> listPhotos=(new ArrayList<>(produit.getPhotoCollection()));
+
+                                                qteStockProperty.setValue(stocks.get(produit.getCodePro()+""));
+
+                                                try {
+                                                    ((HBox)ImagesPane.getContent()).getChildren().clear();
+                                                } catch (Exception e) {}
+
+                                                for (int i = 0; i < listPhotos.size(); i++) {
+                                                    Photo pht=listPhotos.get(i);
+                                                    
+                                                    ImageView img = new ImageView();
+                                                    if(Res.config.getModeStockageImage()==1){
+                                                        
+                                                        new Thread(new Runnable() {
+                                                            
+                                                            @Override
+                                                            public void run() {
+                                                                
+                                                                File file=new File(Res.config.getDossierImagesLocal()
+                                                                        +produit.getCodePro().toString()+"/"
+                                                                        +pht.getLienPhoto());
+                                                                
+                                                                Platform.runLater(new Runnable() {
+                                                                    @Override
+                                                                    public void run() {
+                                                                        try {
+                                                                            img.setImage(new Image(file.toURI().toURL().toExternalForm()));
+                                                                        } catch (MalformedURLException ex) {
+                                                                            img.setImage(new Image("Produits/default.png"));
+                                                                        }
+                                                                    }
+                                                                });
+                                                            }
+                                                            
+                                                        }).start();
+                                                        
+                                                    }else{
+                                                        
+                                                        new Thread(new Runnable() {
+                                                            @Override
+                                                            public void run() {
+                                                                URL url;
+                                                                try {
+                                                                    
+                                                                    url = new URL(lienAbsolueImage(pht));
+                                                                    InputStream is = url.openStream();
+                                                                    Platform.runLater(new Runnable() {
+                                                                        @Override
+                                                                        public void run() {
+                                                                            img.setImage(new Image(is));
+                                                                        }
+                                                                    });
+                                                                    
+                                                                } catch (Exception ex) {
+                                                                    
+                                                                    Platform.runLater(new Runnable() {
+                                                                        @Override
+                                                                        public void run() {
+                                                                            img.setImage(new Image("Produits/default.png"));
+                                                                        }
+                                                                    });
+                                                                    
+                                                                } 
+                                                                
+                                                            }
+                                                        }).start();
+                                                        
+                                                    }
+
+                                                    img.setFitWidth(200);
+                                                    img.setFitHeight(120);
+
+                                                    imagesBox.getChildren().add(img);
+                                                }
+
+                                                ImagesPane.setContent(imagesBox);
+                                                break;
+                                            }catch(Exception e){
+
+                                                Res.not.showNotifications("Echec", 
+                                                    "Impossible de se connecter au serveur."
+                                                    , GlobalNotifications.ECHEC_NOT, 2, false);
+
+                                            }
+                                        }
                                     }
+
+                                }else{
+                                    qteStockProperty.setValue(0);
+                                    qteField.setText("1");
+                                    if(((HBox)ImagesPane.getContent())!=null)
+                                        ((HBox)ImagesPane.getContent()).getChildren().clear();
+                                }
+                            }
+
+                        });
+
+                        remiseField.textProperty().addListener(new ChangeListener<String>(){
+                            @Override
+                            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                                double remise;
+                                try{
+                                    remise=Double.parseDouble(newValue.toString())/100;
+                                }catch(NumberFormatException e){
+                                    remise=0.0;
                                 }
 
-                                ImagesPane.setContent(imagesBox);
-                                break;
-                            }catch(Exception e){
-                                
-                                Res.not.showNotifications("Echec", 
-                                    "Impossible de se connecter au serveur."
-                                    , GlobalNotifications.ECHEC_NOT, 2, false);
-                                
+                                if(remise<=(Res.config.getRemise()/100.0)){
+                                    //netAPayerField.setText(""+totalProperty.getValue()*(1-remise));
+                                    netAPayerField.setText(Res.formatNumber(totalProperty.getValue()*(1-remise)));
+                                }else{
+                                    netAPayerField.setText("0.0");
+                                    Res.not.showNotifications("Erreur d'Ajout à la facture"
+                                    , "La remise ne peut dépasser "+Res.config.getRemise()+"% .",
+                                    GlobalNotifications.ECHEC_NOT, 3, false);
+                                }
+
+
                             }
-                        }
+
+                        });
+
+                        
                     }
-                    
-                }else{
-                    qteStockProperty.setValue(0);
-                    qteField.setText("1");
-                    if(((HBox)ImagesPane.getContent())!=null)
-                        ((HBox)ImagesPane.getContent()).getChildren().clear();
-                }
+                });
             }
-            
-        });
-        
-        remiseField.textProperty().addListener(new ChangeListener<String>(){
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                double remise;
-                try{
-                    remise=Double.parseDouble(newValue.toString())/100;
-                }catch(NumberFormatException e){
-                    remise=0.0;
-                }
-                
-                if(remise<=(Res.config.getRemise()/100.0)){
-                    //netAPayerField.setText(""+totalProperty.getValue()*(1-remise));
-                    netAPayerField.setText(Res.formatNumber(totalProperty.getValue()*(1-remise)));
-                }else{
-                    netAPayerField.setText("0.0");
-                    Res.not.showNotifications("Erreur d'Ajout à la facture"
-                    , "La remise ne peut dépasser "+Res.config.getRemise()+"% .",
-                    GlobalNotifications.ECHEC_NOT, 3, false);
-                }
-                
-                
-            }
-            
         });
         
     }
@@ -759,6 +890,7 @@ public class FacturationController extends Controllers implements Initializable 
     @Override
     protected void setImagesToImageViews() {
         loader.setImage(new Image("chargement2.gif"));
+        imgView.setImage(new Image("Produits/default.png"));
     }
     
     @FXML

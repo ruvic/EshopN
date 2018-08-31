@@ -88,9 +88,6 @@
       <AnchorPane fx:id="imgPane" mouseTransparent="true" onKeyReleased="#onControlReleased" prefHeight="499.0" prefWidth="744.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
             <ImageView fx:id="ImgView" fitHeight="150.0" fitWidth="200.0" layoutX="512.0" layoutY="280.0" pickOnBounds="true" AnchorPane.bottomAnchor="76.0" AnchorPane.rightAnchor="32.0">
-               <image>
-                  <Image url="@../../../images/Produits/5w7g8hq2zslmnc0dbic6--4500fr.jpg" />
-               </image>
                <effect>
                   <DropShadow />
                </effect>

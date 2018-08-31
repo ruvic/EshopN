@@ -27,7 +27,7 @@
             </Label>
             <JFXButton contentDisplay="GRAPHIC_ONLY" onAction="#onShowProduits" prefHeight="71.0" prefWidth="218.0" />
             <Separator layoutX="7.0" layoutY="72.0" prefWidth="200.0" />
-            <Label fx:id="priceLabel" alignment="CENTER" layoutX="18.0" layoutY="97.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="20.0" prefWidth="33.0" style="-fx-font-weight: bold; -fx-font-size: 18;" text="65">
+            <Label fx:id="priceLabel" alignment="CENTER" layoutX="18.0" layoutY="97.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="20.0" prefWidth="33.0" style="-fx-font-weight: bold; -fx-font-size: 18;">
                <font>
                   <Font size="14.0" />
                </font>

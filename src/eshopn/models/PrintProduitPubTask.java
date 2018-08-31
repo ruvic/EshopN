@@ -61,14 +61,31 @@ public class PrintProduitPubTask implements  Runnable {
             for (Produit pr : listesGen) {
                 if(pr.getQte()==0) continue;
                 try {
-                    pdf.addProductRow(pr.getCodePro(),
+                    
+                    if(Res.config.getModeStockageImage()==1){
+                        String Imgpath=Res.config.getDossierImagesLocal()
+                                +pr.getCodePro().toString()+"/"
+                                +(new ArrayList<>(pr.getPhotoCollection())).get(0).getLienPhoto();
+
+                        pdf.addProductRow(pr.getCodePro(),
+                                pr.getNomPro(),
+                                pr.getPrix(),
+                                pr.getQte(),
+                                pr.getIdCategorie().getNomCat(),
+                                pr.getCodeFour(),
+                                pr.getActif(),
+                                Imgpath, true);
+                    }else{
+                        pdf.addProductRow(pr.getCodePro(),
                             pr.getNomPro(),
                             pr.getPrix(),
                             pr.getQte(),
                             pr.getIdCategorie().getNomCat(),
                             pr.getCodeFour(),
                             pr.getActif(),
-                            lienAbsolueImage((new ArrayList<>(pr.getPhotoCollection())).get(0)));
+                            lienAbsolueImage((new ArrayList<>(pr.getPhotoCollection())).get(0)), false);
+                    }
+                    
                 } catch (BadElementException ex) {
                     Logger.getLogger(PrintProduitTask.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (IOException ex) {

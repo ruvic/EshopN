@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -33,6 +34,9 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -170,17 +174,54 @@ public class StocksController extends Controllers implements Initializable {
 
                     Photo pht=(new ArrayList<>(newValue.getProduit().getPhotoCollection())).get(0);
                     
-                    try {
-
-                        /*URL url = new URL(lienAbsolueImage(pht));
-                        InputStream is = url.openStream();
-                        ImgView.setImage(new Image(is));
-                        is.close();*/
+                    if(Res.config.getModeStockageImage()==1){
                         
-                        loadImage(newValue.getProduit().getCodePro().toString(), pht.getLienPhoto(), ImgView);
-
-                    } catch (Exception ex) {
-                        Logger.getLogger(ProduitController.class.getName()).log(Level.SEVERE, null, ex);
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                
+                                File file=new File(Res.config.getDossierImagesLocal()
+                                        +newValue.getProduit().getCodePro().toString()
+                                        +"/"+pht.getLienPhoto());
+                               
+                                Platform.runLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            ImgView.setImage(new Image(file.toURI().toURL().toExternalForm()));
+                                        } catch (MalformedURLException ex) {
+                                            Logger.getLogger(StocksController.class.getName()).log(Level.SEVERE, null, ex);
+                                        }
+                                    }
+                                });
+                                
+                            }
+                        }).start();
+                        
+                        
+                    }else{
+                        
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                
+                                try {
+                                    URL url = new URL(lienAbsolueImage(pht));
+                                    InputStream is = url.openStream();
+                                    
+                                    ImgView.setImage(new Image(is));
+                                    
+                                    is.close();
+                                    
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                
+                                
+                            }
+                        }).start();
+                        
+                        
                     }
                 }
            }
@@ -193,239 +234,274 @@ public class StocksController extends Controllers implements Initializable {
     @Override
     public void init() {
         
-        try {
-            GestionstockJpaController cont=new GestionstockJpaController(Res.emf);
-            listStocks=cont.findGestionstockEntities(true);
-
-            for (Gestionstock stock : listStocks) {
-                MStocks stocks=new MStocks(stock);
-                allStocks.add(new MStocks(stock));
-                table.getItems().add(stocks);
+        Res.not.showLoader(Res.stackPane);
+        BooleanProperty okProperty=new SimpleBooleanProperty(false);
+        
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    
+                    GestionstockJpaController cont=new GestionstockJpaController(Res.emf);
+                    listStocks=cont.findGestionstockEntities(true);
+                    okProperty.setValue(true);
+                } catch (Exception e) {
+                    
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            Res.stackPane.setVisible(false);
+                            Res.not.showNotifications("Echec", 
+                                "Impossible de se connecter au serveur."
+                                , GlobalNotifications.ECHEC_NOT, 2, false);
+                        }
+                    });
+                    
+                    
+                }
             }
-
-            stocksGen=allStocks;
-            showDatasOnTableView(allStocks, pagination, table,Res.itermPerPage);
-
-
-            // 1. Wrap the ObservableList in a FilteredList (initially display all data).
-            FilteredList<MStocks> filteredData = new FilteredList<>(allStocks, p -> true);
-
-            // 2. Set the filter Predicate whenever the filter changes.
-            codeProField.textProperty().addListener((observable, oldValue, newValue) -> {
-                filteredData.setPredicate(mStock -> {
-                    // If filter text is empty, display all persons.
-                    if (newValue == null || newValue.isEmpty()) {
-
-                        if(anneeBox.getValue()==null){
-                            if(moisBox.getValue()==null){
-                                return true;
-                            }else{
-                                if(year(new Date()).equals(anneeBox.getValue())
-                                        && mStock.getDate().split("-")[1].toLowerCase().equals(moisBox.getValue()) ){
-                                    System.out.println("passage");
-                                    return true;
-                                }else return false;
+        }).start();
+        
+        okProperty.addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                
+                
+                if(newValue.booleanValue()){
+                    
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            Res.stackPane.setVisible(false);
+                            for (Gestionstock stock : listStocks) {
+                                MStocks stocks=new MStocks(stock);
+                                allStocks.add(new MStocks(stock));
+                                table.getItems().add(stocks);
                             }
-                        }else{
-                            if(moisBox.getValue()==null){
-                                return true;
-                            }else{
-                                if(mStock.getDate().split("-")[0].equals(anneeBox.getValue())
-                                        && mStock.getDate().split("-")[1].toLowerCase().equals(moisBox.getValue()) ){
-                                    return true;
-                                }else return false;
-                            }
+
+                            stocksGen=allStocks;
+                            showDatasOnTableView(allStocks, pagination, table,Res.itermPerPage);
                         }
+                    });
+                    
+                }  
+            }
+        });
+        
+        // 1. Wrap the ObservableList in a FilteredList (initially display all data).
+        FilteredList<MStocks> filteredData = new FilteredList<>(allStocks, p -> true);
 
-                    }
+        // 2. Set the filter Predicate whenever the filter changes.
+        codeProField.textProperty().addListener((observable, oldValue, newValue) -> {
+            filteredData.setPredicate(mStock -> {
+                // If filter text is empty, display all persons.
+                if (newValue == null || newValue.isEmpty()) {
 
-                    // Compare first name and last name of every person with filter text.
-                    String lowerCaseFilter = newValue.toLowerCase();
-
-                    if (mStock.getCodeProduit().toLowerCase().contains(lowerCaseFilter)) {
-
-                        if(anneeBox.getValue()!=null){
-                            if(moisBox.getValue()!=null){
-                                if(mStock.getDate().split("-")[1].toLowerCase().equals(moisBox.getValue())
-                                      && mStock.getDate().split("-")[0].toLowerCase().equals(anneeBox.getValue())){
-                                    return true;
-                                }else return false;
-                            }else{
-                                if(mStock.getDate().split("-")[1].toLowerCase().equals(anneeBox.getValue())){
-                                    return true;
-                                }else return false;
-                            }
-                        }else{
-                            if(moisBox.getValue()!=null){
-                                if(mStock.getDate().split("-")[1].toLowerCase().equals(moisBox.getValue())
-                                        && year(new Date()).equals(anneeBox.getValue())){
-                                    return true;
-                                }else return false;
-                            }else return true;
-                        }
-                    } 
-                    return false; // Does not match.
-                });
-
-                // 3. Wrap the FilteredList in a SortedList.
-                SortedList<MStocks> sortedData = new SortedList<>(filteredData);
-
-                // 4. Bind the SortedList comparator to the TableView comparator.
-                sortedData.comparatorProperty().bind(table.comparatorProperty());
-
-                // 5. Add sorted (and filtered) data to the table.
-                table.setItems(sortedData);
-
-                stocksGen=observableFromSortedList(sortedData);
-                showDatasOnTableView(observableFromSortedList(sortedData), pagination, table,Res.itermPerPage);
-            });
-
-            moisBox.valueProperty().addListener((observable, oldValue, newValue) -> {
-                filteredData.setPredicate(mStock -> {
-                    // If filter text is empty, display all persons.
-                    if (newValue == null || newValue.isEmpty()) {
-                        if(anneeBox.getValue()==null){
-                            if(codeProField.getText().isEmpty()){
-                                return true;
-                            }else{
-                                if(mStock.getCodeProduit().contains(codeProField.getText().trim())){
-                                    return true;
-                                }else{
-                                    return false;
-                                }
-                            }
-                        }else{
-                            if(codeProField.getText().isEmpty()){
-                                if(mStock.getDate().split("-")[0].equals(anneeBox.getValue())){
-                                    return true;
-                                }else return false;
-                            }else{
-                                if(mStock.getDate().split("-")[0].equals(anneeBox.getValue())
-                                        && mStock.getCodeProduit().contains(codeProField.getText().trim())){
-                                    return true;
-                                }else return false;
-                            }
-                        }
-                    }
-
-                    // Compare first name and last name of every person with filter text.
-                    String lowerCaseFilter = newValue.toLowerCase();
-
-                    if (mStock.getDate().split("-")[1].toLowerCase().contains(lowerCaseFilter)) {
-
-                        if(anneeBox.getValue()==null){
-                            if(codeProField.getText().isEmpty()){
-                                return true;
-                            }else{
-                                if(mStock.getCodeProduit().contains(codeProField.getText().trim())){
-                                    return true;
-                                }else return  false;
-                            }
-                        }else{
-                            if(codeProField.getText().isEmpty()){
-                                if(mStock.getDate().split("-")[0].equals(anneeBox.getValue())){
-                                    return true;
-                                }else return  false;
-                            }else{
-                                if(mStock.getDate().split("-")[0].equals(anneeBox.getValue())
-                                        && mStock.getCodeProduit().contains(codeProField.getText().trim())){
-                                    return true;
-                                }else return  false;
-                            }
-                        }
-                    } 
-                    return false; // Does not match.
-                });
-
-                // 3. Wrap the FilteredList in a SortedList.
-                SortedList<MStocks> sortedData = new SortedList<>(filteredData);
-
-                // 4. Bind the SortedList comparator to the TableView comparator.
-                sortedData.comparatorProperty().bind(table.comparatorProperty());
-
-                // 5. Add sorted (and filtered) data to the table.
-                table.setItems(sortedData);
-
-                stocksGen=observableFromSortedList(sortedData);
-                showDatasOnTableView(observableFromSortedList(sortedData), pagination, table,Res.itermPerPage);
-
-            });
-
-            anneeBox.valueProperty().addListener((observable, oldValue, newValue) -> {
-                filteredData.setPredicate(mStock -> {
-                    // If filter text is empty, display all persons.
-                    if (newValue == null || newValue.isEmpty()) {
+                    if(anneeBox.getValue()==null){
                         if(moisBox.getValue()==null){
-                            if(codeProField.getText().isEmpty()){
+                            return true;
+                        }else{
+                            if(year(new Date()).equals(anneeBox.getValue())
+                                    && mStock.getDate().split("-")[1].toLowerCase().equals(moisBox.getValue()) ){
+                                System.out.println("passage");
+                                return true;
+                            }else return false;
+                        }
+                    }else{
+                        if(moisBox.getValue()==null){
+                            return true;
+                        }else{
+                            if(mStock.getDate().split("-")[0].equals(anneeBox.getValue())
+                                    && mStock.getDate().split("-")[1].toLowerCase().equals(moisBox.getValue()) ){
+                                return true;
+                            }else return false;
+                        }
+                    }
+
+                }
+
+                // Compare first name and last name of every person with filter text.
+                String lowerCaseFilter = newValue.toLowerCase();
+
+                if (mStock.getCodeProduit().toLowerCase().contains(lowerCaseFilter)) {
+
+                    if(anneeBox.getValue()!=null){
+                        if(moisBox.getValue()!=null){
+                            if(mStock.getDate().split("-")[1].toLowerCase().equals(moisBox.getValue())
+                                  && mStock.getDate().split("-")[0].toLowerCase().equals(anneeBox.getValue())){
+                                return true;
+                            }else return false;
+                        }else{
+                            if(mStock.getDate().split("-")[1].toLowerCase().equals(anneeBox.getValue())){
+                                return true;
+                            }else return false;
+                        }
+                    }else{
+                        if(moisBox.getValue()!=null){
+                            if(mStock.getDate().split("-")[1].toLowerCase().equals(moisBox.getValue())
+                                    && year(new Date()).equals(anneeBox.getValue())){
+                                return true;
+                            }else return false;
+                        }else return true;
+                    }
+                } 
+                return false; // Does not match.
+            });
+
+            // 3. Wrap the FilteredList in a SortedList.
+            SortedList<MStocks> sortedData = new SortedList<>(filteredData);
+
+            // 4. Bind the SortedList comparator to the TableView comparator.
+            sortedData.comparatorProperty().bind(table.comparatorProperty());
+
+            // 5. Add sorted (and filtered) data to the table.
+            table.setItems(sortedData);
+
+            stocksGen=observableFromSortedList(sortedData);
+            showDatasOnTableView(observableFromSortedList(sortedData), pagination, table,Res.itermPerPage);
+        });
+
+        moisBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+            filteredData.setPredicate(mStock -> {
+                // If filter text is empty, display all persons.
+                if (newValue == null || newValue.isEmpty()) {
+                    if(anneeBox.getValue()==null){
+                        if(codeProField.getText().isEmpty()){
+                            return true;
+                        }else{
+                            if(mStock.getCodeProduit().contains(codeProField.getText().trim())){
                                 return true;
                             }else{
-                                if(mStock.getCodeProduit().contains(codeProField.getText().trim())){
-                                    return true;
-                                }else return false;
-                            }
-                        }else{
-                            if(codeProField.getText().isEmpty()){
-                                if(mStock.getDate().split("-")[1].equals(moisBox.getValue())
-                                        && year(new Date()).equals(mStock.getDate().split("-")[0]))
-                                    return true;
-                                return false;
-                            }else{
-                                if(mStock.getDate().split("-")[1].equals(moisBox.getValue())
-                                        && year(new Date()).equals(anneeBox.getValue())
-                                        && mStock.getCodeProduit().contains(codeProField.getText().trim()))
-                                    return true;
                                 return false;
                             }
                         }
+                    }else{
+                        if(codeProField.getText().isEmpty()){
+                            if(mStock.getDate().split("-")[0].equals(anneeBox.getValue())){
+                                return true;
+                            }else return false;
+                        }else{
+                            if(mStock.getDate().split("-")[0].equals(anneeBox.getValue())
+                                    && mStock.getCodeProduit().contains(codeProField.getText().trim())){
+                                return true;
+                            }else return false;
+                        }
+                    }
+                }
+
+                // Compare first name and last name of every person with filter text.
+                String lowerCaseFilter = newValue.toLowerCase();
+
+                if (mStock.getDate().split("-")[1].toLowerCase().contains(lowerCaseFilter)) {
+
+                    if(anneeBox.getValue()==null){
+                        if(codeProField.getText().isEmpty()){
+                            return true;
+                        }else{
+                            if(mStock.getCodeProduit().contains(codeProField.getText().trim())){
+                                return true;
+                            }else return  false;
+                        }
+                    }else{
+                        if(codeProField.getText().isEmpty()){
+                            if(mStock.getDate().split("-")[0].equals(anneeBox.getValue())){
+                                return true;
+                            }else return  false;
+                        }else{
+                            if(mStock.getDate().split("-")[0].equals(anneeBox.getValue())
+                                    && mStock.getCodeProduit().contains(codeProField.getText().trim())){
+                                return true;
+                            }else return  false;
+                        }
+                    }
+                } 
+                return false; // Does not match.
+            });
+
+            // 3. Wrap the FilteredList in a SortedList.
+            SortedList<MStocks> sortedData = new SortedList<>(filteredData);
+
+            // 4. Bind the SortedList comparator to the TableView comparator.
+            sortedData.comparatorProperty().bind(table.comparatorProperty());
+
+            // 5. Add sorted (and filtered) data to the table.
+            table.setItems(sortedData);
+
+            stocksGen=observableFromSortedList(sortedData);
+            showDatasOnTableView(observableFromSortedList(sortedData), pagination, table,Res.itermPerPage);
+
+        });
+
+        anneeBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+            filteredData.setPredicate(mStock -> {
+                // If filter text is empty, display all persons.
+                if (newValue == null || newValue.isEmpty()) {
+                    if(moisBox.getValue()==null){
+                        if(codeProField.getText().isEmpty()){
+                            return true;
+                        }else{
+                            if(mStock.getCodeProduit().contains(codeProField.getText().trim())){
+                                return true;
+                            }else return false;
+                        }
+                    }else{
+                        if(codeProField.getText().isEmpty()){
+                            if(mStock.getDate().split("-")[1].equals(moisBox.getValue())
+                                    && year(new Date()).equals(mStock.getDate().split("-")[0]))
+                                return true;
+                            return false;
+                        }else{
+                            if(mStock.getDate().split("-")[1].equals(moisBox.getValue())
+                                    && year(new Date()).equals(anneeBox.getValue())
+                                    && mStock.getCodeProduit().contains(codeProField.getText().trim()))
+                                return true;
+                            return false;
+                        }
+                    }
+                }
+
+                // Compare first name and last name of every person with filter text.
+                String lowerCaseFilter = newValue.toLowerCase();
+
+                if (mStock.getDate().split("-")[0].toLowerCase().contains(lowerCaseFilter)) {
+
+                    if(moisBox.getValue()==null){
+                        if(codeProField.getText().isEmpty()){
+                            return true;
+                        }else {
+                            if(mStock.getCodeProduit().contains(codeProField.getText().trim())){
+                                return true;
+                            }else return false;
+                        }
+                    }else{
+                        if(codeProField.getText().isEmpty()){
+                            if(mStock.getDate().split("-")[1].equals(moisBox.getValue())){
+                                return true;
+                            }else return false;
+                        }else {
+                            if(mStock.getCodeProduit().contains(codeProField.getText().trim())
+                                    && mStock.getDate().split("-")[1].equals(moisBox.getValue())){
+                                return true;
+                            }else return false;
+                        }
                     }
 
-                    // Compare first name and last name of every person with filter text.
-                    String lowerCaseFilter = newValue.toLowerCase();
-
-                    if (mStock.getDate().split("-")[0].toLowerCase().contains(lowerCaseFilter)) {
-
-                        if(moisBox.getValue()==null){
-                            if(codeProField.getText().isEmpty()){
-                                return true;
-                            }else {
-                                if(mStock.getCodeProduit().contains(codeProField.getText().trim())){
-                                    return true;
-                                }else return false;
-                            }
-                        }else{
-                            if(codeProField.getText().isEmpty()){
-                                if(mStock.getDate().split("-")[1].equals(moisBox.getValue())){
-                                    return true;
-                                }else return false;
-                            }else {
-                                if(mStock.getCodeProduit().contains(codeProField.getText().trim())
-                                        && mStock.getDate().split("-")[1].equals(moisBox.getValue())){
-                                    return true;
-                                }else return false;
-                            }
-                        }
-
-                    } 
-                    return false; // Does not match.
-                });
-
-                // 3. Wrap the FilteredList in a SortedList.
-                SortedList<MStocks> sortedData = new SortedList<>(filteredData);
-
-                // 4. Bind the SortedList comparator to the TableView comparator.
-                sortedData.comparatorProperty().bind(table.comparatorProperty());
-
-                // 5. Add sorted (and filtered) data to the table.
-                table.setItems(sortedData);
-
-                stocksGen=observableFromSortedList(sortedData);
-                showDatasOnTableView(observableFromSortedList(sortedData), pagination, table,Res.itermPerPage);
+                } 
+                return false; // Does not match.
             });
-        } catch (Exception e) {
-            Res.not.showNotifications("Echec de l'ajout", 
-                        "Impossible de se connecter au serveur."
-                        , GlobalNotifications.ECHEC_NOT, 2, false);
-        }
+
+            // 3. Wrap the FilteredList in a SortedList.
+            SortedList<MStocks> sortedData = new SortedList<>(filteredData);
+
+            // 4. Bind the SortedList comparator to the TableView comparator.
+            sortedData.comparatorProperty().bind(table.comparatorProperty());
+
+            // 5. Add sorted (and filtered) data to the table.
+            table.setItems(sortedData);
+
+            stocksGen=observableFromSortedList(sortedData);
+            showDatasOnTableView(observableFromSortedList(sortedData), pagination, table,Res.itermPerPage);
+        });
         
         
     }
@@ -454,6 +530,8 @@ public class StocksController extends Controllers implements Initializable {
         loaderImg.setImage(new Image("chargement2.gif"));
         arrowsImg.setImage(arrow);
         arrowsSelected.setImage(arrow_selected);
+        ImgView.setImage(new Image("Produits/default.png"));
+        
     }
     
     
@@ -501,92 +579,107 @@ public class StocksController extends Controllers implements Initializable {
     }
 
     @FXML
-    void onPrint(ActionEvent event) throws IOException, DocumentException {
+    void onPrint(ActionEvent event) {
         
-        loaderImg.setVisible(true);
-        System.out.println(loaderImg.isVisible());
-        String annee=anneeBox.getValue();
-        String mois=moisBox.getValue();
-        String code=codeProField.getText().trim();
-        
-        DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-        File file=new File(Res.config.getDossierStocksPdf()+sdf.format((new GregorianCalendar()).getTime())+".pdf");
-        if(file != null){
-            PDFStock pdf = new PDFStock(file.getAbsolutePath().replace("\\", "/"));
-            PhotoJpaController cont=new PhotoJpaController(Res.emf);
-            List<Gestionstock> listes=new ArrayList<>();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    
+                    loaderImg.setVisible(true);
+                    String annee=anneeBox.getValue();
+                    String mois=moisBox.getValue();
+                    String code=codeProField.getText().trim();
 
-            if(annee==null){
-                if(mois==null){
-                    if(codeProField.getText().isEmpty()){
-                        listes=listStocks;
-                    }else{
-                        for (Gestionstock stock : listStocks) {
-                            if(stock.getCodePro().getCodePro().toString().contains(code))
-                                listes.add(stock);
-                        }
-                    }
-                }else {
-                    if(codeProField.getText().isEmpty()){
-                        for (Gestionstock stock : listStocks) {
+                    DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+                    File file=new File(Res.config.getDossierStocksPdf()+sdf.format((new GregorianCalendar()).getTime())+".pdf");
+                    if(file != null){
+                        PDFStock pdf = new PDFStock(file.getAbsolutePath().replace("\\", "/"));
+                        //PhotoJpaController cont=new PhotoJpaController(Res.emf);
+                        List<Gestionstock> listes=new ArrayList<>();
 
-                            if(Res.sdf.format(stock.getDateStock()).toString().split("-")[1].toLowerCase().equals(mois))
-                                listes.add(stock);
+                        if(annee==null){
+                            if(mois==null){
+                                if(codeProField.getText().isEmpty()){
+                                    listes=listStocks;
+                                }else{
+                                    for (Gestionstock stock : listStocks) {
+                                        if(stock.getCodePro().getCodePro().toString().contains(code))
+                                            listes.add(stock);
+                                    }
+                                }
+                            }else {
+                                if(codeProField.getText().isEmpty()){
+                                    for (Gestionstock stock : listStocks) {
+
+                                        if(Res.sdf.format(stock.getDateStock()).toString().split("-")[1].toLowerCase().equals(mois))
+                                            listes.add(stock);
+                                    }
+                                }else{
+                                    for (Gestionstock stock : listStocks) {
+                                        if(stock.getCodePro().getCodePro().toString().contains(code)
+                                                && Res.sdf.format(stock.getDateStock()).toString().split("-")[1].toLowerCase().equals(mois))
+                                            listes.add(stock);
+                                    }
+                                }
+                            }
+                        }else{
+                           if(mois==null){
+                                if(codeProField.getText().isEmpty()){
+                                    for (Gestionstock stock : listStocks) {
+                                        if(Res.sdf.format(stock.getDateStock()).toString().split("-")[0].toLowerCase().equals(annee))
+                                            listes.add(stock);
+                                    }
+                                }else{
+                                    for (Gestionstock stock : listStocks) {
+                                        if(Res.sdf.format(stock.getDateStock()).toString().split("-")[0].toLowerCase().equals(annee)
+                                                && stock.getCodePro().getCodePro().toString().contains(code))
+                                            listes.add(stock);
+                                    }
+                                }
+                            }else {
+                                if(codeProField.getText().isEmpty()){
+                                    for (Gestionstock stock : listStocks) {
+                                        if(Res.sdf.format(stock.getDateStock()).toString().split("-")[1].toLowerCase().equals(mois)
+                                                && Res.sdf.format(stock.getDateStock()).toString().split("-")[0].toLowerCase().equals(annee))
+                                            listes.add(stock);
+                                    }
+                                }else{
+                                    for (Gestionstock stock : listStocks) {
+                                        if(stock.getCodePro().getCodePro().toString().contains(code)
+                                                && Res.sdf.format(stock.getDateStock()).toString().split("-")[1].toLowerCase().equals(mois)
+                                                && Res.sdf.format(stock.getDateStock()).toString().split("-")[0].toLowerCase().equals(annee))
+                                            listes.add(stock);
+                                    }
+                                }
+                            } 
                         }
-                    }else{
-                        for (Gestionstock stock : listStocks) {
-                            if(stock.getCodePro().getCodePro().toString().contains(code)
-                                    && Res.sdf.format(stock.getDateStock()).toString().split("-")[1].toLowerCase().equals(mois))
-                                listes.add(stock);
+
+                        for (Gestionstock stock : listes) {
+                            pdf.addStockRow(stock.getCodePro().getNomPro(), 
+                                        formatCode(stock.getCodePro().getCodePro().toString()), 
+                                        stock.getQte(), 
+                                        stock.getDateStock(), 
+                                        stock.getOperation(), 
+                                        lienAbsolueImage((new ArrayList<>(stock.getCodePro().getPhotoCollection())).get(0)));
                         }
+
+                        Desktop.getDesktop().open(file);
+                        pdf.save();
                     }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            }else{
-               if(mois==null){
-                    if(codeProField.getText().isEmpty()){
-                        for (Gestionstock stock : listStocks) {
-                            if(Res.sdf.format(stock.getDateStock()).toString().split("-")[0].toLowerCase().equals(annee))
-                                listes.add(stock);
-                        }
-                    }else{
-                        for (Gestionstock stock : listStocks) {
-                            if(Res.sdf.format(stock.getDateStock()).toString().split("-")[0].toLowerCase().equals(annee)
-                                    && stock.getCodePro().getCodePro().toString().contains(code))
-                                listes.add(stock);
-                        }
-                    }
-                }else {
-                    if(codeProField.getText().isEmpty()){
-                        for (Gestionstock stock : listStocks) {
-                            if(Res.sdf.format(stock.getDateStock()).toString().split("-")[1].toLowerCase().equals(mois)
-                                    && Res.sdf.format(stock.getDateStock()).toString().split("-")[0].toLowerCase().equals(annee))
-                                listes.add(stock);
-                        }
-                    }else{
-                        for (Gestionstock stock : listStocks) {
-                            if(stock.getCodePro().getCodePro().toString().contains(code)
-                                    && Res.sdf.format(stock.getDateStock()).toString().split("-")[1].toLowerCase().equals(mois)
-                                    && Res.sdf.format(stock.getDateStock()).toString().split("-")[0].toLowerCase().equals(annee))
-                                listes.add(stock);
-                        }
-                    }
-                } 
-            }
 
-            for (Gestionstock stock : listes) {
-                pdf.addStockRow(stock.getCodePro().getNomPro(), 
-                            formatCode(stock.getCodePro().getCodePro().toString()), 
-                            stock.getQte(), 
-                            stock.getDateStock(), 
-                            stock.getOperation(), 
-                            lienAbsolueImage((new ArrayList<>(stock.getCodePro().getPhotoCollection())).get(0)));
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        loaderImg.setVisible(false);        
+                    }
+                });
+                
             }
-            
-            Desktop.getDesktop().open(file);
-            pdf.save();
-        }
-        
-        loaderImg.setVisible(false);        
+        }).start();
     }
     
     private ObservableList<MStocks> observableFromSortedList(SortedList<MStocks> slist){

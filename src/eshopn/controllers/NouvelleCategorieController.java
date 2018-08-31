@@ -21,7 +21,11 @@ import eshopn.models.GlobalNotifications;
 import eshopn.models.Res;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
 
 /**
  * FXML Controller class
@@ -44,76 +48,124 @@ public class NouvelleCategorieController extends Controllers implements Initiali
     private  Categorie current_categorie;
     private ListeCategoriesController listCatCont;
     
+    @FXML
+    private StackPane stack;
+
+    @FXML
+    private ImageView loader;
+
+    
 
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        
+        loader.setImage(new Image("chargement2.gif"));
     }    
 
     @FXML
     void onAdd(ActionEvent event) {
-        CategorieJpaController cont=new CategorieJpaController(Res.emf);
         
-        if(!categorieField.getText().trim().isEmpty()){
-            
-            if(categorieField.getText().trim().length()<60){
+        stack.setVisible(true);
+        
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
                 
-                if(isNew){
-                    Categorie cat=new Categorie(categorieField.getText().trim());
-                    try {
-                        cont.create(cat);
-                        
-                        listCatCont.init();
+                CategorieJpaController cont=new CategorieJpaController(Res.emf);
+        
+                if(!categorieField.getText().trim().isEmpty()){
 
-                        getStage().close();
+                    if(categorieField.getText().trim().length()<60){
 
-                        Res.not.showNotifications("Confirmation Création Nouvelle catégorie", 
-                                            "La catégorie "+categorieField.getText().trim()+" a été crée avec succès"
-                                            , GlobalNotifications.SUCCESS_NOT, 3, false);
-                        
-                    } catch (Exception e) {
-                        Res.not.showNotifications("Echec ", 
-                                    "Impossible de se connecter au serveur."
-                                    , GlobalNotifications.ECHEC_NOT, 3, false);
-                    }
-                }else{
-                    
-                    current_categorie.setNomCat(categorieField.getText().trim());
-                    
-                    try {
-                        cont.edit(current_categorie);
-                        
-                        listCatCont.init();
+                        if(isNew){
+                            Categorie cat=new Categorie(categorieField.getText().trim());
+                            try {
+                                cont.create(cat);
 
-                        getStage().close();
+                                
+                                Platform.runLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        
+                                        
 
-                        Res.not.showNotifications("Confirmation Création Nouvelle catégorie", 
-                                            "La catégorie "+categorieField.getText().trim()+" a été crée avec succès"
-                                            , GlobalNotifications.SUCCESS_NOT, 3, false);
-                        
-                    } catch (Exception ex) {
+                                        getStage().close();
+
+                                        Res.not.showNotifications("Confirmation Création Nouvelle catégorie", 
+                                                            "La catégorie "+categorieField.getText().trim()+" a été crée avec succès"
+                                                            , GlobalNotifications.SUCCESS_NOT, 3, false);
+
+                                        stack.setVisible(false);
+                                        
+                                        listCatCont.init();
+                                    }
+                                });
+
+                            } catch (Exception e) {
+                                
+                                Platform.runLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        stack.setVisible(false);
+                                        Res.not.showNotifications("Echec ", 
+                                                    "Impossible de se connecter au serveur."
+                                                    , GlobalNotifications.ECHEC_NOT, 3, false);
+                                    }
+                                });
+                                
+                            }
+                        }else{
+
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    
+                                    current_categorie.setNomCat(categorieField.getText().trim());
+
+                                    try {
+                                        cont.edit(current_categorie);
+
+
+                                        getStage().close();
+
+                                        Res.not.showNotifications("Confirmation Création Nouvelle catégorie", 
+                                                            "La catégorie "+categorieField.getText().trim()+" a été crée avec succès"
+                                                            , GlobalNotifications.SUCCESS_NOT, 3, false);
+                                        stack.setVisible(false);
+                                        listCatCont.init();
+                                        
+                                    } catch (Exception ex) {
+                                        stack.setVisible(false);
+                                        Res.not.showNotifications("Echec", 
+                                                    "Impossible de se connecter au serveur."
+                                                    , GlobalNotifications.ECHEC_NOT, 3, false);
+                                    }
+                                }
+                            });
+                            
+                        }
+
+
+
+                    }else{
+                        stack.setVisible(false);
                         Res.not.showNotifications("Echec", 
-                                    "Impossible de se connecter au serveur."
-                                    , GlobalNotifications.ECHEC_NOT, 3, false);
+                                            "Le nom de la catégorie doit tenir sur 60 caractères"
+                                            , GlobalNotifications.ECHEC_NOT, 3, false);
                     }
-                }
 
-                
-                
-            }else{
-                Res.not.showNotifications("Echec de création de la nouvelle catégorie", 
-                                    "Le nom de la catégorie doit tenir sur 60 caractères"
-                                    , GlobalNotifications.ECHEC_NOT, 3, false);
+                }else{
+                    stack.setVisible(false);
+                    Res.not.showNotifications("Echec", 
+                                        "Le nom de la catégorie ne peut être vide"
+                                        , GlobalNotifications.ECHEC_NOT, 3, false);
+                }
             }
-            
-        }else{
-            Res.not.showNotifications("Echec de création", 
-                                "Le nom de la catégorie ne peut être vide"
-                                , GlobalNotifications.ECHEC_NOT, 3, false);
-        }
+        }).start();
+        
+        
         
     }
 

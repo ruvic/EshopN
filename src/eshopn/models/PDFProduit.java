@@ -26,6 +26,14 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import javax.imageio.ImageIO;
+import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
+
 /**
  *
  * @author Lionel
@@ -47,7 +55,21 @@ public class PDFProduit {
         PdfWriter.getInstance(document, new FileOutputStream(dest));
         document.open();
         
-        Image image = Image.getInstance(Res.config.getLogoPdf());
+        Image image = null;
+        
+        if(Res.config.getModeStockageImage()==1){
+            File file2=new File(Res.config.getLogoPdfLocal());
+            byte[] byteArray=imagetoByteArray(file2);
+            
+            if(byteArray!=null){
+                image=Image.getInstance(byteArray);
+            }else{
+                System.out.println("C'était null");
+            }
+        }else{
+            image = Image.getInstance(Res.config.getLogoPdf());
+        }
+        
         image.scaleAbsolute(509f, 130f);
         image.setAlignment(Image.ALIGN_CENTER);
         document.add(image);
@@ -91,13 +113,38 @@ public class PDFProduit {
         
     }
     
+    public static byte [] imagetoByteArray(File imgFile){
+        
+        try {
+            
+            ByteArrayOutputStream baos=new ByteArrayOutputStream(1000);
+            BufferedImage img=ImageIO.read(imgFile);
+            ImageIO.write(img, "jpg", baos);
+            baos.flush();
+
+            String base64String=Base64.encode(baos.toByteArray());
+            baos.close();
+
+            byte[] bytearray = Base64.decode(base64String);
+            
+            return bytearray;
+            
+        } catch (Exception e) {
+            return null;
+        }
+        
+    }
+    
     public String dateActuelle(){
         Date actuelle=new Date();
         DateFormat df=new SimpleDateFormat("EEEEEEEE, d MMMMMMMMMMMM yyyy\nHH:mm:ss");
         return df.format(actuelle);
     }
     
-    public void addProductRow(Integer codePro, String nomPro, BigDecimal prix, int qte, String categorie, String codeFour, boolean actif,String img) throws BadElementException, IOException{
+    public void addProductRow(Integer codePro, String nomPro, BigDecimal prix,
+            int qte, String categorie, String codeFour, boolean actif,
+            String imgPath, boolean isAbsolutePath) throws BadElementException, IOException{
+        
         PdfPCell cell = new PdfPCell();
         cell.setPhrase(new Phrase(Res.formatCode(""+codePro)));
         table.addCell(cell);
@@ -112,9 +159,20 @@ public class PDFProduit {
         cell.setPhrase(new Phrase(""+categorie));
         table.addCell(cell);
         
+        if(isAbsolutePath){
+            File file=new File(imgPath);
+            byte[] byteArray=imagetoByteArray(file);
+            
+            if(byteArray!=null){
+                cell.setImage(Image.getInstance(byteArray));
+            }else{
+                System.out.println("C'était null");
+            }
+        }else{
+            URL url = new URL(imgPath);
+            cell.setImage(Image.getInstance(url));
+        }
         
-        URL url = new URL(img);
-        cell.setImage(Image.getInstance(url));
         table.addCell(cell);
 
     }

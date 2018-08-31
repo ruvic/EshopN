@@ -84,6 +84,11 @@
                         <FontAwesomeIcon fill="#4ecc99" iconName="SEARCH" size="30" />
                      </graphic>
                   </JFXButton>
+                  <ImageView fx:id="loaderImg" fitHeight="33.0" fitWidth="51.0" layoutX="27.0" layoutY="337.0" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.bottomAnchor="64.0" AnchorPane.leftAnchor="40.0">
+                     <image>
+                        <Image url="@../../../images/chargement2.gif" />
+                     </image>
+                  </ImageView>
                </children>
             </AnchorPane>
             <JFXButton buttonType="RAISED" layoutX="10.0" layoutY="51.0" onAction="#onHome" prefHeight="25.0" prefWidth="94.0">

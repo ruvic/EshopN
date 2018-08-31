@@ -21,8 +21,12 @@ import javafx.scene.control.Label;
 import eshopn.entities.Gestionnaire;
 import eshopn.models.GlobalNotifications;
 import eshopn.models.Res;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
 
 /**
  * FXML Controller class
@@ -48,6 +52,13 @@ public class AdminEditGestionnaireController extends Controllers implements Init
 
     @FXML
     private JFXToggleButton actifToogleBtn;
+    
+    
+    @FXML
+    private StackPane stack;
+
+    @FXML
+    private ImageView loader;
 
     public static boolean isStorekeeper;
     public static MGestionnaire current_gestionnaire;
@@ -58,6 +69,7 @@ public class AdminEditGestionnaireController extends Controllers implements Init
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         
+        loader.setImage(new Image("chargement2.gif"));
         titleLabel.setText("Modifier "+((isStorekeeper)?"Magasinier":"Caissier"));
         
         nameField.setText(current_gestionnaire.getGest().getNomGest());
@@ -83,67 +95,108 @@ public class AdminEditGestionnaireController extends Controllers implements Init
     @FXML
     void onEdit(ActionEvent event) {
 
-        if(nameField.getText().isEmpty() 
-                || usernameField.getText().isEmpty()
-                || pwdField.getText().isEmpty()
-                || confirmpwdField.getText().isEmpty()){
-            
-            Res.not.showNotifications("Confirmation modification", 
-                            "Tous les champs doivent être remplis", 
-                            GlobalNotifications.ECHEC_NOT, 3, false);
-            
-        }else{
-            if(pwdField.getText().equals(confirmpwdField.getText())){
-                if(pwdField.getText().length()<=20){
-                    try {
-                        
-                        GestionnaireJpaController cont = new GestionnaireJpaController(Res.emf);
+        stack.setVisible(true);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if(nameField.getText().isEmpty() 
+                        || usernameField.getText().isEmpty()
+                        || pwdField.getText().isEmpty()
+                        || confirmpwdField.getText().isEmpty()){
 
-                        Gestionnaire gest=current_gestionnaire.getGest();
-                        gest.setNomGest(nameField.getText().trim());
-                        gest.setLogin(usernameField.getText().trim());
-                        gest.setPwd(pwdField.getText());
-                        gest.setActif(actifToogleBtn.isSelected());
-
-                        try {
-                            cont.edit(gest);
-
-                            /**Mise à jour de la table**/
-                            current_gestionnaire.nameProperty().setValue(gest.getNomGest());
-                            current_gestionnaire.usernameProperty().setValue(gest.getLogin());
-                            current_gestionnaire.statusProperty().setValue((gest.getActif())?"Activé":"Désactivé");
-
-                            getStage().close();
-
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            stack.setVisible(false);
                             Res.not.showNotifications("Confirmation modification", 
-                                    "Les informations ont été modifiées avec succès", 
-                                    GlobalNotifications.SUCCESS_NOT, 2, false);
-                        } catch (Exception e) {
-                            Res.not.showNotifications("Echec", 
-                                "Impossible de se connecter au serveur."
-                                , GlobalNotifications.ECHEC_NOT, 2, false);
+                                            "Tous les champs doivent être remplis", 
+                                            GlobalNotifications.ECHEC_NOT, 3, false);
                         }
-                        
-                    } catch (Exception e) {
+                    });
+                    
 
-                        Res.not.showNotifications("Confirmation modification", 
-                                "L'application a généré une exception lors de la modification", 
-                                GlobalNotifications.ECHEC_NOT, 2, false);
-                    }
                 }else{
-                    Res.not.showNotifications("Confirmation Modification", 
-                            "Les mots de passe ne doivent pas dépasser 20 caractères", 
-                            GlobalNotifications.ECHEC_NOT, 2, false);
+                    if(pwdField.getText().equals(confirmpwdField.getText())){
+                        if(pwdField.getText().length()<=20){
+                            try {
+
+                                GestionnaireJpaController cont = new GestionnaireJpaController(Res.emf);
+
+                                Gestionnaire gest=current_gestionnaire.getGest();
+                                gest.setNomGest(nameField.getText().trim());
+                                gest.setLogin(usernameField.getText().trim());
+                                gest.setPwd(pwdField.getText());
+                                gest.setActif(actifToogleBtn.isSelected());
+
+                                try {
+                                    cont.edit(gest);
+
+                                    /**Mise à jour de la table**/
+                                    current_gestionnaire.nameProperty().setValue(gest.getNomGest());
+                                    current_gestionnaire.usernameProperty().setValue(gest.getLogin());
+                                    current_gestionnaire.statusProperty().setValue((gest.getActif())?"Activé":"Désactivé");
+
+                                    Platform.runLater(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            getStage().close();
+                                            stack.setVisible(false);
+                                            Res.not.showNotifications("Confirmation modification", 
+                                                    "Les informations ont été modifiées avec succès", 
+                                                    GlobalNotifications.SUCCESS_NOT, 2, false);
+                                        }
+                                    });
+                                    
+                                } catch (Exception e) {
+                                    Platform.runLater(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            stack.setVisible(false);
+                                            Res.not.showNotifications("Echec", 
+                                                "Impossible de se connecter au serveur."
+                                                , GlobalNotifications.ECHEC_NOT, 2, false);
+                                        }
+                                    });
+                                }
+
+                            } catch (Exception e) {
+
+                                Platform.runLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        stack.setVisible(false);
+                                        Res.not.showNotifications("Confirmation modification", 
+                                                "L'application a généré une exception lors de la modification", 
+                                                GlobalNotifications.ECHEC_NOT, 2, false);
+                                    }
+                                });
+                            }
+                        }else{
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    stack.setVisible(false);
+                                    Res.not.showNotifications("Confirmation Modification", 
+                                            "Les mots de passe ne doivent pas dépasser 20 caractères", 
+                                            GlobalNotifications.ECHEC_NOT, 2, false);
+                                }
+                            });
+                        }
+                    }else{
+                        
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                stack.setVisible(false);
+                                Res.not.showNotifications("Confirmation modification", 
+                                            "Les mots de passe ne correspondent pas", 
+                                            GlobalNotifications.ECHEC_NOT, 2, false);
+                            }
+                        });
+                    }
                 }
-            }else{
-                
-                Res.not.showNotifications("Confirmation modification", 
-                            "Les mots de passe ne correspondent pas", 
-                            GlobalNotifications.ECHEC_NOT, 2, false);
             }
-        }
-        
-        
+        }).start();
         
 
     }

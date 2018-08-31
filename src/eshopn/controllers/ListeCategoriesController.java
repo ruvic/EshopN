@@ -17,6 +17,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -84,41 +85,68 @@ public class ListeCategoriesController extends Controllers implements Initializa
     @Override
     public void init() {
         
-        try {
-            
-            CategorieJpaController cont=new CategorieJpaController(Res.emf);
-            ProduitJpaController contPro=new ProduitJpaController(Res.emf);
-            listes=contPro.findCategoriesByDescProductsCount();
-            List<Categorie> list1=cont.findCategorieEntities();
+        
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                
+                try {
+                    
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            Res.not.showLoader(Res.stackPane);
+                        }
+                    });
+                    
+                    CategorieJpaController cont=new CategorieJpaController(Res.emf);
+                    ProduitJpaController contPro=new ProduitJpaController(Res.emf);
+                    listes=contPro.findCategoriesByDescProductsCount();
+                    List<Categorie> list1=cont.findCategorieEntities();
 
-            for (Categorie categorie : list1) {
-                if(listes.indexOf(categorie)<0){
-                    listes.add(categorie);
+                    for (Categorie categorie : list1) {
+                        if(listes.indexOf(categorie)<0){
+                            listes.add(categorie);
+                        }
+                    }
+                    
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            setPaginationProperties(Res.NbreEltParLigne*2,listes);
+
+                            listesGen=listes;
+
+                            getScene().widthProperty().addListener(new ChangeListener<Number>(){
+                                @Override
+                                public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                                    setPaginationProperties(Res.NbreEltParLigne*2, listesGen);
+                                }
+
+                            });
+
+                            getStage().setMinWidth(STAGE_MIN_WIDTH);
+                            getStage().setMinHeight(STAGE_MIN_HEIGHT);
+                            
+                        }
+                    });
+
+                } catch (Exception e) {
+
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            Res.stackPane.setVisible(false);
+                            Res.not.showNotifications("Echec", 
+                                        "Impossible de se connecter au serveur."
+                                        , GlobalNotifications.ECHEC_NOT, 2, false);
+                        }
+                    });
+
                 }
             }
-
-            setPaginationProperties(Res.NbreEltParLigne*2,listes);
-
-            listesGen=listes;
-
-            getScene().widthProperty().addListener(new ChangeListener<Number>(){
-                @Override
-                public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                    setPaginationProperties(Res.NbreEltParLigne*2, listesGen);
-                }
-
-            });
-
-            getStage().setMinWidth(STAGE_MIN_WIDTH);
-            getStage().setMinHeight(STAGE_MIN_HEIGHT);
-            
-        } catch (Exception e) {
-            
-            Res.not.showNotifications("Echec", 
-                        "Impossible de se connecter au serveur."
-                        , GlobalNotifications.ECHEC_NOT, 2, false);
-            
-        }
+        }).start();
+        
         
     }
     
@@ -176,7 +204,6 @@ public class ListeCategoriesController extends Controllers implements Initializa
         Res.reset();
         Res.listeCat.getChildren().clear();
         int nb=(pageIndex+1)*itemPerPages;
-        Res.not.showLoader(Res.stackPane);
         for (int i = nb-itemPerPages; i<list.size() && i < nb; i++) {
             Categorie cat=list.get(i);
             Res.listeCat.add(getMain().getCategorieView(content, cat, this)

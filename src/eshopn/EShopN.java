@@ -275,6 +275,7 @@ public class EShopN extends Application {
     public void ShowConnexionPage(){
         
         try {
+            
             loader=new FXMLLoader();
             loader.setLocation(getClass().getResource("views/connexion.fxml"));
             BorderPane root=loader.load();
@@ -359,6 +360,7 @@ public class EShopN extends Application {
     public void showListeFactures(){
         
         try {
+            
             loader=new FXMLLoader();
             loader.setLocation(getClass().getResource("views/ListeFactures.fxml"));
             BorderPane root=loader.load();
@@ -704,6 +706,7 @@ public class EShopN extends Application {
     public Node getCategorieView(AnchorPane content, Categorie categ, ListeCategoriesController list){
         Node contenu = null;
         try{
+            
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getResource("views/Categorie.fxml"));
             contenu = (AnchorPane) loader.load();
@@ -797,6 +800,7 @@ public class EShopN extends Application {
             String dossierImagesLocal=prop.getProperty("dossierImagesLocal");
             String dossierLogosLocal=prop.getProperty("dossierLogosLocal");
             String logoAppLocal=prop.getProperty("logoAppLocal");
+            String logoPdfLocal=prop.getProperty("logoPdfLocal");
             String logoConnexionLocal=prop.getProperty("logoConnexionLocal");
             
             String dossierApp=prop.getProperty("dossierApp");
@@ -823,7 +827,7 @@ public class EShopN extends Application {
                     ,logoApp, logoPdf,logoCon ,remise,nro,rc,
                     dossierFacturesPdf, dossierProduitsPdf, dossierStocksPdf,
                     modeStockageImage, dossierImagesLocal, dossierLogosLocal,
-                    logoAppLocal, logoConnexionLocal, minoration);
+                    logoAppLocal,logoPdfLocal ,logoConnexionLocal, minoration);
             
             return true;
             

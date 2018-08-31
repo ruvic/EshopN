@@ -28,6 +28,7 @@ import javafx.scene.control.Label;
 
 import eshopn.models.GlobalNotifications;
 import eshopn.models.Res;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.transformation.FilteredList;
@@ -77,6 +78,9 @@ public class AdminEmployeesController extends Controllers implements Initializab
     private JFXTextField searchField;
     
     @FXML
+    private ImageView loaderImg;
+    
+    @FXML
     private Label employeeLabel;
 
     @FXML
@@ -124,47 +128,23 @@ public class AdminEmployeesController extends Controllers implements Initializab
     @Override
     public void init() {
         
-        try {
-            
-            list_Gestionnaires=getElements();
-            table.setItems(list_Gestionnaires);
-
-            genGest=list_Gestionnaires;
-            allGest=list_Gestionnaires;
-            showDatasOnTableView(list_Gestionnaires, pagination, table,Res.itermPerPage);
-
-
-            /** Trie suivant la colonne des noms par ordre alphabétique **/
-            table.getSortOrder().add(nameColumn);
-
-            search();
-
-            MGestionnaire.stack=stack;
-            
-        } catch (Exception e) {
-            
-            Res.not.showNotifications("Echec", 
-                        "Impossible de se connecter au serveur."
-                        , GlobalNotifications.ECHEC_NOT, 2, false);
-            
-        }
-        
-        
+        BooleanProperty okProperty=new SimpleBooleanProperty(false);
+        loaderImg.setVisible(true);
         getScene().widthProperty().addListener(new ChangeListener<Number>(){
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 rect.setWidth(newValue.doubleValue());
                 fondImgView.setFitWidth(newValue.doubleValue());
             }
-            
+
         });
-        
+
         getScene().heightProperty().addListener(new ChangeListener<Number>(){
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 rect.setHeight(newValue.doubleValue());
                 fondImgView.setFitHeight(newValue.doubleValue());
-                
+
                 double new_val=newValue.doubleValue();
                 System.out.println(new_val);
                 if(new_val<=542) Res.itermPerPage=7;
@@ -172,14 +152,55 @@ public class AdminEmployeesController extends Controllers implements Initializab
                 else if (new_val<=621) Res.itermPerPage=9;
                 else if(new_val<=662) Res.itermPerPage=10;
                 else Res.itermPerPage=11;
-                
+
                 showDatasOnTableView(genGest, pagination, table,Res.itermPerPage);
             }
-            
+
         });
-        
+
         getStage().setMinWidth(STAGE_MIN_WIDTH);
         getStage().setMinHeight(STAGE_MIN_HEIGHT);
+        
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                
+                list_Gestionnaires=getElements();
+                
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        
+                        try {
+            
+                            list_Gestionnaires=getElements();
+                            table.setItems(list_Gestionnaires);
+
+                            genGest=list_Gestionnaires;
+                            allGest=list_Gestionnaires;
+                            showDatasOnTableView(list_Gestionnaires, pagination, table,Res.itermPerPage);
+
+
+                            /** Trie suivant la colonne des noms par ordre alphabétique **/
+                            table.getSortOrder().add(nameColumn);
+
+                            search();
+
+                            MGestionnaire.stack=stack;
+
+                        } catch (Exception e) {
+                            Res.not.showNotifications("Echec", 
+                                        "Impossible de se connecter au serveur."
+                                        , GlobalNotifications.ECHEC_NOT, 2, false);
+
+                        }
+                        
+                        loaderImg.setVisible(false);
+
+                    }
+                });
+            }
+        }).start();
         
     }
     
@@ -235,21 +256,29 @@ public class AdminEmployeesController extends Controllers implements Initializab
         fondImgView.setImage(fond);
         arrowsImg.setImage(arrow);
         arrowsSelected.setImage(arrow_selected);
+        loaderImg.setImage(new Image("chargement2.gif"));
+        
     }
     
     public ObservableList<MGestionnaire> getElements(){
         
-        GestionnaireJpaController cont = new GestionnaireJpaController(Res.emf);
-        ObservableList<Gestionnaire> liste1
-                =FXCollections.observableList(cont.findGestionnaire(isStoreKeeper));
-        ObservableList<MGestionnaire> liste2=FXCollections.observableArrayList();
-        
-        for (Gestionnaire g : liste1) {
-            liste2.add(new MGestionnaire(g));
+        try {
+            GestionnaireJpaController cont = new GestionnaireJpaController(Res.emf);
+            ObservableList<Gestionnaire> liste1
+                    =FXCollections.observableList(cont.findGestionnaire(isStoreKeeper));
+            ObservableList<MGestionnaire> liste2=FXCollections.observableArrayList();
+
+            for (Gestionnaire g : liste1) {
+                liste2.add(new MGestionnaire(g));
+            }
+
+            MGestionnaire.table=table;
+            return liste2;
+
+        } catch (Exception e) {
+            return null;
         }
         
-        MGestionnaire.table=table;
-        return liste2;
     }
     
     public void search(){

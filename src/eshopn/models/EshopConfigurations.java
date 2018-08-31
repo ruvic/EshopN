@@ -30,6 +30,7 @@ public class EshopConfigurations {
     private String dossierImagesLocal;
     private String dossierLogosLocal;
     private String logoAppLocal;
+    private String logoPdfLocal;
     private String logoConnexionLocal;
 
     
@@ -63,7 +64,7 @@ public class EshopConfigurations {
             String dossierFacturesPdf, String dossierProduitsPdf, 
             String dossierStocksPdf, int modeStockageImage, 
             String dossierImagesLocal, String dossierLogosLocal,
-            String logoAppLocal, String logoConnexionLocal, double minoration) throws IOException {
+            String logoAppLocal,String logoPdfLocal ,String logoConnexionLocal, double minoration) throws IOException {
             
         this.admin = admin;
         this.adminPwd = adminpwd;
@@ -73,16 +74,29 @@ public class EshopConfigurations {
         this.url = "jdbc:mysql://"+serverBD+":"+portBD+"/"+bd+"?zeroDateTimeBehavior=convertToNull";
         this.user = user;
         this.password = password;
-        this.dossierPhotos=server+":"+port+"/"+dossierApp+"/"+dossierphotos+"/";
-        this.dossierLogos=server+":"+port+"/"+dossierApp+"/"+dossierLogos+"/";
+        
+        
+        
+        URL url1, url2, url3;
+        if(port.isEmpty()){
+            this.dossierPhotos=server+"/"+dossierApp+"/"+dossierphotos+"/";
+            this.dossierLogos=server+"/"+dossierApp+"/"+dossierLogos+"/";
+            this.uploadPhp=server+"/"+dossierApp+"/"+requestController;
+            url1 = new URL(server+"/"+dossierApp+"/"+dossierLogos+"/"+logoApp);
+            url2 = new URL(server+"/"+dossierApp+"/"+dossierLogos+"/"+logoPdf);
+            url3 = new URL(server+"/"+dossierApp+"/"+dossierLogos+"/"+logoCon);
+        }else{
+            this.dossierPhotos=server+":"+port+"/"+dossierApp+"/"+dossierphotos+"/";
+            this.dossierLogos=server+":"+port+"/"+dossierApp+"/"+dossierLogos+"/";
+            this.uploadPhp=server+":"+port+"/"+dossierApp+"/"+requestController;
+            url1 = new URL(server+":"+port+"/"+dossierApp+"/"+dossierLogos+"/"+logoApp);
+            url2 = new URL(server+":"+port+"/"+dossierApp+"/"+dossierLogos+"/"+logoPdf);
+            url3 = new URL(server+":"+port+"/"+dossierApp+"/"+dossierLogos+"/"+logoCon);            
+        }
+        
         this.dossierPhotsRelative=dossierphotos+"/";
-        this.uploadPhp=server+":"+port+"/"+dossierApp+"/"+requestController;
-        
         this.ModeStockageImage=modeStockageImage;
-        
-        URL url1 = new URL(server+":"+port+"/"+dossierApp+"/"+dossierLogos+"/"+logoApp);
-        URL url2 = new URL(server+":"+port+"/"+dossierApp+"/"+dossierLogos+"/"+logoPdf);
-        URL url3 = new URL(server+":"+port+"/"+dossierApp+"/"+dossierLogos+"/"+logoCon);
+
         
         this.logoAppURL=url1;
         this.logoPdf=url2;
@@ -91,6 +105,7 @@ public class EshopConfigurations {
         this.dossierImagesLocal=dossierImagesLocal+"/";
         this.dossierLogosLocal=dossierLogosLocal+"/";
         this.logoAppLocal=dossierLogosLocal+"/"+logoAppLocal;
+        this.logoPdfLocal=dossierLogosLocal+"/"+logoPdfLocal;
         this.logoConnexionLocal=dossierLogosLocal+"/"+logoConnexionLocal;
         
         this.remise=remise;
@@ -501,6 +516,20 @@ public class EshopConfigurations {
      */
     public void setLogoAppURL(URL logoAppURL) {
         this.logoAppURL = logoAppURL;
+    }
+
+    /**
+     * @return the logoPdfLocal
+     */
+    public String getLogoPdfLocal() {
+        return logoPdfLocal;
+    }
+
+    /**
+     * @param logoPdfLocal the logoPdfLocal to set
+     */
+    public void setLogoPdfLocal(String logoPdfLocal) {
+        this.logoPdfLocal = logoPdfLocal;
     }
     
     

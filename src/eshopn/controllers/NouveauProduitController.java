@@ -33,6 +33,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.stage.FileChooser;
 import java.util.ArrayList;
+import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -41,6 +42,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 
 /**
  * FXML Controller class
@@ -67,6 +69,12 @@ public class NouveauProduitController extends Controllers implements Initializab
     
     @FXML
     private HBox imgViewBox;
+    
+    @FXML
+    private StackPane stack;
+
+    @FXML
+    private ImageView loader;
 
     @FXML
     private JFXTextArea descriptField;
@@ -89,105 +97,195 @@ public class NouveauProduitController extends Controllers implements Initializab
     public void initialize(URL url, ResourceBundle rb) {
         imgsBox=new HBox();
         pane.setContent(imgsBox);
+        loader.setImage(new Image("chargement2.gif"));
     }    
 
     @FXML
     void onAdd(ActionEvent event) throws Exception {
         
-        if(nomProduitField.getText().trim().isEmpty() 
-             || prixUnitField.getText().trim().isEmpty()
-             || codeFourfield.getText().trim().isEmpty()
-             || descriptField.getText().trim().isEmpty()
-             || ((HBox)(pane.getContent())).getChildren().size()==0){
-            
-            Res.not.showNotifications("Echec de l'ajout", 
-                    "Toutes les champs doivent être remplis, \n"
-                            + "et le produit doit avoir au moins une image"
-                    , GlobalNotifications.ECHEC_NOT, 3, false);
-        }else {
-            try {
-                BigDecimal bg=BigDecimal.valueOf(Double.valueOf(prixUnitField.getText().trim()));
+        stack.setVisible(true);
+        
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
                 
-                if(descriptField.getText().trim().length()>100){
-                    Res.not.showNotifications("Echec de l'ajout", 
-                    "La description doit avoir 100 caractères au maximum"
-                    , GlobalNotifications.ECHEC_NOT, 2, false);
-                }else{
-                    
-                    if(codeFourfield.getText().trim().length()>12){
-                        
-                        Res.not.showNotifications("Echec de l'ajout", 
-                            "Le code Fournisseur doit avoir 12 caractères au maximum"
-                            , GlobalNotifications.ECHEC_NOT, 2, false);
-                        
-                    }else{
-                        
-                        try {
-                            
-                            int codePro=generateCode();
-                            Produit pr=new Produit(codePro,
-                                    nomProduitField.getText().trim()
-                                    , BigDecimal.valueOf(Double.valueOf(prixUnitField.getText())), 0
-                                    , descriptField.getText()
-                                    , codeFourfield.getText().trim(), categorie,true);
+                if(nomProduitField.getText().trim().isEmpty() 
+                     || prixUnitField.getText().trim().isEmpty()
+                     || codeFourfield.getText().trim().isEmpty()
+                     || descriptField.getText().trim().isEmpty()
+                     || ((HBox)(pane.getContent())).getChildren().size()==0){
 
-                            /** Insertion des photos dans la base de donnée **/
-                            maj();
-
-                            /** Insertion proprement dite dans la base de donnée **/
-                            ProduitJpaController contPro=new ProduitJpaController(Res.emf);
-                            PhotoJpaController contPhoto=new PhotoJpaController(Res.emf);
-
-                            
-
-                            //création du dossier
-                            File fileFolder=new File(Res.config.getDossierImagesLocal()+pr.getCodePro());
-                            if(fileFolder.mkdir()){
-                                // Insertion du produit dans la base de donnée
-                                contPro.create(pr);
-
-                                //Insertion des images dans la base de donnée
-                                for (File photo_file : sourceFiles) {
-
-                                    Photo ph=new Photo(photo_file.getName(), pr);
-                                    contPhoto.create(ph);
-
-                                    /*(new HTTPRequest(Res.config.getUploadPhp())).appendParam("id", Res.config.getDossierPhotsRelative()+codePro)
-                                               .appendParam("img", photo_file)
-                                               .post();*/
-
-                                    File dest=new File(Res.config.getDossierImagesLocal()+pr.getCodePro()+"/"+ph.getLienPhoto());
-
-                                    copyFileUsingStream(photo_file, dest);
-
-                                }
-
-                                listProdCont.init();
-
-                                getStage().close();
-                            }else{
-                                Res.not.showNotifications("Echec de l'ajout", 
-                                    "Erreur de création du dossier image."
-                                    , GlobalNotifications.ECHEC_NOT, 5, false);
-                            }
-                            
-                            
-                        } catch (Exception e) {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            stack.setVisible(false);
                             Res.not.showNotifications("Echec de l'ajout", 
-                                "Impossible de se connecter au serveur."
-                                , GlobalNotifications.ECHEC_NOT, 5, false);
+                            "Toutes les champs doivent être remplis, \n"
+                                    + "et le produit doit avoir au moins une image"
+                            , GlobalNotifications.ECHEC_NOT, 3, false);
                         }
-                    }
+                    });
                     
+
+                }else {
+
+                    try {
+                        
+                        BigDecimal bg=BigDecimal.valueOf(Double.valueOf(prixUnitField.getText().trim()));
+
+                        if(descriptField.getText().trim().length()>100){
+                            
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    stack.setVisible(false);
+                                    Res.not.showNotifications("Echec de l'ajout", 
+                                    "La description doit avoir 100 caractères au maximum"
+                                    , GlobalNotifications.ECHEC_NOT, 2, false);
+                                }
+                            });
+                            
+                            
+                        }else{
+
+                            if(codeFourfield.getText().trim().length()>12){
+                                
+                                Platform.runLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        stack.setVisible(false);
+                                        Res.not.showNotifications("Echec de l'ajout", 
+                                        "Le code Fournisseur doit avoir 12 caractères au maximum"
+                                        , GlobalNotifications.ECHEC_NOT, 2, false);
+                                    }
+                                });
+                                
+                            }else{
+
+                                try {
+
+                                    int codePro=generateCode();
+                                    Produit pr=new Produit(codePro,
+                                            nomProduitField.getText().trim()
+                                            , BigDecimal.valueOf(Double.valueOf(prixUnitField.getText())), 0
+                                            , descriptField.getText()
+                                            , codeFourfield.getText().trim(), categorie,true);
+
+                                    /** Insertion des photos dans la base de donnée **/
+                                    maj();
+
+                                    /** Insertion proprement dite dans la base de donnée **/
+                                    ProduitJpaController contPro=new ProduitJpaController(Res.emf);
+                                    PhotoJpaController contPhoto=new PhotoJpaController(Res.emf);
+                                    
+                                    
+                                    if(Res.config.getModeStockageImage()==1){
+                                        //création du dossier
+                                        File fileFolder=new File(Res.config.getDossierImagesLocal()+pr.getCodePro());
+                                        if(fileFolder.mkdir()){
+                                            // Insertion du produit dans la base de donnée
+                                            contPro.create(pr);
+
+                                            //Insertion des images dans la base de donnée
+                                            for (File photo_file : sourceFiles) {
+
+                                                Photo ph=new Photo(photo_file.getName(), pr);
+                                                contPhoto.create(ph);
+
+                                                /*(new HTTPRequest(Res.config.getUploadPhp())).appendParam("id", Res.config.getDossierPhotsRelative()+codePro)
+                                                           .appendParam("img", photo_file)
+                                                           .post();*/
+
+                                                File dest=new File(Res.config.getDossierImagesLocal()+pr.getCodePro()+"/"+ph.getLienPhoto());
+
+                                                copyFileUsingStream(photo_file, dest);
+
+                                            }
+                                            
+                                            Platform.runLater(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    getStage().close();
+                                                    stack.setVisible(false);
+                                                    listProdCont.init();
+                                                }
+                                            });
+                                            
+                                            
+                                        }else{
+                                            
+                                            Platform.runLater(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    stack.setVisible(false);
+                                                    Res.not.showNotifications("Echec", 
+                                                    "Erreur de création du dossier image."
+                                                    , GlobalNotifications.ECHEC_NOT, 5, false);
+                                                }
+                                            });
+                                            
+                                        }
+                                    }else{
+                                        // Insertion du produit dans la base de donnée
+                                        contPro.create(pr);
+
+                                        //Insertion des images dans la base de donnée
+                                        for (File photo_file : sourceFiles) {
+                                            Photo ph=new Photo(photo_file.getName(), pr);
+                                            contPhoto.create(ph);
+
+                                            (new HTTPRequest(Res.config.getUploadPhp())).appendParam("id", Res.config.getDossierPhotsRelative()+codePro)
+                                                       .appendParam("img", photo_file)
+                                                       .post();
+
+                                        }
+
+                                        Platform.runLater(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                getStage().close();
+                                                stack.setVisible(false);
+                                                listProdCont.init();
+                                            }
+                                        });
+                                    }
+
+
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                    
+                                    Platform.runLater(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            stack.setVisible(false);
+                                            Res.not.showNotifications("Echec", 
+                                            "Impossible de se connecter au serveur."
+                                            , GlobalNotifications.ECHEC_NOT, 5, false);
+                                        }
+                                    });
+                                    
+                                }
+                            }
+
+                        }
+
+                    } catch (NumberFormatException e) {
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                stack.setVisible(false);
+                                Res.not.showNotifications("Echec", 
+                                "Le prix doit être un réel"
+                                , GlobalNotifications.ECHEC_NOT, 2, false);
+                            }
+                        });
+                        
+                    }
                 }
-                
-            } catch (NumberFormatException e) {
-                
-                Res.not.showNotifications("Echec de l'ajout", 
-                    "Le prix doit être un réel"
-                    , GlobalNotifications.ECHEC_NOT, 2, false);
             }
-        }
+        }).start();
+        
+        
         
     }
     
@@ -234,6 +332,7 @@ public class NouveauProduitController extends Controllers implements Initializab
 
     @FXML
     void onBrowse(ActionEvent event) throws FileNotFoundException, IOException {
+        
         FileChooser fileChooser = new FileChooser();
         
         FileChooser.ExtensionFilter extFilterJPG = new FileChooser.ExtensionFilter("JPG files (*.JPG)", "*.JPG");

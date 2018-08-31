@@ -13,6 +13,7 @@ import eshopn.models.Res;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -79,11 +80,23 @@ public class CategorieController extends Controllers implements Initializable {
     public void init() {
         categorieTitle.setText(categorie.getNomCat());
         
-        ProduitJpaController cont=new ProduitJpaController(Res.emf);
-        List<Produit> listProd=cont.findProductsCategorie(categorie);
-        priceLabel.setText(listProd.size()+"");
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ProduitJpaController cont=new ProduitJpaController(Res.emf);
+                List<Produit> listProd=cont.findProductsCategorie(categorie);
+                
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        priceLabel.setText(listProd.size()+"");
+                        content=Res.content;
+                    }
+                });
+            }
+        }).start();
+        
 
-        content=Res.content;
     }
 
     @Override

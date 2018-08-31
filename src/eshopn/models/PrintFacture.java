@@ -16,6 +16,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 import com.sun.pdfview.PDFFile;
 import com.sun.pdfview.PDFPrintPage;
 import eshopn.entities.Facture;
+import static eshopn.models.PDFProduit.imagetoByteArray;
 import java.awt.print.Book;
 import java.awt.print.PageFormat;
 import java.awt.print.Paper;
@@ -142,8 +143,22 @@ public class PrintFacture extends Printer{
         File file=new File(Res.config.getDossierFacturePdf()+generateName());
         PdfWriter.getInstance(document, new FileOutputStream(file));
         document.open();
-
-        Image image = Image.getInstance(Res.config.getLogoPdf());
+        
+        Image image = null;
+        
+        if(Res.config.getModeStockageImage()==1){
+            File file2=new File(Res.config.getLogoPdfLocal());
+            byte[] byteArray=imagetoByteArray(file2);
+            
+            if(byteArray!=null){
+                image=Image.getInstance(byteArray);
+            }else{
+                System.out.println("C'était null");
+            }
+        }else{
+            image = Image.getInstance(Res.config.getLogoPdf());
+        }
+        
         image.setSpacingBefore(150f);
         image.setSpacingAfter(150f);
         image.scaleAbsolute(170f, 44f);

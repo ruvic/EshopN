@@ -9,6 +9,7 @@ import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXToggleButton;
 import eshopn.entities.Gestionnaire;
 import eshopn.entities.controllers.GestionnaireJpaController;
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -100,15 +101,38 @@ public final class MGestionnaire {
             @Override
             public void handle(ActionEvent event) {
                 getGest().setActif(!getGest().getActif());
-                try {
-                    cont.edit(getGest());
-                    statusProperty().setValue((getGest().getActif())?ACTIVE:DESACTIVE);
-                    toggle.setText((getGest().getActif())?ACTIVE:DESACTIVE);
-                } catch (Exception e) {
-                    Res.not.showNotifications("Echec", 
-                            "Impossible de se connecter au serveur."
-                            , GlobalNotifications.ECHEC_NOT, 2, false);
-                }
+                
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            cont.edit(getGest());
+                            
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    statusProperty().setValue((getGest().getActif())?ACTIVE:DESACTIVE);
+                                    toggle.setText((getGest().getActif())?ACTIVE:DESACTIVE);
+
+                                }
+                            });
+                            
+                        } catch (Exception e) {
+                            
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Res.not.showNotifications("Echec", 
+                                        "Impossible de se connecter au serveur."
+                                        , GlobalNotifications.ECHEC_NOT, 2, false);
+                                }
+                            });
+                            
+                        }
+                    }
+                }).start();
+                
+                
             }
         });
         

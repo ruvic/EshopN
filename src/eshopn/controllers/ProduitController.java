@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -72,37 +73,69 @@ public class ProduitController extends Controllers implements Initializable {
         numberProduct.setText(current_product.getQte()+"");
         
         /** Récupération d'une image du produit **/
-        PhotoJpaController cont=new PhotoJpaController(Res.emf);
+        //PhotoJpaController cont=new PhotoJpaController(Res.emf);
         Photo pht=(new ArrayList<>(current_product.getPhotoCollection())).get(0);
         
-        
-        try {
-        
-            File file=new File(Res.config.getDossierImagesLocal()
-                +current_product.getCodePro()+"/"+pht.getLienPhoto());
-        
-            photo.setImage(new Image(file.toURI().toURL().toExternalForm()));
-            
-            /*try {
-            
-            URL url = new URL(lienAbsolueImage(pht));
-            InputStream is = url.openStream();
-            photo.setImage(new Image(is));
-            is.close();
-            } catch (FileNotFoundException ex) {
-            Logger.getLogger(ProduitController.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IOException ex) {
-            Logger.getLogger(ProduitController.class.getName()).log(Level.SEVERE, null, ex);
-            }*/
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(ProduitController.class.getName()).log(Level.SEVERE, null, ex);
+        if(Res.config.getModeStockageImage()==1){
+                
+            new Thread(new Runnable() {
+                
+                @Override
+                public void run() {
+
+                    File file=new File(Res.config.getDossierImagesLocal()
+                        +current_product.getCodePro()+"/"+pht.getLienPhoto());
+
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                photo.setImage(new Image(file.toURI().toURL().toExternalForm()));
+                            } catch (MalformedURLException ex) {
+                                photo.setImage(new Image("Produits/default.png"));
+                                Logger.getLogger(ProduitController.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
+                    });
+
+                }
+                
+            }).start();
+
+
+        }else{
+
+            new Thread(new Runnable() {
+                
+                @Override
+                public void run() {
+
+                    try {
+
+                        URL url = new URL(lienAbsolueImage(pht));
+                        InputStream is = url.openStream();
+
+                        photo.setImage(new Image(is));
+
+                        is.close();
+
+                    } catch (Exception ex) {
+                        photo.setImage(new Image("Produits/default.png"));
+                        Logger.getLogger(ProduitController.class.getName()).log(Level.SEVERE, null, ex);
+                    } 
+
+                }
+                
+            }).start();
+
         }
+        
         
     }
 
     @Override
     protected void setImagesToImageViews() {
-        Image robe = new Image("Produits/robe.jpg");
+        Image robe = new Image("Produits/default.png");
         
         photo.setImage(robe);
     }

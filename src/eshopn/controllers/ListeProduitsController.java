@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -281,93 +282,117 @@ public class ListeProduitsController extends Controllers implements Initializabl
     @Override
     public void init() {
         
-        try {
+        Res.not.showLoader(Res.stackPane);
+        System.out.println("Suis passé");
+        new Thread(new Runnable() {
             
-            ProduitJpaController cont=new ProduitJpaController(Res.emf);
-            listes=cont.findProduitEntitiesOrder();
+            @Override
+            public void run() {
+                
+                try {
 
-            if(current_categorie!=null){
-
-                nomCat.setText(current_categorie.getNomCat());
-                List<Produit> list=new ArrayList<>();
-
-                if(!Res.connected_storekeeper.getTypeGest()){
-                    printBtn.setText("Imprimer Pub");
-                    printPubBtn.setVisible(false);
-                    AnchorPane.setLeftAnchor(nomCat, 165.0);
-                    printBtn.setOnAction(new EventHandler<ActionEvent>() {
+                    ProduitJpaController cont=new ProduitJpaController(Res.emf);
+                    listes=cont.findProduitEntitiesOrder();
+                    
+                    Platform.runLater(new Runnable() {
+                        
                         @Override
-                        public void handle(ActionEvent event) {
-                            try {
-                                onPrintPub(event);
-                            } catch (IOException ex) {
-                                Logger.getLogger(ListeProduitsController.class.getName()).log(Level.SEVERE, null, ex);
-                            } catch (DocumentException ex) {
-                                Logger.getLogger(ListeProduitsController.class.getName()).log(Level.SEVERE, null, ex);
+                        public void run() {
+                            if(current_categorie!=null){
+
+                                nomCat.setText(current_categorie.getNomCat());
+                                List<Produit> list=new ArrayList<>();
+
+                                if(!Res.connected_storekeeper.getTypeGest()){
+                                    printBtn.setText("Imprimer Pub");
+                                    printPubBtn.setVisible(false);
+                                    AnchorPane.setLeftAnchor(nomCat, 165.0);
+                                    printBtn.setOnAction(new EventHandler<ActionEvent>() {
+                                        @Override
+                                        public void handle(ActionEvent event) {
+                                            try {
+                                                onPrintPub(event);
+                                            } catch (IOException ex) {
+                                                Logger.getLogger(ListeProduitsController.class.getName()).log(Level.SEVERE, null, ex);
+                                            } catch (DocumentException ex) {
+                                                Logger.getLogger(ListeProduitsController.class.getName()).log(Level.SEVERE, null, ex);
+                                            }
+                                        }
+                                    });
+                                }
+
+                                for (Produit pr : listes) {
+                                    if(!pr.getIdCategorie().getIdCat().equals(current_categorie.getIdCat())){
+                                        list.add(pr);
+                                    }
+                                }
+
+                                for (Produit pr : list) {
+                                    listes.remove(pr);
+                                }
+
+                                AnchorPane.setLeftAnchor(nomCat, 527.0);
+
+                            }else{
+                                nomCat.setText("Toutes les catégories");
+                                newProductBtn.setVisible(false);
+                                if(!Res.connected_storekeeper.getTypeGest()){
+                                    printBtn.setText("Imprimer Pub");
+                                    printPubBtn.setVisible(false);
+                                    printBtn.setOnAction(new EventHandler<ActionEvent>() {
+                                        @Override
+                                        public void handle(ActionEvent event) {
+                                            try {
+                                                onPrintPub(event);
+                                            } catch (IOException ex) {
+                                                Logger.getLogger(ListeProduitsController.class.getName()).log(Level.SEVERE, null, ex);
+                                            } catch (DocumentException ex) {
+                                                Logger.getLogger(ListeProduitsController.class.getName()).log(Level.SEVERE, null, ex);
+                                            }
+                                        }
+                                    });
+                                }
+
+                                prod1Img.setVisible(true);
+                                prod1Text.setVisible(true);
+                                prod2Img.setVisible(false);
+                                prod2Text.setVisible(false);
+                                categorieBtn.setVisible(false);
+                                categorieImg.setVisible(false);
+                                categorieText.setVisible(false);
                             }
+
+                            setPaginationProperties(Res.NbreEltParLigne*2, listes);
+
+                            listesGen=listes;
+
+                            getScene().widthProperty().addListener(new ChangeListener<Number>(){
+                                @Override
+                                public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                                    setPaginationProperties(Res.NbreEltParLigne*2, listesGen);
+                                    getStage().centerOnScreen();
+                                }   
+                            });
+                            
+                            Res.stackPane.setVisible(false);
                         }
                     });
-                }
 
-                for (Produit pr : listes) {
-                    if(!pr.getIdCategorie().getIdCat().equals(current_categorie.getIdCat())){
-                        list.add(pr);
-                    }
-                }
-
-                for (Produit pr : list) {
-                    listes.remove(pr);
+                } catch (Exception e) {
+                    
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            Res.stackPane.setVisible(false);
+                            Res.not.showNotifications("Echec", 
+                                        "Impossible de se connecter au serveur."
+                                        , GlobalNotifications.ECHEC_NOT, 2, false);
+                        }
+                    });
                 }
                 
-                AnchorPane.setLeftAnchor(nomCat, 527.0);
-
-            }else{
-                nomCat.setText("Toutes les catégories");
-                newProductBtn.setVisible(false);
-                if(!Res.connected_storekeeper.getTypeGest()){
-                    printBtn.setText("Imprimer Pub");
-                    printPubBtn.setVisible(false);
-                    printBtn.setOnAction(new EventHandler<ActionEvent>() {
-                        @Override
-                        public void handle(ActionEvent event) {
-                            try {
-                                onPrintPub(event);
-                            } catch (IOException ex) {
-                                Logger.getLogger(ListeProduitsController.class.getName()).log(Level.SEVERE, null, ex);
-                            } catch (DocumentException ex) {
-                                Logger.getLogger(ListeProduitsController.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                        }
-                    });
-                }
-
-                prod1Img.setVisible(true);
-                prod1Text.setVisible(true);
-                prod2Img.setVisible(false);
-                prod2Text.setVisible(false);
-                categorieBtn.setVisible(false);
-                categorieImg.setVisible(false);
-                categorieText.setVisible(false);
             }
-
-            setPaginationProperties(Res.NbreEltParLigne*2, listes);
-
-            listesGen=listes;
-
-            getScene().widthProperty().addListener(new ChangeListener<Number>(){
-                @Override
-                public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                    setPaginationProperties(Res.NbreEltParLigne*2, listesGen);
-                    getStage().centerOnScreen();
-                }   
-            });
-            
-        } catch (Exception e) {
-            
-            Res.not.showNotifications("Echec", 
-                        "Impossible de se connecter au serveur."
-                        , GlobalNotifications.ECHEC_NOT, 2, false);
-        }
+        }).start();
         
     }
     

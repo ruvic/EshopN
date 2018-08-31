@@ -22,6 +22,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Date;
 import java.text.DateFormat;
@@ -33,6 +34,7 @@ import java.util.GregorianCalendar;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -176,6 +178,7 @@ public class AlterStockController extends Controllers implements Initializable {
 
     @Override
     public void init() {
+        
         if(isOperation()) {
             titleLabel.setText("Ajout de stock");
             validBtn.setText("Ajouter");
@@ -188,31 +191,66 @@ public class AlterStockController extends Controllers implements Initializable {
         codeLabel.setText(formatCode(current_produit.getCodePro().toString()));
         qteMaxLabel.setText(current_produit.getQte()+"");
         
-//        PhotoJpaController cont=new PhotoJpaController(Res.emf);
-//        Photo pht=cont.findPhotosEntities(current_produit).get(0);
         Photo pht=(new ArrayList<>(current_produit.getPhotoCollection())).get(0);
-        try {
-
-            /*URL url = new URL(lienAbsolueImage(pht));
-            InputStream is = url.openStream();
-            imgView.setImage(new Image(is));
-            is.close();*/
-            
-            File file=new File(Res.config.getDossierImagesLocal()
-                +current_produit.getCodePro()+"/"+pht.getLienPhoto());
         
-            imgView.setImage(new Image(file.toURI().toURL().toExternalForm()));
+        if(Res.config.getModeStockageImage()==1){
             
-        } catch (Exception ex) {
-            Logger.getLogger(ProduitController.class.getName()).log(Level.SEVERE, null, ex);
-        } 
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    
+                    try {
+
+                        File file=new File(Res.config.getDossierImagesLocal()
+                            +current_produit.getCodePro()+"/"+pht.getLienPhoto());
+                            
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    imgView.setImage(new Image(file.toURI().toURL().toExternalForm()));
+                                } catch (MalformedURLException ex) {
+                                    Logger.getLogger(AlterStockController.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                            }
+                        });
+
+                    } catch (Exception ex) {
+                        Logger.getLogger(ProduitController.class.getName()).log(Level.SEVERE, null, ex);
+                    } 
+                    
+                }
+            }).start();
+            
+        }else{
+            
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        
+                        URL url = new URL(lienAbsolueImage(pht));
+                        InputStream is = url.openStream();
+                        
+                        imgView.setImage(new Image(is));
+                        
+                        is.close();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+            
+            
+        }
+        
         
     }
     
     
     @Override
     protected void setImagesToImageViews() {
-        
+        imgView.setImage(new Image("Produits/default.png"));
     }
     
     public boolean isOperation() {

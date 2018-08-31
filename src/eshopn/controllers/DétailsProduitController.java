@@ -31,6 +31,11 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -44,6 +49,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 
 /**
@@ -80,6 +86,11 @@ public class DétailsProduitController extends Controllers implements Initializa
     @FXML
     private JFXTextArea descriptionProd;
     
+    @FXML
+    private StackPane stack;
+
+    @FXML
+    private ImageView loader;
     
     @FXML
     private JFXButton modifBTn;
@@ -110,6 +121,7 @@ public class DétailsProduitController extends Controllers implements Initializa
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         setImagesToImageViews();
+        
         imgsBox=new HBox();
         pane.setContent(imgsBox);
         
@@ -137,97 +149,207 @@ public class DétailsProduitController extends Controllers implements Initializa
         descriptionProd.setText(produit.getDescription());
         codeFourField.setText(produit.getCodeFour());
         
-        /** Récupération d'une image du produit **/
-        PhotoJpaController cont=new PhotoJpaController(Res.emf);
+        Res.not.showLoader(Res.stackPane);
+        BooleanProperty okProperty=new SimpleBooleanProperty(false);
         
-        try {
+        /** Récupération d'une image du produit **/
+        new Thread(new Runnable() {
             
-            listPhotos=(new ArrayList<>(produit.getPhotoCollection()));
-            
-            loadImage(produit.getCodePro().toString(), listPhotos.get(0).getLienPhoto(), photoVue);
-            
-            /*URL url = new URL(lienAbsolueImage(listPhotos.get(0)));
-            InputStream is = url.openStream();
-            photoVue.setImage(new Image(is));
-            is.close();*/
-            
-            for (int i = 0; i < listPhotos.size(); i++) {
-                Photo pht=listPhotos.get(i);
-                //String photo=lienAbsolueImage(pht);
+            @Override
+            public void run() {
                 
-                //photos.add(photo);
-                
-                String photo=Res.config.getDossierImagesLocal()+produit.getCodePro().toString()+"/"+pht.getLienPhoto();
-                photos.add(photo);
-                    
-                File fil=new File(photo);
-                sourceFiles.add(fil);
-
                 try {
-                    
-                    /*URL url2 = new URL(lienAbsolueImage(pht));
-                    InputStream is2 = url2.openStream();
-                    final ImageView img = new ImageView(new Image(is2));*/
-                    
-                    final ImageView img = new ImageView();
-                    loadImage(produit.getCodePro().toString(), pht.getLienPhoto(), img);
-                    
-                    img.setFitWidth(97);
-                    img.setFitHeight(84);
 
-                    final ContextMenu contextMenu=new ContextMenu();
-                    final MenuItem item=new MenuItem("Supprimer");
-                    final int index=i;
-                    contextMenu.getItems().addAll(item);
-
-                    if(Res.connected_storekeeper.getTypeGest()){
-
-                        img.setOnContextMenuRequested(new EventHandler<ContextMenuEvent>(){
+                    listPhotos=(new ArrayList<>(produit.getPhotoCollection()));
+                    
+                    
+                    if(Res.config.getModeStockageImage()==1){
+                        
+                        File file=new File(
+                                Res.config.getDossierImagesLocal()+produit.getCodePro().toString()
+                                        +"/"+listPhotos.get(0).getLienPhoto());
+                        
+                        Platform.runLater(new Runnable() {
                             @Override
-                            public void handle(ContextMenuEvent e) {
-                                contextMenu.show(img, e.getScreenX(), e.getScreenY());
+                            public void run() {
+                                try {
+                                    photoVue.setImage(new Image(file.toURI().toURL().toExternalForm()));
+                                } catch (MalformedURLException ex) {
+                                    okProperty.setValue(false);
+                                    Logger.getLogger(DétailsProduitController.class.getName()).log(Level.SEVERE, null, ex);
+                                }
                             }
                         });
+                        
+                    }else{
+                        URL url = new URL(lienAbsolueImage(listPhotos.get(0)));
+                        InputStream is = url.openStream();
+                        
+                        photoVue.setImage(new Image(is));
 
-                        item.setOnAction(new EventHandler<ActionEvent>() {
-                            @Override
-                            public void handle(ActionEvent event) {
-                                ((HBox)(pane.getContent())).getChildren().remove(img);
-                                aRetirer.add(index);
-                                photosAsupprimer.add(pht.getLienPhoto());
+                        is.close();
+                    }
+                    
+                    for (int i = 0; i < listPhotos.size(); i++) {
+                        Photo pht=listPhotos.get(i);
+                        
+                        String photo=Res.config.getDossierImagesLocal()+produit.getCodePro().toString()+"/"+pht.getLienPhoto();
+                        photos.add(photo);
+
+                        File fil=new File(photo);
+                        sourceFiles.add(fil);
+
+                        try {
+
+                            final ImageView img = new ImageView();
+                            
+                            if(Res.config.getModeStockageImage()==1){
+                                
+                                File file2=new File(
+                                Res.config.getDossierImagesLocal()+produit.getCodePro().toString()
+                                        +"/"+pht.getLienPhoto());
+
+                                
+                                Platform.runLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            img.setImage(new Image(file2.toURI().toURL().toExternalForm()));
+                                        } catch (MalformedURLException ex) {
+                                            okProperty.setValue(false);
+                                            Logger.getLogger(DétailsProduitController.class.getName()).log(Level.SEVERE, null, ex);
+                                        }
+                                    }
+                                });
+                                
+                            }else{
+                                
+                                URL url2 = new URL(lienAbsolueImage(pht));
+                                InputStream is2 = url2.openStream();
+                                
+                                img.setImage(new Image(is2));
+                                
+                                is2.close();
                             }
-                        });
+                            
+                            img.setFitWidth(97);
+                            img.setFitHeight(84);
+
+                            final ContextMenu contextMenu=new ContextMenu();
+                            final MenuItem item=new MenuItem("Supprimer");
+                            final int index=i;
+                            contextMenu.getItems().addAll(item);
+
+                            if(Res.connected_storekeeper.getTypeGest()){
+
+                                img.setOnContextMenuRequested(new EventHandler<ContextMenuEvent>(){
+                                    @Override
+                                    public void handle(ContextMenuEvent e) {
+                                        Platform.runLater(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                contextMenu.show(img, e.getScreenX(), e.getScreenY());
+                                            }
+                                        });
+                                    }
+                                });
+
+                                item.setOnAction(new EventHandler<ActionEvent>() {
+                                    @Override
+                                    public void handle(ActionEvent event) {
+                                        
+                                        Platform.runLater(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                ((HBox)(pane.getContent())).getChildren().remove(img);
+                                                aRetirer.add(index);
+                                                photosAsupprimer.add(pht.getLienPhoto());
+                                            }
+                                        });
+                                        
+                                    }
+                                });
+                            }
+                            
+                            
+
+                            img.setOnMouseClicked(new EventHandler<MouseEvent>(){
+                                @Override
+                                public void handle(MouseEvent event) {
+                                    
+                                    Platform.runLater(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            photoVue.setImage(img.getImage());
+                                        }
+                                    });
+                                    
+                                }
+                            });
+                            
+                            ((HBox)(pane.getContent())).setSpacing(5);
+                            ((HBox)(pane.getContent())).getChildren().add(img);
+
+                            //is2.close();
+                            
+                        } catch(Exception e){
+                            
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Res.not.showNotifications("Echec", 
+                                    "Impossible de se connecter au serveur."
+                                    , GlobalNotifications.ECHEC_NOT, 2, false);
+                                }
+                            });
+                            
+                        }
+                        
                     }
 
-                    img.setOnMouseClicked(new EventHandler<MouseEvent>(){
+                    //getStage().show();
+                    okProperty.setValue(true);
+
+                } catch (Exception e) {
+                    
+                    Platform.runLater(new Runnable() {
                         @Override
-                        public void handle(MouseEvent event) {
-                            photoVue.setImage(img.getImage());
+                        public void run() {
+                            
+                            Res.not.showNotifications("Echec de l'ajout", 
+                                "Impossible de se connecter au serveur."
+                                , GlobalNotifications.ECHEC_NOT, 2, false);
                         }
                     });
-
-                    ((HBox)(pane.getContent())).setSpacing(5);
-                    ((HBox)(pane.getContent())).getChildren().add(img);
-
-                    //is2.close();
-                } catch(Exception e){
-                    Res.not.showNotifications("Echec de l'ajout", 
-                        "Impossible de se connecter au serveur."
-                        , GlobalNotifications.ECHEC_NOT, 2, false);
+                    
                 }
+                
+            }
+        }).start();
+        
+        okProperty.addListener(new ChangeListener<Boolean>() {
+            
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        
+                        Res.stackPane.setVisible(false);
+                        if(newValue.booleanValue()){
+                            getStage().show();
+                        }else{
+                             Res.not.showNotifications("Echec de l'ajout", 
+                                "Impossible de se connecter au serveur."
+                                , GlobalNotifications.ECHEC_NOT, 2, false);
+                        }
+                    }
+                });
+                
             }
             
-            this.getStage().show();
-            
-        } catch (Exception e) {
-            Res.not.showNotifications("Echec de l'ajout", 
-                        "Impossible de se connecter au serveur."
-                        , GlobalNotifications.ECHEC_NOT, 2, false);
-        }
-        
-        
-        
-        
+        });
         
     }
     
@@ -235,7 +357,8 @@ public class DétailsProduitController extends Controllers implements Initializa
 
     @Override
     protected void setImagesToImageViews() {
-        
+        photoVue.setImage(new Image("Produits/default.png"));
+        loader.setImage(new Image("chargement2.gif"));
     }
 
     @FXML
@@ -246,112 +369,180 @@ public class DétailsProduitController extends Controllers implements Initializa
     @FXML
     void onEdit(ActionEvent event) {
         
-        if(!Res.connected_storekeeper.getTypeGest()){
-            getStage().close();
-        }else{
-            
-            if(nomProd.getText().trim().isEmpty() 
-                 || prixProd.getText().trim().isEmpty()
-                 || codeProd.getText().trim().isEmpty()
-                 || descriptionProd.getText().trim().isEmpty()
-                 || ((HBox)(pane.getContent())).getChildren().size()==0){
-
-                Res.not.showNotifications("Echec de l'ajout", 
-                        "Toutes les champs doivent être remplis, \n"
-                                + "et le produit doit avoir au moins une image"
-                        , GlobalNotifications.ECHEC_NOT, 2, false);
-            }else{
-                try {
-                    BigDecimal bg=BigDecimal.valueOf(Double.valueOf(prixProd.getText().trim()));
-
-                    try {
-                       
-                        produit.setNomPro(nomProd.getText().trim());
-                        produit.setPrix(BigDecimal.valueOf(Double.valueOf(prixProd.getText().trim())));
-                        produit.setQte(Integer.valueOf(qteProd.getText()));
-                        produit.setDescription(descriptionProd.getText().trim());
-
-                        ProduitJpaController contPro=new ProduitJpaController(Res.emf);
-                        PhotoJpaController contPht=new PhotoJpaController(Res.emf);
-                        contPro.edit(produit);
-
-                        maj();
-
-                        //Suppression de toutes les photos à supprimer dans la base de donnée
-                        int compteur=0;
-                        for (Photo ph : listPhotos) {
-                            
-                            for (String phS : photosAsupprimer) {
-                                if(phS.equals(ph.getLienPhoto())){
-                                    try {
-                                        compteur++;
-                                        contPht.destroy(ph.getIdPhoto());
-                                    } catch (NonexistentEntityException ex) {
-                                        Logger.getLogger(DétailsProduitController.class.getName()).log(Level.SEVERE, null, ex);
-                                    }
-                                }
-                            }
-                            
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                
+                if(!Res.connected_storekeeper.getTypeGest()){
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            getStage().close(); 
                         }
-
-                        
-                        /*for (String string : photosAsupprimer) {
-
-                            (new HTTPRequest(Res.config.getUploadPhp())).appendParam("id", Res.config.getDossierPhotsRelative()+produit.getCodePro())
-                                   .appendParam("file_to_delete", string)
-                                   .post();
-                        }*/
-
-                        //Insertion des images dans la base de donnée
-                        for (File photo_file : sourceFiles) {
-
-                            /*if(!photo_file.getAbsolutePath().contains("http:")){
-                                Photo ph=new Photo(photo_file.getName(), produit);
-                                contPht.create(ph);
-
-                                (new HTTPRequest(Res.config.getUploadPhp())).appendParam("id", Res.config.getDossierPhotsRelative()+produit.getCodePro())
-                                   .appendParam("img", photo_file)
-                                   .post();
-                               
-                            }*/
-                            
-                            
-                            if(!photo_file.getAbsolutePath().contains(Res.config.getDossierImagesLocal().replace('/', '\\'))){
-                                
-                                Photo ph=new Photo(photo_file.getName(), produit);
-                                contPht.create(ph);
-                                
-                                File dest=new File(Res.config.getDossierImagesLocal()+produit.getCodePro()+"/"+photo_file.getName());
-                                copyFileUsingStream(photo_file, dest);
-                                
-                            }
-                            
+                    });
+                }else{
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            stack.setVisible(true);
                         }
-
-                        getStage().close();
-
-                        Res.not.showNotifications("Confirmation Modification", 
-                                "Les modifications du produit "+produit.getNomPro()+"\n"
-                                        + "ont été pris en compte"
-                                , GlobalNotifications.SUCCESS_NOT, 3, false);
-
-                        listProCont.init();
-
-                    } catch (Exception ex) {
-                        Res.not.showNotifications("Echec", 
-                                "Impossible de se connecter au serveur."
-                                , GlobalNotifications.ECHEC_NOT, 3, false);
-                    }  
+                    });
                     
-                } catch (Exception e) {
-                    Res.not.showNotifications("Echec de l'ajout", 
-                        "Le prix doit être un réel"
-                        , GlobalNotifications.ECHEC_NOT, 2, false);
+                    if(nomProd.getText().trim().isEmpty() 
+                         || prixProd.getText().trim().isEmpty()
+                         || codeProd.getText().trim().isEmpty()
+                         || descriptionProd.getText().trim().isEmpty()
+                         || ((HBox)(pane.getContent())).getChildren().size()==0){
+                        
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                stack.setVisible(false);
+                                Res.not.showNotifications("Echec de l'ajout", 
+                                        "Toutes les champs doivent être remplis, \n"
+                                                + "et le produit doit avoir au moins une image"
+                                        , GlobalNotifications.ECHEC_NOT, 2, false);
+                            }
+                        });
+                        
+                    }else{
+                        try {
+                            
+                            BigDecimal bg=BigDecimal.valueOf(Double.valueOf(prixProd.getText().trim()));
+
+                            try {
+
+                                produit.setNomPro(nomProd.getText().trim());
+                                produit.setPrix(BigDecimal.valueOf(Double.valueOf(prixProd.getText().trim())));
+                                produit.setQte(Integer.valueOf(qteProd.getText()));
+                                produit.setDescription(descriptionProd.getText().trim());
+                                
+
+                                ProduitJpaController contPro=new ProduitJpaController(Res.emf);
+                                PhotoJpaController contPht=new PhotoJpaController(Res.emf);
+                                contPro.edit(produit);
+
+                                maj();
+
+                                //Suppression de toutes les photos à supprimer dans la base de donnée
+                                int compteur=0;
+                                for (Photo ph : listPhotos) {
+
+                                    for (String phS : photosAsupprimer) {
+                                        if(phS.equals(ph.getLienPhoto())){
+                                            try {
+                                                compteur++;
+                                                contPht.destroy(ph.getIdPhoto());
+                                            } catch (NonexistentEntityException ex) {
+                                                Logger.getLogger(DétailsProduitController.class.getName()).log(Level.SEVERE, null, ex);
+                                            }
+                                        }
+                                    }
+
+                                }
+
+                                if(Res.config.getModeStockageImage()==1){
+                                    
+                                    //Insertion des images dans la base de donnée
+                                    for (File photo_file : sourceFiles) {
+
+                                        if(!photo_file.getAbsolutePath().contains(Res.config.getDossierImagesLocal().replace('/', '\\'))){
+
+                                            Photo ph=new Photo(photo_file.getName(), produit);
+                                            contPht.create(ph);
+
+                                            File dest=new File(Res.config.getDossierImagesLocal()+produit.getCodePro()+"/"+photo_file.getName());
+                                            copyFileUsingStream(photo_file, dest);
+
+                                        }
+
+                                    }
+                                    
+                                    Platform.runLater(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            getStage().close();
+                                            stack.setVisible(false);
+                                            Res.not.showNotifications("Confirmation Modification", 
+                                                    "Les modifications du produit "+produit.getNomPro()+"\n"
+                                                            + "ont été pris en compte"
+                                                    , GlobalNotifications.SUCCESS_NOT, 3, false);
+
+                                            listProCont.init();
+                                            
+                                        }
+                                    });
+                                    
+                                }else{
+                                    //Suppression des images présent sur le serveur et qui ont été supprimer
+                                    for (String string : photosAsupprimer) {
+
+                                        (new HTTPRequest(Res.config.getUploadPhp())).appendParam("id", Res.config.getDossierPhotsRelative()+produit.getCodePro())
+                                               .appendParam("file_to_delete", string)
+                                               .post();
+                                    }
+
+                                    //Insertion des images dans la base de donnée
+                                    for (File photo_file : sourceFiles) {
+
+                                        if(!photo_file.getAbsolutePath().contains("http:")){
+                                            Photo ph=new Photo(photo_file.getName(), produit);
+                                            contPht.create(ph);
+
+                                            (new HTTPRequest(Res.config.getUploadPhp())).appendParam("id", Res.config.getDossierPhotsRelative()+produit.getCodePro())
+                                               .appendParam("img", photo_file)
+                                               .post();
+
+                                        }
+                                    }
+                                    
+                                    Platform.runLater(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            getStage().close();
+                                            stack.setVisible(false);
+                                            Res.not.showNotifications("Confirmation Modification", 
+                                                    "Les modifications du produit "+produit.getNomPro()+"\n"
+                                                            + "ont été pris en compte"
+                                                    , GlobalNotifications.SUCCESS_NOT, 3, false);
+
+                                            listProCont.init();
+                                            
+                                        }
+                                    });
+                                    
+                                }
+
+                            } catch (Exception ex) {
+                                Platform.runLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        stack.setVisible(false);
+                                        Res.not.showNotifications("Echec", 
+                                                "Impossible de se connecter au serveur."
+                                                , GlobalNotifications.ECHEC_NOT, 3, false);
+                                    }
+                                });
+                                
+                            }  
+
+                        } catch (Exception e) {
+                            
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    stack.setVisible(false);
+                                    Res.not.showNotifications("Echec de l'ajout", 
+                                        "Le prix doit être un réel"
+                                        , GlobalNotifications.ECHEC_NOT, 2, false);
+                                }
+                            });
+                            
+                        }
+                    }
                 }
             }
-        }
-        
-        
+        }).start();
         
         
     }
@@ -384,20 +575,26 @@ public class DétailsProduitController extends Controllers implements Initializa
             
             String photo=photos.get(i);
             
-            /*InputStream is=null;
-            URL url=null;
-            if(photo.contains("http:/")){
-                url = new URL(photo);
-                is= url.openStream();
-            }else{
-                is=new FileInputStream(photo);
-            }
-            
-            ImageView img = new ImageView(new Image(is));*/
-            
-            File file=new File(photo);
             ImageView img = new ImageView();
-            img.setImage(new Image(file.toURI().toURL().toExternalForm()));
+            
+            if(Res.config.getModeStockageImage()==1){
+                
+                File file=new File(photo);
+                img.setImage(new Image(file.toURI().toURL().toExternalForm()));
+                
+            }else{
+                
+                InputStream is=null;
+                URL url=null;
+                if(photo.contains("http:/")){
+                    url = new URL(photo);
+                    is= url.openStream();
+                }else{
+                    is=new FileInputStream(photo);
+                }
+                is.close();
+                
+            }
             
             img.setFitWidth(97);
             img.setFitHeight(84);

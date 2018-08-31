@@ -63,6 +63,7 @@ public abstract class Controllers {
        
         File file=new File(Res.config.getDossierImagesLocal()+code+"/"+nom);
         imageView.setImage(new Image(file.toURI().toURL().toExternalForm()));
+        
     }
     
     public String year(Date date){
