@@ -566,17 +566,21 @@ public class FacturationController extends Controllers implements Initializable 
                 }
 
             }
+            
+            recette=(recette/Res.config.getMinoration());
 
             Res.stackPane.setVisible(true);
 
             Res.not.showDialog(Res.stackPane, "Recette Journalière"
-                    , "Votre recette journalière est de :   "+Res.formatNumber(recette)+" Fcfa", null,false);
+                    , "Votre recette journalière est de :   "+Res.formatNumber(round(recette, 2))+" Fcfa", null,false);
          } catch (Exception e) {
             Res.not.showNotifications("Echec", 
                        "Impossible de se connecter au serveur."
                        , GlobalNotifications.ECHEC_NOT, 2, false);
          }
     }
+    
+    
 
     @Override
     public void init() {

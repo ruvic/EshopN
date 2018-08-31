@@ -24,6 +24,7 @@ import eshopn.controllers.NouveauProduitController;
 import eshopn.controllers.NouvelleCategorieController;
 import eshopn.controllers.ProduitController;
 import eshopn.controllers.ProduitPDFController;
+import eshopn.controllers.SplashScreenController;
 import eshopn.entities.Categorie;
 import eshopn.entities.Produit;
 import eshopn.models.EshopConfigurations;
@@ -36,21 +37,32 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.TableView;
+import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
 /**
@@ -61,31 +73,148 @@ public class EShopN extends Application {
     private Scene scene;
     private Stage stage;
     private FXMLLoader loader;
+    private BooleanProperty okProperty=new SimpleBooleanProperty(false);
+    
     
     @Override
     public void start(Stage primaryStage) throws Exception {
+        
         setStage(primaryStage);
         
-        getDatabaseConfigurations();
+        ShowSplashScreenPage();
         
-        String driver=Res.config.getDriver();
-        String url=Res.config.getUrl();
-        String user=Res.config.getUser();
-        String password=Res.config.getPassword();
-        
-        if(getEntityManager(driver, url, user, password)==null){
-            ShowConnexionPage();
-            Res.not.showNotifications("Erreur de Connexion au serveur"
-                    , "Les informations de configurations du serveur sont incorrectes\n"
-                            + "  Veuillez arrêtez l'application, vérifiez les configurations\n"
-                            + "  et relancer"
-                    , GlobalNotifications.ECHEC_NOT, 15, false);
-        }else{
+        new Thread(new Runnable() {
             
-            ShowConnexionPage();
-        }
+            @Override
+            public void run() {
+                
+                if(getDatabaseConfigurations()){
+            
+                    String driver=Res.config.getDriver();
+                    String url=Res.config.getUrl();
+                    String user=Res.config.getUser();
+                    String password=Res.config.getPassword();
+
+                    if(getEntityManager(driver, url, user, password)==null){
+                        
+                        
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                stage.close();
+                                Alert alert=new Alert(Alert.AlertType.ERROR);
+                                alert.setTitle("Erreur");
+                                alert.setHeaderText("Erreur de connection au serveur");
+                                alert.setContentText("Une erreur est survenue lors de la connection"
+                                        + " au serveur.");
+                                alert.showAndWait();
+                            }
+                        });
+                        
+                    }else{
+
+                        if(Res.config.getModeStockageImage()==1){
+                            
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    
+                                    try {
+
+                                        File file=new File(Res.config.getLogoAppLocal());
+                                        Res.config.setLogoApp(new Image(file.toURI().toURL().toExternalForm()));
+                                        okProperty.setValue(true);
+                                        
+                                    } catch (Exception ex) {
+                                        
+                                        Platform.runLater(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                stage.close();
+                                                Alert alert=new Alert(Alert.AlertType.ERROR);
+                                                alert.setTitle("Erreur");
+                                                alert.setHeaderText("Logo introuvable");
+                                                alert.setContentText(Res.config.getLogoAppLocal() +" Inacessible.");
+                                                alert.showAndWait();
+                                            }
+                                        });
+                                    }
+                                }
+                                
+                            }).start();                                    
+                            
+                            
+                        }else{
+                            
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    InputStream is;
+                                    try {
+
+                                        is = Res.config.getLogoAppURL().openStream();
+                                        Res.config.setLogoApp(new Image(is));
+                                        okProperty.setValue(true);
+                                        
+
+                                    } catch (IOException ex) {
+                                        
+                                        Platform.runLater(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                stage.close();
+                                                Alert alert=new Alert(Alert.AlertType.ERROR);
+                                                alert.setTitle("Erreur");
+                                                alert.setHeaderText("Erreur de connection au serveur");
+                                                alert.setContentText("Une erreur est survenue lors de la connection"
+                                                        + "au serveur.");
+                                                alert.showAndWait();
+                                            }
+                                        });
+                                    }
+                                }
+                                
+                            }).start();                                    
+                        }
+                        
+                    }
+
+                }else{
+                    
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            stage.close();
+                            Alert alert=new Alert(Alert.AlertType.ERROR);
+                            alert.setTitle("Erreur");
+                            alert.setHeaderText("Erreur de chargement des données");
+                            alert.setContentText("Une erreur est survenue lors du chargement des données. "
+                                    + "Verifier vos configurations, verifier également si votre serveur"
+                                    + "est accessible. ");
+                            alert.showAndWait();
+                        }
+                    });
+                    
+                }
+                
+            }
+            
+        }).start();
         
         
+        okProperty.addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if(newValue.booleanValue()){
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            ShowConnexionPage();
+                        }
+                    });
+                }
+            }
+        });
         
     }
     
@@ -100,11 +229,11 @@ public class EShopN extends Application {
         try {
             emf = Persistence.createEntityManagerFactory("EShopNPU", properties);
             em=(EntityManager) emf.createEntityManager();
-            
-        } catch (Exception e) {
             return em;
+        } catch (Exception e) {
+            return null;
         }
-        return em;
+        
     }
     
     /**
@@ -120,7 +249,31 @@ public class EShopN extends Application {
     /*****************************************************************
      * Méthode pour afficher les vues de connection et les vues du root
      ******************************************************************/
+    public void ShowSplashScreenPage(){
+        try {
+            
+            loader=new FXMLLoader();
+            loader.setLocation(getClass().getResource("views/SplashScreen.fxml"));
+            AnchorPane root=loader.load();
+            setScene(new Scene(root, 502,265));
+
+            SplashScreenController controller=loader.getController();
+            controller.setStage(stage);
+            
+            stage.setScene(getScene());
+            stage.setResizable(false);
+            stage.initStyle(StageStyle.UNDECORATED);
+            stage.centerOnScreen();
+            stage.show();
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+    }
+    
     public void ShowConnexionPage(){
+        
         try {
             loader=new FXMLLoader();
             loader.setLocation(getClass().getResource("views/connexion.fxml"));
@@ -133,6 +286,8 @@ public class EShopN extends Application {
             controller.setMain(this);
             controller.init();
             
+            stage.close();
+            stage=new Stage();
             stage.setScene(getScene());
             stage.getIcons().add(Res.config.getLogoApp());
             stage.centerOnScreen();
@@ -141,7 +296,6 @@ public class EShopN extends Application {
             stage.show();
             
         } catch (Exception e) {
-            System.out.println("Erreur d'affichage de la page de connexion");
             e.printStackTrace();
         }
         
@@ -603,58 +757,79 @@ public class EShopN extends Application {
         stage.setHeight(bounds.getHeight());
     }
     
-    public void getDatabaseConfigurations() throws IOException{
-        Properties prop = new Properties();
-	InputStream input = null;
+    public boolean getDatabaseConfigurations(){
         
 	try {
-            input = new FileInputStream("eshop/config.properties");
-            prop.load(input);
             
-	} catch (IOException ex) {
-            ex.printStackTrace();
-	} finally {
-            if (input != null) {
-                try {
+            Properties prop = new Properties();
+            InputStream input = null;
+            
+            try {
+                input = new FileInputStream("eshop/config.properties");
+                prop.load(input);
+                
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            } finally {
+                if (input != null) {
+                    try {
                         input.close();
-                } catch (IOException e) {
+                    } catch (IOException e) {
                         e.printStackTrace();
+                    }
                 }
             }
+            
+            String admin=prop.getProperty("admin");
+            String adminpwd=prop.getProperty("adminpwd");
+            String adresse=prop.getProperty("adresse");
+            String tel=prop.getProperty("tel");
+            
+            String bd=prop.getProperty("bd");
+            String user=prop.getProperty("user");
+            String password=prop.getProperty("password");
+            String server=prop.getProperty("server");
+            String serverBD=prop.getProperty("serverBD");
+            String port=prop.getProperty("port");
+            String portBD=prop.getProperty("portBD");
+            
+            int modeStockageImage=Integer.parseInt(prop.getProperty("ModeStockageImage"));
+            String dossierImagesLocal=prop.getProperty("dossierImagesLocal");
+            String dossierLogosLocal=prop.getProperty("dossierLogosLocal");
+            String logoAppLocal=prop.getProperty("logoAppLocal");
+            String logoConnexionLocal=prop.getProperty("logoConnexionLocal");
+            
+            String dossierApp=prop.getProperty("dossierApp");
+            String dossierphotos=prop.getProperty("dossierphotos");
+            String dossierLogos=prop.getProperty("dossierLogos");
+            String requestController=prop.getProperty("requestController");
+            String logoApp=prop.getProperty("logoApp");
+            String logoPdf=prop.getProperty("logoPdf");
+            String logoCon=prop.getProperty("logoConnexion");
+            
+            double remise=Double.parseDouble(prop.getProperty("remise"));
+            String nro=prop.getProperty("nro");
+            String rc=prop.getProperty("rc");
+            double minoration=Double.parseDouble(prop.getProperty("minoration"));
+            
+            String dossierFacturesPdf=prop.getProperty("dossierFactures");
+            String dossierProduitsPdf=prop.getProperty("dossierProduits");
+            String dossierStocksPdf=prop.getProperty("dossierStocks");
+            
+            Res.config=new EshopConfigurations(
+                    admin, adminpwd, adresse, tel,
+                    bd, server, serverBD, port,portBD, user, password,
+                    dossierApp, dossierphotos,dossierLogos,requestController
+                    ,logoApp, logoPdf,logoCon ,remise,nro,rc,
+                    dossierFacturesPdf, dossierProduitsPdf, dossierStocksPdf,
+                    modeStockageImage, dossierImagesLocal, dossierLogosLocal,
+                    logoAppLocal, logoConnexionLocal, minoration);
+            
+            return true;
+            
+        } catch (Exception ex) {
+            return false;
 	}
-        
-        String admin=prop.getProperty("admin");
-        String adminpwd=prop.getProperty("adminpwd");
-        String adresse=prop.getProperty("adresse");
-        String tel=prop.getProperty("tel");
-        String bd=prop.getProperty("bd");
-        String user=prop.getProperty("user");
-        String password=prop.getProperty("password");
-        String server=prop.getProperty("server");
-        String serverBD=prop.getProperty("serverBD");
-        String port=prop.getProperty("port");
-        String portBD=prop.getProperty("portBD");
-        String dossierApp=prop.getProperty("dossierApp");
-        String dossierphotos=prop.getProperty("dossierphotos");
-        String dossierLogos=prop.getProperty("dossierLogos");
-        String requestController=prop.getProperty("requestController");
-        String logoApp=prop.getProperty("logoApp");
-        String logoPdf=prop.getProperty("logoPdf");
-        String logoCon=prop.getProperty("logoConnexion");
-        double remise=Double.parseDouble(prop.getProperty("remise"));
-        String nro=prop.getProperty("nro");
-        String rc=prop.getProperty("rc");
-        String dossierFacturesPdf=prop.getProperty("dossierFactures");
-        String dossierProduitsPdf=prop.getProperty("dossierProduits");
-        String dossierStocksPdf=prop.getProperty("dossierStocks");
-        String dossierImagesLocal=prop.getProperty("dossierImagesLocal");
-        
-        Res.config=new EshopConfigurations(
-                admin, adminpwd, adresse, tel,
-                bd, server, serverBD, port,portBD, user, password, 
-                dossierApp, dossierphotos,dossierLogos,requestController 
-                ,logoApp, logoPdf,logoCon ,remise,nro,rc,
-                dossierFacturesPdf, dossierProduitsPdf, dossierStocksPdf, dossierImagesLocal);
         
     }
     

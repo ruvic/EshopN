@@ -25,65 +25,84 @@ public class EshopConfigurations {
     private String user;
     private String driver="com.mysql.jdbc.Driver";
     private String password;
+    
+    private int ModeStockageImage;
+    private String dossierImagesLocal;
+    private String dossierLogosLocal;
+    private String logoAppLocal;
+    private String logoConnexionLocal;
+
+    
     private String dossierApp;
     private String dossierPhotos;
     private String dossierLogos;
     private String status;
+    
     private String uploadPhp;
     private Image logoApp;
+    private URL logoAppURL;
     private URL logoPdf;
     private URL logoConnexion;
     private String dossierPhotsRelative;
+    
     private double remise;
     private String nro;
     private String rc;
+    private double minoration;
+    
     private String dossierFacturePdf;
     private String dossierProduitsPdf;
     private String dossierStocksPdf;
-    private String dossierImagesLocal;
 
-    public EshopConfigurations(String admin, String adminPwd,
-            String adresse,String tel, 
-            String bd,String server, String serverBD,
-            String port , String portBD , String user, 
-            String password, String dossierApp,
-            String dossierPhotos, String dossierLogos,
-            String requestController,String logoApp,
-            String logoPdf, String logoConn,double remise,
-            String nro, String rc,
-            String factures, String produits, String stocks, String dossierImagesLocal) throws IOException {
-        
+    public EshopConfigurations(String admin, String adminpwd, String adresse, 
+            String tel, String bd, String server, String serverBD,
+            String port, String portBD, String user, String password,
+            String dossierApp, String dossierphotos, String dossierLogos, 
+            String requestController, String logoApp, String logoPdf, 
+            String logoCon, double remise, String nro, String rc, 
+            String dossierFacturesPdf, String dossierProduitsPdf, 
+            String dossierStocksPdf, int modeStockageImage, 
+            String dossierImagesLocal, String dossierLogosLocal,
+            String logoAppLocal, String logoConnexionLocal, double minoration) throws IOException {
+            
         this.admin = admin;
-        this.adminPwd = adminPwd;
+        this.adminPwd = adminpwd;
         this.adresse=adresse;
         this.tel=tel;
+        
         this.url = "jdbc:mysql://"+serverBD+":"+portBD+"/"+bd+"?zeroDateTimeBehavior=convertToNull";
         this.user = user;
         this.password = password;
-        this.dossierPhotos=server+":"+port+"/"+dossierApp+"/"+dossierPhotos+"/";
+        this.dossierPhotos=server+":"+port+"/"+dossierApp+"/"+dossierphotos+"/";
         this.dossierLogos=server+":"+port+"/"+dossierApp+"/"+dossierLogos+"/";
-        this.dossierPhotsRelative=dossierPhotos+"/";
+        this.dossierPhotsRelative=dossierphotos+"/";
         this.uploadPhp=server+":"+port+"/"+dossierApp+"/"+requestController;
+        
+        this.ModeStockageImage=modeStockageImage;
         
         URL url1 = new URL(server+":"+port+"/"+dossierApp+"/"+dossierLogos+"/"+logoApp);
         URL url2 = new URL(server+":"+port+"/"+dossierApp+"/"+dossierLogos+"/"+logoPdf);
-        URL url3 = new URL(server+":"+port+"/"+dossierApp+"/"+dossierLogos+"/"+logoConn);
-        InputStream is = url1.openStream();
+        URL url3 = new URL(server+":"+port+"/"+dossierApp+"/"+dossierLogos+"/"+logoCon);
         
-        this.logoApp=new Image(is);
+        this.logoAppURL=url1;
         this.logoPdf=url2;
         this.logoConnexion=url3;
+        
+        this.dossierImagesLocal=dossierImagesLocal+"/";
+        this.dossierLogosLocal=dossierLogosLocal+"/";
+        this.logoAppLocal=dossierLogosLocal+"/"+logoAppLocal;
+        this.logoConnexionLocal=dossierLogosLocal+"/"+logoConnexionLocal;
         
         this.remise=remise;
         this.nro=nro;
         this.rc=rc;
+        this.minoration=minoration;
         
-        this.dossierFacturePdf=factures+"/";
-        this.dossierProduitsPdf=produits+"/";
-        this.dossierStocksPdf=stocks+"/";
-        this.dossierImagesLocal=dossierImagesLocal+"/";
+        this.dossierFacturePdf=dossierFacturesPdf+"/";
+        this.dossierProduitsPdf=dossierProduitsPdf+"/";
+        this.dossierStocksPdf=dossierStocksPdf+"/";
         
-        is.close();
+        
     }
 
     /**
@@ -398,6 +417,90 @@ public class EshopConfigurations {
      */
     public void setDossierImagesLocal(String dossierImagesLocal) {
         this.dossierImagesLocal = dossierImagesLocal;
+    }
+
+    /**
+     * @return the ModeStockageImage
+     */
+    public int getModeStockageImage() {
+        return ModeStockageImage;
+    }
+
+    /**
+     * @param ModeStockageImage the ModeStockageImage to set
+     */
+    public void setModeStockageImage(int ModeStockageImage) {
+        this.ModeStockageImage = ModeStockageImage;
+    }
+
+    /**
+     * @return the minoration
+     */
+    public double getMinoration() {
+        return minoration;
+    }
+
+    /**
+     * @param minoration the minoration to set
+     */
+    public void setMinoration(double minoration) {
+        this.minoration = minoration;
+    }
+
+    /**
+     * @return the dossierLogosLocal
+     */
+    public String getDossierLogosLocal() {
+        return dossierLogosLocal;
+    }
+
+    /**
+     * @param dossierLogosLocal the dossierLogosLocal to set
+     */
+    public void setDossierLogosLocal(String dossierLogosLocal) {
+        this.dossierLogosLocal = dossierLogosLocal;
+    }
+
+    /**
+     * @return the logoAppLocal
+     */
+    public String getLogoAppLocal() {
+        return logoAppLocal;
+    }
+
+    /**
+     * @param logoAppLocal the logoAppLocal to set
+     */
+    public void setLogoAppLocal(String logoAppLocal) {
+        this.logoAppLocal = logoAppLocal;
+    }
+
+    /**
+     * @return the logoConnexionLocal
+     */
+    public String getLogoConnexionLocal() {
+        return logoConnexionLocal;
+    }
+
+    /**
+     * @param logoConnexionLocal the logoConnexionLocal to set
+     */
+    public void setLogoConnexionLocal(String logoConnexionLocal) {
+        this.logoConnexionLocal = logoConnexionLocal;
+    }
+
+    /**
+     * @return the logoAppURL
+     */
+    public URL getLogoAppURL() {
+        return logoAppURL;
+    }
+
+    /**
+     * @param logoAppURL the logoAppURL to set
+     */
+    public void setLogoAppURL(URL logoAppURL) {
+        this.logoAppURL = logoAppURL;
     }
     
     
