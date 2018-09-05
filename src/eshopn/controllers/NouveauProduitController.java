@@ -339,7 +339,15 @@ public class NouveauProduitController extends Controllers implements Initializab
         FileChooser.ExtensionFilter extFilterjpg = new FileChooser.ExtensionFilter("jpg files (*.jpg)", "*.jpg");
         FileChooser.ExtensionFilter extFilterPNG = new FileChooser.ExtensionFilter("PNG files (*.PNG)", "*.PNG");
         FileChooser.ExtensionFilter extFilterpng = new FileChooser.ExtensionFilter("png files (*.png)", "*.png");
-        fileChooser.getExtensionFilters().addAll(extFilterJPG, extFilterPNG, extFilterjpg, extFilterpng);
+        FileChooser.ExtensionFilter extFilterJPEG = new FileChooser.ExtensionFilter("PNG files (*.JPEG)", "*.JPEG");
+        FileChooser.ExtensionFilter extFilterjpeg = new FileChooser.ExtensionFilter("png files (*.jpeg)", "*.jpeg");
+        FileChooser.ExtensionFilter extFilterGIF = new FileChooser.ExtensionFilter("PNG files (*.GIF)", "*.GIF");
+        FileChooser.ExtensionFilter extFiltergif = new FileChooser.ExtensionFilter("png files (*.gif)", "*.gif");
+        fileChooser.getExtensionFilters().addAll(
+                extFilterJPG, extFilterPNG,
+                extFilterJPEG, extFilterGIF,
+                extFilterjpg, extFilterpng,
+                extFilterjpeg, extFiltergif);
         
         List<File> listfile = fileChooser.showOpenMultipleDialog(getStage());
         

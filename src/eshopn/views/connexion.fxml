@@ -45,7 +45,10 @@
                   </JFXPasswordField>
                   <FontAwesomeIcon fill="#17758d" iconName="USER" layoutX="39.0" layoutY="205.0" size="30" AnchorPane.leftAnchor="38.0" />
                   <FontAwesomeIcon fill="#17758d" iconName="UNLOCK_ALT" layoutX="40.0" layoutY="259.0" size="30" AnchorPane.leftAnchor="38.0" />
-                  <JFXCheckBox fx:id="adminCheckBox" checkedColor="#17758d" layoutX="210.0" layoutY="284.0" text="Admin" AnchorPane.rightAnchor="38.0" />
+                  <JFXCheckBox fx:id="adminCheckBox" checkedColor="#17758d" layoutX="210.0" layoutY="284.0" text="." AnchorPane.rightAnchor="38.0">
+                     <font>
+                        <Font size="1.0" />
+                     </font></JFXCheckBox>
                   <JFXButton buttonType="RAISED" defaultButton="true" layoutX="38.0" layoutY="326.0" onAction="#onSignIn" prefHeight="42.0" prefWidth="229.0" ripplerFill="#bebebf" style="-fx-background-color: #17758d;" text="Se Connecter" textFill="#eeeeee" AnchorPane.leftAnchor="38.0" AnchorPane.rightAnchor="38.0">
                      <font>
                         <Font name="System Bold" size="17.0" />

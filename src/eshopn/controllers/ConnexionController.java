@@ -115,7 +115,7 @@ public class ConnexionController extends Controllers implements Initializable {
 
                  }else{
 
-                    try {
+                    /*try {
                         InputStream is = Res.config.getLogoConnexion().openStream();
                     
                         logoImg.setImage(new Image(is));
@@ -125,7 +125,20 @@ public class ConnexionController extends Controllers implements Initializable {
                         
                     } catch (Exception e) {
                         e.printStackTrace();
-                    }
+                    }*/
+                    
+                    File file=new File(Res.config.getLogoConnexionLocal());
+
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                logoImg.setImage(new Image(file.toURI().toURL().toExternalForm()));
+                            } catch (MalformedURLException ex) {
+                                Logger.getLogger(ConnexionController.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
+                    });
                  }
             }
         }).start();

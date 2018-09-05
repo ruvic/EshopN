@@ -97,7 +97,6 @@ public class EShopN extends Application {
 
                     if(getEntityManager(driver, url, user, password)==null){
                         
-                        
                         Platform.runLater(new Runnable() {
                             @Override
                             public void run() {
@@ -149,16 +148,19 @@ public class EShopN extends Application {
                             new Thread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    InputStream is;
+                                    //InputStream is;
                                     try {
 
-                                        is = Res.config.getLogoAppURL().openStream();
+                                        /*is = Res.config.getLogoAppURL().openStream();
                                         Res.config.setLogoApp(new Image(is));
-                                        okProperty.setValue(true);
+                                        okProperty.setValue(true);*/
                                         
+                                        File file=new File(Res.config.getLogoAppLocal());
+                                        Res.config.setLogoApp(new Image(file.toURI().toURL().toExternalForm()));
+                                        okProperty.setValue(true);  
 
                                     } catch (IOException ex) {
-                                        
+                                        ex.printStackTrace();
                                         Platform.runLater(new Runnable() {
                                             @Override
                                             public void run() {
@@ -166,8 +168,8 @@ public class EShopN extends Application {
                                                 Alert alert=new Alert(Alert.AlertType.ERROR);
                                                 alert.setTitle("Erreur");
                                                 alert.setHeaderText("Erreur de connection au serveur");
-                                                alert.setContentText("Une erreur est survenue lors de la connection"
-                                                        + "au serveur.");
+                                                alert.setContentText("Une erreur est survenue lors de l'accès à logo de l'application"
+                                                        + ". Veuillez verifier vos configurations.");
                                                 alert.showAndWait();
                                             }
                                         });
