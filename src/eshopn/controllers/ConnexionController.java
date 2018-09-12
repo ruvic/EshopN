@@ -80,7 +80,7 @@ public class ConnexionController extends Controllers implements Initializable {
      * Initializes the controller class.
      */
     @Override
-    public void initialize(URL url, ResourceBundle rb) {
+public void initialize(URL url, ResourceBundle rb) {
         
         /** Définition du fond d'écran (Image du magasin) **/ 
         Image fond=new Image("connexion/fond.jpg");

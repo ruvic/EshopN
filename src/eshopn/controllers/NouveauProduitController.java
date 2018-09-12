@@ -334,15 +334,17 @@ public class NouveauProduitController extends Controllers implements Initializab
     void onBrowse(ActionEvent event) throws FileNotFoundException, IOException {
         
         FileChooser fileChooser = new FileChooser();
-        
+        if(!Res.lastBrowsedFolder.isEmpty()){
+            fileChooser.setInitialDirectory(new File(Res.lastBrowsedFolder));
+        }
         FileChooser.ExtensionFilter extFilterJPG = new FileChooser.ExtensionFilter("JPG files (*.JPG)", "*.JPG");
         FileChooser.ExtensionFilter extFilterjpg = new FileChooser.ExtensionFilter("jpg files (*.jpg)", "*.jpg");
         FileChooser.ExtensionFilter extFilterPNG = new FileChooser.ExtensionFilter("PNG files (*.PNG)", "*.PNG");
         FileChooser.ExtensionFilter extFilterpng = new FileChooser.ExtensionFilter("png files (*.png)", "*.png");
-        FileChooser.ExtensionFilter extFilterJPEG = new FileChooser.ExtensionFilter("PNG files (*.JPEG)", "*.JPEG");
-        FileChooser.ExtensionFilter extFilterjpeg = new FileChooser.ExtensionFilter("png files (*.jpeg)", "*.jpeg");
-        FileChooser.ExtensionFilter extFilterGIF = new FileChooser.ExtensionFilter("PNG files (*.GIF)", "*.GIF");
-        FileChooser.ExtensionFilter extFiltergif = new FileChooser.ExtensionFilter("png files (*.gif)", "*.gif");
+        FileChooser.ExtensionFilter extFilterJPEG = new FileChooser.ExtensionFilter("JPEG files (*.JPEG)", "*.JPEG");
+        FileChooser.ExtensionFilter extFilterjpeg = new FileChooser.ExtensionFilter("jpeg files (*.jpeg)", "*.jpeg");
+        FileChooser.ExtensionFilter extFilterGIF = new FileChooser.ExtensionFilter("GIF files (*.GIF)", "*.GIF");
+        FileChooser.ExtensionFilter extFiltergif = new FileChooser.ExtensionFilter("gif files (*.gif)", "*.gif");
         fileChooser.getExtensionFilters().addAll(
                 extFilterJPG, extFilterPNG,
                 extFilterJPEG, extFilterGIF,
@@ -353,6 +355,11 @@ public class NouveauProduitController extends Controllers implements Initializab
         
         maj();
         if(listfile != null){
+            
+            if(Res.lastBrowsedFolder.isEmpty()){
+                Res.lastBrowsedFolder = listfile.get(0).getParent();
+            }   
+            
             for(File file : listfile){
                 photos.add(file.getAbsolutePath().replace('\\', '/'));
                 sourceFiles.add(file);

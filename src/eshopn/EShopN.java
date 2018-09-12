@@ -346,6 +346,7 @@ public class EShopN extends Application {
             controller.setMain(this);
             controller.setStage(stage);
             controller.init();
+            
             getScene().getStylesheets().add(
                 getClass().getResource("views/css/style.css").toExternalForm()
             );

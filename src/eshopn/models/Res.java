@@ -34,6 +34,7 @@ public class Res {
     private static int column_index=0;
     public static int NbreEltParLigne=4;
     public static int itermPerPage=12;
+    public static String lastBrowsedFolder="";
     
     
     public static int getIndexLine(){

@@ -21,9 +21,7 @@ import javafx.stage.Stage;
  */
 public class SplashScreenController implements Initializable {
 
-    @FXML
-    private ImageView logo;
-
+    
     @FXML
     private ImageView loader;
     
@@ -39,7 +37,6 @@ public class SplashScreenController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         
-        logo.setImage(new Image("login2.png"));
         loader.setImage(new Image("chargement2.gif"));
         closeImg.setImage(new Image("incorrect.png"));
         

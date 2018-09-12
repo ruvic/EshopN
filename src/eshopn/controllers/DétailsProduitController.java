@@ -161,8 +161,7 @@ public class DétailsProduitController extends Controllers implements Initializa
                 try {
 
                     listPhotos=(new ArrayList<>(produit.getPhotoCollection()));
-                    
-                    
+                   
                     if(Res.config.getModeStockageImage()==1){
                         
                         File file=new File(
@@ -182,22 +181,22 @@ public class DétailsProduitController extends Controllers implements Initializa
                         });
                         
                     }else{
+                        
                         URL url = new URL(lienAbsolueImage(listPhotos.get(0)));
                         InputStream is = url.openStream();
-                        
                         photoVue.setImage(new Image(is));
-
                         is.close();
                     }
                     
                     for (int i = 0; i < listPhotos.size(); i++) {
+                        
                         Photo pht=listPhotos.get(i);
                         
-                        String photo=Res.config.getDossierImagesLocal()+produit.getCodePro().toString()+"/"+pht.getLienPhoto();
+                        /*String photo=Res.config.getDossierImagesLocal()+produit.getCodePro().toString()+"/"+pht.getLienPhoto();
                         photos.add(photo);
 
                         File fil=new File(photo);
-                        sourceFiles.add(fil);
+                        sourceFiles.add(fil);*/
 
                         try {
 
@@ -205,10 +204,11 @@ public class DétailsProduitController extends Controllers implements Initializa
                             
                             if(Res.config.getModeStockageImage()==1){
                                 
-                                File file2=new File(
-                                Res.config.getDossierImagesLocal()+produit.getCodePro().toString()
-                                        +"/"+pht.getLienPhoto());
-
+                                String photo=Res.config.getDossierImagesLocal()+produit.getCodePro().toString()+"/"+pht.getLienPhoto();
+                                photos.add(photo);
+                                
+                                File file2=new File(photo);
+                                sourceFiles.add(file2);
                                 
                                 Platform.runLater(new Runnable() {
                                     @Override
@@ -224,7 +224,10 @@ public class DétailsProduitController extends Controllers implements Initializa
                                 
                             }else{
                                 
-                                URL url2 = new URL(lienAbsolueImage(pht));
+                                String photo = lienAbsolueImage(pht);
+                                photos.add(photo);
+                                
+                                URL url2 = new URL(photo);
                                 InputStream is2 = url2.openStream();
                                 
                                 img.setImage(new Image(is2));
@@ -429,6 +432,7 @@ public class DétailsProduitController extends Controllers implements Initializa
                                 for (Photo ph : listPhotos) {
 
                                     for (String phS : photosAsupprimer) {
+                                        
                                         if(phS.equals(ph.getLienPhoto())){
                                             try {
                                                 compteur++;
@@ -551,15 +555,18 @@ public class DétailsProduitController extends Controllers implements Initializa
     void onBrowse(ActionEvent event) throws FileNotFoundException, MalformedURLException, IOException {
         
         FileChooser fileChooser = new FileChooser();
-        
+        if(!Res.lastBrowsedFolder.isEmpty()){
+            fileChooser.setInitialDirectory(new File(Res.lastBrowsedFolder));
+        }
         FileChooser.ExtensionFilter extFilterJPG = new FileChooser.ExtensionFilter("JPG files (*.JPG)", "*.JPG");
         FileChooser.ExtensionFilter extFilterjpg = new FileChooser.ExtensionFilter("jpg files (*.jpg)", "*.jpg");
         FileChooser.ExtensionFilter extFilterPNG = new FileChooser.ExtensionFilter("PNG files (*.PNG)", "*.PNG");
         FileChooser.ExtensionFilter extFilterpng = new FileChooser.ExtensionFilter("png files (*.png)", "*.png");
-        FileChooser.ExtensionFilter extFilterJPEG = new FileChooser.ExtensionFilter("PNG files (*.JPEG)", "*.JPEG");
-        FileChooser.ExtensionFilter extFilterjpeg = new FileChooser.ExtensionFilter("png files (*.jpeg)", "*.jpeg");
-        FileChooser.ExtensionFilter extFilterGIF = new FileChooser.ExtensionFilter("PNG files (*.GIF)", "*.GIF");
-        FileChooser.ExtensionFilter extFiltergif = new FileChooser.ExtensionFilter("png files (*.gif)", "*.gif");
+        FileChooser.ExtensionFilter extFilterJPEG = new FileChooser.ExtensionFilter("JPEG files (*.JPEG)", "*.JPEG");
+        FileChooser.ExtensionFilter extFilterjpeg = new FileChooser.ExtensionFilter("jpeg files (*.jpeg)", "*.jpeg");
+        FileChooser.ExtensionFilter extFilterGIF = new FileChooser.ExtensionFilter("GIF files (*.GIF)", "*.GIF");
+        FileChooser.ExtensionFilter extFiltergif = new FileChooser.ExtensionFilter("gif files (*.gif)", "*.gif");
+        
         fileChooser.getExtensionFilters().addAll(
                 extFilterJPG, extFilterPNG,
                 extFilterJPEG, extFilterGIF,
@@ -570,6 +577,11 @@ public class DétailsProduitController extends Controllers implements Initializa
         maj();
         
         if(listfile != null){
+            
+            if(Res.lastBrowsedFolder.isEmpty()){
+                Res.lastBrowsedFolder = listfile.get(0).getParent();
+            }
+            
             for(File file : listfile){
                 photos.add(file.getAbsolutePath().replace('\\', '/'));
                 sourceFiles.add(file);
@@ -591,15 +603,22 @@ public class DétailsProduitController extends Controllers implements Initializa
                 
             }else{
                 
-                InputStream is=null;
-                URL url=null;
+                
                 if(photo.contains("http:/")){
+                    
+                    InputStream is=null;
+                    URL url=null;
                     url = new URL(photo);
-                    is= url.openStream();
+                    is = url.openStream();
+                    img.setImage(new Image(is));
+                    is.close();
+                    
                 }else{
-                    is=new FileInputStream(photo);
+                    
+                    File file=new File(photo);
+                    img.setImage(new Image(file.toURI().toURL().toExternalForm()));
+                    
                 }
-                is.close();
                 
             }
             
@@ -645,10 +664,16 @@ public class DétailsProduitController extends Controllers implements Initializa
         
         aRetirer.sort(null);
         for (int i = aRetirer.size()-1; i >= 0; i--) {
-            if(sourceFiles.get(aRetirer.get(i).intValue()).delete()){
+            
+            if(Res.config.getModeStockageImage() == 1){
+                if(sourceFiles.get(aRetirer.get(i).intValue()).delete()){
+                    photos.remove(aRetirer.get(i).intValue());
+                    sourceFiles.remove(aRetirer.get(i).intValue());
+                }
+            }else{
                 photos.remove(aRetirer.get(i).intValue());
-                sourceFiles.remove(aRetirer.get(i).intValue());
             }
+            
         }
         aRetirer.clear();
         

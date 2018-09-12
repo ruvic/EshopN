@@ -573,7 +573,12 @@ public class FacturationController extends Controllers implements Initializable 
                     File file1=print(false, facture2.getIdFac());
 
                     /** Remise des champs à jour **/
-                    clear();
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            clear();
+                        }
+                    });
 
                     prinTicketPDF(file1.getAbsolutePath(), file1.getName().substring(0, file1.getName().indexOf(".pdf")));
 

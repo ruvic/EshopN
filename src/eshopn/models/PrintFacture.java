@@ -112,7 +112,7 @@ public class PrintFacture extends Printer{
     public File print(Facture facture, ObservableList<MFact> listMFact,
                     double montant , double remise, String mode , String no) throws DocumentException, FileNotFoundException, BadElementException, IOException, PrinterException {   
         
-        template = template.replace("$date", new SimpleDateFormat("dd-MM-yyyy hh:mm:ss").format(new Date()));
+        template = template.replace("$date", new SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(new Date()));
         template = template.replace("$gestName", facture.getIdCaissiere().getNomGest());
         template = template.replace("$phone", facture.getTel());
         
