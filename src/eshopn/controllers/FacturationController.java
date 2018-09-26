@@ -404,6 +404,7 @@ public class FacturationController extends Controllers implements Initializable 
     }
     
     private void clear(){
+        
         telField.clear();
         codeProField.clear();
         remiseField.clear();
@@ -411,6 +412,7 @@ public class FacturationController extends Controllers implements Initializable 
         qteField.setText("1");
         qteStock.setText("ND");
         totalField.setText("0.0");
+        totalProperty.setValue(0.0);
         netAPayerField.setText("0.0");
         montantRemisField.clear();
         resteApayerLabel.setText("0.0");
