@@ -283,7 +283,6 @@ public class ListeProduitsController extends Controllers implements Initializabl
     public void init() {
         
         Res.not.showLoader(Res.stackPane);
-        System.out.println("Suis passé");
         new Thread(new Runnable() {
             
             @Override

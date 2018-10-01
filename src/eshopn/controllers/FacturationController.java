@@ -7,6 +7,7 @@ package eshopn.controllers;
 
 import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.DocumentException;
+import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXTextField;
 import com.jfoenix.controls.JFXToggleButton;
 import com.sun.pdfview.PDFFile;
@@ -146,7 +147,8 @@ public class FacturationController extends Controllers implements Initializable 
     private IntegerProperty qteStockProperty;
     private HashMap<String, Integer> stocks;
     private Facture facture;
-   
+    
+    
     
     
 
@@ -460,12 +462,18 @@ public class FacturationController extends Controllers implements Initializable 
     
     
     private File print(boolean isPreview, Integer id) throws DocumentException, BadElementException, BadElementException, IOException, FileNotFoundException, PrinterException{
+        
         if(table.getItems().size()!=0){
             
             if(telField.getText().trim().isEmpty()){
-                Res.not.showNotifications("Erreur d'Ajout à la facture"
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        Res.not.showNotifications("Erreur d'Ajout à la facture"
                             , "Veuillez entrer le numéro de téléphone du client.",
                             GlobalNotifications.ECHEC_NOT, 3, false);
+                    }
+                });
             }else{
 
                 BigDecimal remise;
@@ -503,21 +511,40 @@ public class FacturationController extends Controllers implements Initializable 
                         );
                         
                     }else{
-                        Res.not.showNotifications("Erreur d'Ajout à la facture"
-                        , "Le numéro de téléphone doit avoir au plus 15 chiffres",
-                        GlobalNotifications.ECHEC_NOT, 3, false);
+                        
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                Res.not.showNotifications("Erreur d'Ajout à la facture"
+                                , "Le numéro de téléphone doit avoir au plus 15 chiffres",
+                                GlobalNotifications.ECHEC_NOT, 3, false);
+                            }
+                        });
+                        
                     }
                 }else{
-                    Res.not.showNotifications("Erreur d'Ajout à la facture"
-                        , "Le numéro de téléphone est incorrect",
-                        GlobalNotifications.ECHEC_NOT, 3, false);
+                    
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            Res.not.showNotifications("Erreur d'Ajout à la facture"
+                            , "Le numéro de téléphone est incorrect",
+                            GlobalNotifications.ECHEC_NOT, 3, false);
+                        }
+                    });
                 }
                     
             }   
         }else{
-            Res.not.showNotifications("Facture vide"
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    Res.not.showNotifications("Facture vide"
                         , "Aucun contenu à imprimer, veuillez remplir la facture.",
                         GlobalNotifications.ECHEC_NOT, 3, false);
+                }
+            });
+            
         }
         
         return null;
@@ -525,6 +552,9 @@ public class FacturationController extends Controllers implements Initializable 
 
     @FXML
     void onValider(ActionEvent event) throws DocumentException, BadElementException, IOException, Exception {
+        
+        JFXButton btn = (JFXButton)event.getSource();
+        btn.setDisable(true);
         
         loader.setVisible(true);
 
@@ -541,48 +571,62 @@ public class FacturationController extends Controllers implements Initializable 
                     /** Insertion de la facture dans la base de donnée **/
                     File file=print(true, null);
 
-                    contFact.create(facture);
-                    Facture facture2=contFact.findFacture(facture.getDateFac());
+                    if(file != null){
+                        
+                        contFact.create(facture);
+                        Facture facture2=contFact.findFacture(facture.getDateFac());
 
 
-                    /** Insertion des données dans la table ligneFacture **/
-                    for (MFact item : table.getItems()) {
+                        /** Insertion des données dans la table ligneFacture **/
+                        for (MFact item : table.getItems()) {
 
-                        Integer codePro=Integer.parseInt(item.getCodeProduit().replace("-", ""));
+                            Integer codePro=Integer.parseInt(item.getCodeProduit().replace("-", ""));
 
-                        LignefacturePK pk=new LignefacturePK(
-                                codePro, 
-                                facture2.getIdFac().intValue()
-                        );
+                            LignefacturePK pk=new LignefacturePK(
+                                    codePro, 
+                                    facture2.getIdFac().intValue()
+                            );
 
-                        /** Mise à jour de la quantité du produit courant dans la BD **/
-                        Produit pr=contPro.findProduit(codePro);
-                        pr.setQte(pr.getQte()-item.getQte());
-                        contPro.edit(pr);
+                            /** Mise à jour de la quantité du produit courant dans la BD **/
+                            Produit pr=contPro.findProduit(codePro);
+                            pr.setQte(pr.getQte()-item.getQte());
+                            contPro.edit(pr);
 
-                        Lignefacture lign=new Lignefacture(
-                                pk, BigDecimal.valueOf(item.getPrixUnitaire()), 
-                                (short)item.getQte(), pr,  
-                                facture2
-                        );
+                            Lignefacture lign=new Lignefacture(
+                                    pk, BigDecimal.valueOf(item.getPrixUnitaire()), 
+                                    (short)item.getQte(), pr,  
+                                    facture2
+                            );
 
-                        contListFact.create(lign);
+                            contListFact.create(lign);
 
-                    }
-
-                    file.delete();
-
-                    File file1=print(false, facture2.getIdFac());
-
-                    /** Remise des champs à jour **/
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            clear();
                         }
-                    });
 
-                    prinTicketPDF(file1.getAbsolutePath(), file1.getName().substring(0, file1.getName().indexOf(".pdf")));
+                        file.delete();
+
+                        File file1=print(false, facture2.getIdFac());
+
+                        /** Remise des champs à jour **/
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                clear();
+                                btn.setDisable(false);
+                            }
+                        });
+
+                        prinTicketPDF(file1.getAbsolutePath(), file1.getName().substring(0, file1.getName().indexOf(".pdf")));
+                    }else{
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                //clear();
+                                btn.setDisable(false);
+                            }
+                        });
+                    }
+                    
+                    
 
                 } catch (Exception e) {
                     Platform.runLater(new Runnable() {
@@ -590,7 +634,7 @@ public class FacturationController extends Controllers implements Initializable 
                         public void run() {
                             loader.setVisible(false);
                             Res.not.showNotifications("Echec", 
-                                        "Impossible de se connecter au serveur."
+                                        e.getMessage()
                                         , GlobalNotifications.ECHEC_NOT, 2, false);
                         }
                     });

@@ -307,6 +307,14 @@ public class ListeFacturesController extends Controllers implements Initializabl
         });
     }
     
+    @FXML
+    void onRefresh(ActionEvent event) {
+        table.getItems().clear();
+        allFactures = FXCollections.observableArrayList();
+        listGen = FXCollections.observableArrayList();
+        init();
+    }
+    
     @Override
     public void init() {
         
@@ -339,9 +347,11 @@ public class ListeFacturesController extends Controllers implements Initializabl
         getStage().setMinWidth(STAGE_MIN_WIDTH);
         getStage().setMinHeight(STAGE_MIN_HEIGHT);
         
+        loaderImg.setVisible(true);
         new Thread(new Runnable() {
             @Override
             public void run() {
+                
                 FactureJpaController contFact=new FactureJpaController(Res.emf);
                 List<Facture> listFact=contFact.findFactureEntities(true);
                 
@@ -357,6 +367,13 @@ public class ListeFacturesController extends Controllers implements Initializabl
                                 table.getItems().add(fact);
                             }
 
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    loaderImg.setVisible(false);
+                                }
+                            });
+                            
                             listGen=allFactures;
                             showDatasOnTableView(allFactures, pagination, table, Res.itermPerPage);
 

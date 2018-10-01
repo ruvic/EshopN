@@ -88,7 +88,12 @@
                   <Font name="System Bold" size="14.0" />
                </font>
             </JFXButton>
-            <ImageView fx:id="loaderImg" fitHeight="33.0" fitWidth="51.0" layoutX="26.0" layoutY="445.0" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.bottomAnchor="33.0" AnchorPane.leftAnchor="20.0">
+            <JFXButton buttonType="RAISED" layoutX="423.0" layoutY="67.0" onAction="#onRefresh" prefHeight="35.0" prefWidth="143.0" style="-fx-background-color: rgba(34,44,58,0.2);" text="Actualiser" textFill="#222c3a" AnchorPane.leftAnchor="423.0">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </JFXButton>
+            <ImageView fx:id="loaderImg" fitHeight="44.0" fitWidth="53.0" layoutX="20.0" layoutY="435.0" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.bottomAnchor="32.0" AnchorPane.leftAnchor="20.0">
                <image>
                   <Image url="@../../../images/chargement2.gif" />
                </image>
