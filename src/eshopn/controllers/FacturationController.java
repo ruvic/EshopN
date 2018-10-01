@@ -626,8 +626,6 @@ public class FacturationController extends Controllers implements Initializable 
                         });
                     }
                     
-                    
-
                 } catch (Exception e) {
                     Platform.runLater(new Runnable() {
                         @Override
