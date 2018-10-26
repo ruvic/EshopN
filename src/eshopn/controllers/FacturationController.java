@@ -149,9 +149,6 @@ public class FacturationController extends Controllers implements Initializable 
     private Facture facture;
     
     
-    
-    
-
     /**
      * Initializes the controller class.
      */
@@ -689,8 +686,6 @@ public class FacturationController extends Controllers implements Initializable 
                        , GlobalNotifications.ECHEC_NOT, 2, false);
          }
     }
-    
-    
 
     @Override
     public void init() {

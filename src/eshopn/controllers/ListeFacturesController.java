@@ -200,6 +200,7 @@ public class ListeFacturesController extends Controllers implements Initializabl
                                 loaderImg.setVisible(true);
                                 PrintFacture printer=new PrintFacture();
                                 Facture facture=factSel.getFacture();
+                                
                                 ObservableList<MFact> listeFact=FXCollections.observableArrayList();
                                 List<Lignefacture> liste1=contLignFact.findLignefactureEntities(facture);
 
@@ -217,7 +218,7 @@ public class ListeFacturesController extends Controllers implements Initializabl
 
                                 File file;
                                 try {
-                                    file = printer.print(
+                                    file = printer.printExisting(
                                             facture, listeFact,
                                             facture.getMontant().doubleValue(),
                                             facture.getRemise().doubleValue(),
@@ -314,6 +315,14 @@ public class ListeFacturesController extends Controllers implements Initializabl
         listGen = FXCollections.observableArrayList();
         init();
     }
+    
+    @FXML
+    void onDetailsFacture(ActionEvent event) {
+        MFacture factSel=table.getSelectionModel().getSelectedItem();
+        Facture fact = factSel.getFacture();
+        getMain().showAdminDetailsFacture(fact);
+    }
+
     
     @Override
     public void init() {
@@ -956,8 +965,6 @@ public class ListeFacturesController extends Controllers implements Initializabl
         
         return recette;
     }
-    
-    
     
     private void resetJourBox(int year, int month){
         int nbre=numberOfDaysForMonth(year, month);

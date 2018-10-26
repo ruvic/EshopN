@@ -20,6 +20,7 @@ public class MFact {
     private Produit produit;
 
     public MFact(String codeProduit, double prixUnitaire, int qte, double sousTotal, Produit pr) {
+        
         this.codeProduit = codeProduit;
         this.prixUnitaire = prixUnitaire;
         this.qte = qte;

@@ -98,6 +98,11 @@
                   <Image url="@../../../images/chargement2.gif" />
                </image>
             </ImageView>
+            <JFXButton buttonType="RAISED" layoutX="576.0" layoutY="67.0" onAction="#onDetailsFacture" prefHeight="35.0" prefWidth="143.0" style="-fx-background-color: rgba(34,44,58,0.2);" text="Details Facture" textFill="#222c3a" AnchorPane.leftAnchor="576.0">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </JFXButton>
          </children>
       </AnchorPane>
    </center>

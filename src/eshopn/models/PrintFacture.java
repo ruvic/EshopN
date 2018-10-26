@@ -107,12 +107,13 @@ public class PrintFacture extends Printer{
     "</body>\n" +
     "\n" +
     "</html>";
-
+    
+    private Date date = new Date();
     
     public File print(Facture facture, ObservableList<MFact> listMFact,
                     double montant , double remise, String mode , String no) throws DocumentException, FileNotFoundException, BadElementException, IOException, PrinterException {   
         
-        template = template.replace("$date", new SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(new Date()));
+        template = template.replace("$date", new SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(date));
         template = template.replace("$gestName", facture.getIdCaissiere().getNomGest());
         template = template.replace("$phone", facture.getTel());
         
@@ -176,5 +177,12 @@ public class PrintFacture extends Printer{
         return file;
     }
     
+    public File printExisting(Facture facture, ObservableList<MFact> listMFact,
+                    double montant , double remise, String mode , String no) throws DocumentException, FileNotFoundException, BadElementException, IOException, PrinterException{
+        
+       date = facture.getDateFac();
+       return print(facture, listMFact, montant, remise, mode, no);
+       
+    }
     
 }

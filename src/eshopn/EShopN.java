@@ -9,6 +9,7 @@ import eshopn.controllers.AdminAccueilController;
 import eshopn.controllers.AdminAjoutGestionnaireController;
 import eshopn.controllers.AdminEditGestionnaireController;
 import eshopn.controllers.AdminEmployeesController;
+import eshopn.controllers.AdminFactDetailsController;
 import eshopn.controllers.AllCategoriesController;
 import eshopn.controllers.AlterStockController;
 import eshopn.controllers.CategorieController;
@@ -26,9 +27,11 @@ import eshopn.controllers.ProduitController;
 import eshopn.controllers.ProduitPDFController;
 import eshopn.controllers.SplashScreenController;
 import eshopn.entities.Categorie;
+import eshopn.entities.Facture;
 import eshopn.entities.Produit;
 import eshopn.models.EshopConfigurations;
 import eshopn.models.GlobalNotifications;
+import eshopn.models.MFacture;
 import eshopn.models.MGestionnaire;
 import eshopn.models.Page;
 import eshopn.models.Res;
@@ -74,7 +77,6 @@ public class EShopN extends Application {
     private Stage stage;
     private FXMLLoader loader;
     private BooleanProperty okProperty=new SimpleBooleanProperty(false);
-    
     
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -492,6 +494,35 @@ public class EShopN extends Application {
             new_stage.setResizable(false);
             new_stage.centerOnScreen();
             new_stage.setTitle("Factures pour produit");
+            new_stage.initModality(Modality.APPLICATION_MODAL);
+            new_stage.show();
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void showAdminDetailsFacture(Facture fact){
+        Stage new_stage=new Stage();
+        Scene new_scene;
+        try {
+            loader=new FXMLLoader();
+            loader.setLocation(getClass().getResource("views/AdminFactDetails.fxml"));
+            AnchorPane root=loader.load();
+            new_scene=new Scene(root, 549,511);
+            
+            AdminFactDetailsController controller=loader.getController();
+            controller.setFacture(fact);
+            controller.setScene(new_scene);
+            controller.setMain(this);
+            controller.setStage(new_stage);
+            controller.init();
+            
+            new_stage.setScene(new_scene);
+            new_stage.getIcons().add(Res.config.getLogoApp());
+            new_stage.setResizable(false);
+            new_stage.centerOnScreen();
+            new_stage.setTitle("Details de la facture");
             new_stage.initModality(Modality.APPLICATION_MODAL);
             new_stage.show();
             
