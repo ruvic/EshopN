@@ -7,6 +7,7 @@ package eshopn;
 
 import eshopn.controllers.AdminAccueilController;
 import eshopn.controllers.AdminAjoutGestionnaireController;
+import eshopn.controllers.AdminAnalyseController;
 import eshopn.controllers.AdminEditGestionnaireController;
 import eshopn.controllers.AdminEmployeesController;
 import eshopn.controllers.AdminFactDetailsController;
@@ -45,8 +46,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -372,6 +371,33 @@ public class EShopN extends Application {
             setScene(new Scene(root, 900,479));
 
             ListeFacturesController controller=loader.getController();
+            controller.setScene(getScene());
+            controller.setMain(this);
+            controller.setStage(stage);
+            controller.init();
+            getScene().getStylesheets().add(
+                getClass().getResource("views/css/style.css").toExternalForm()
+            );
+
+            setMaximized(stage);
+            stage.setScene(getScene());
+            stage.centerOnScreen();
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void showAnalyses(){
+        
+        try {
+            
+            loader=new FXMLLoader();
+            loader.setLocation(getClass().getResource("views/AdminAnalyse.fxml"));
+            BorderPane root=loader.load();
+            setScene(new Scene(root, 900,479));
+
+            AdminAnalyseController controller=loader.getController();
             controller.setScene(getScene());
             controller.setMain(this);
             controller.setStage(stage);

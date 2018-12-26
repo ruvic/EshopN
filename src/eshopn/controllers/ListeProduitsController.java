@@ -398,7 +398,6 @@ public class ListeProduitsController extends Controllers implements Initializabl
     @FXML
     void onPrint(ActionEvent event) throws IOException, DocumentException {
         
-        
         PrintProduitTask task=new PrintProduitTask(listesGen, loaderImg);
         Thread t=new Thread(task);
         t.start();

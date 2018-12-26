@@ -22,7 +22,6 @@ public class MFacture {
     private String tel;
     private String typeFact;
     private Facture facture;
-    
    
 
     public MFacture(Facture fact) {

@@ -79,10 +79,6 @@ public abstract class Controllers {
     }
     
     public int numberOfDaysForMonth(int year, int month){
-//        Calendar calendar = Calendar.getInstance();
-//        calendar.set(Calendar.YEAR, year);
-//        calendar.set(Calendar.MONTH, month-1);
-//        return calendar.getActualMaximum(Calendar.DATE);
         
         LocalDate date = LocalDate.of(year, month, 1);
         return date.lengthOfMonth();

@@ -12,17 +12,17 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.shape.Rectangle?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="479.0" prefWidth="744.0" style="-fx-background-color: #222c3a;" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eshopn.controllers.AdminAccueilController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="479.0" prefWidth="942.0" style="-fx-background-color: #222c3a;" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eshopn.controllers.AdminAccueilController">
    <center>
       <AnchorPane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: white;" BorderPane.alignment="TOP_CENTER">
          <children>
             <Rectangle fx:id="rect" arcHeight="5.0" arcWidth="5.0" fill="#1fff7e" height="406.0" opacity="0.2" stroke="BLACK" strokeType="INSIDE" width="744.0" AnchorPane.bottomAnchor="3.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-            <ImageView fx:id="fondImgView" fitHeight="409.0" fitWidth="744.0" layoutX="-1.0" layoutY="-2.0" opacity="0.61" pickOnBounds="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <ImageView fx:id="fondImgView" fitHeight="409.0" fitWidth="942.0" layoutX="-1.0" layoutY="-2.0" opacity="0.61" pickOnBounds="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <image>
                   <Image url="@../../../images/fond.jpg" />
                </image>
             </ImageView>
-            <AnchorPane fx:id="btnAnchorPane" layoutX="74.0" layoutY="75.0" prefHeight="275.0" prefWidth="589.0" AnchorPane.leftAnchor="45.0">
+            <AnchorPane fx:id="btnAnchorPane" layoutX="74.0" layoutY="75.0" prefHeight="275.0" prefWidth="589.0" AnchorPane.leftAnchor="45.0" AnchorPane.rightAnchor="45.0">
                <children>
                   <JFXButton buttonType="RAISED" contentDisplay="GRAPHIC_ONLY" focusTraversable="false" layoutX="1.0" layoutY="29.0" onAction="#onStorekeeper" prefHeight="100.0" prefWidth="100.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="29.0">
                      <graphic>
@@ -42,7 +42,7 @@
                         </ImageView>
                      </graphic>
                   </JFXButton>
-                  <JFXButton buttonType="RAISED" contentDisplay="GRAPHIC_ONLY" focusTraversable="false" layoutX="470.0" layoutY="29.0" onAction="#onFactures" prefHeight="100.0" prefWidth="100.0" text="Button" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="29.0">
+                  <JFXButton buttonType="RAISED" contentDisplay="GRAPHIC_ONLY" focusTraversable="false" layoutX="462.0" layoutY="29.0" onAction="#onFactures" prefHeight="100.0" prefWidth="100.0" text="Button" AnchorPane.topAnchor="29.0">
                      <graphic>
                         <ImageView fx:id="factImg" fitHeight="166.0" fitWidth="170.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -51,9 +51,19 @@
                         </ImageView>
                      </graphic>
                   </JFXButton>
+                  <JFXButton buttonType="RAISED" contentDisplay="GRAPHIC_ONLY" focusTraversable="false" layoutX="462.0" layoutY="29.0" onAction="#onAnalyse" prefHeight="100.0" prefWidth="100.0" text="Button" AnchorPane.leftAnchor="675.0" AnchorPane.topAnchor="29.0">
+                     <graphic>
+                        <ImageView fx:id="analyseImg" fitHeight="166.0" fitWidth="170.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../../../images/AdminAccueil/analyse.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </JFXButton>
                   <Label layoutX="1.0" layoutY="214.0" prefHeight="27.0" prefWidth="179.0" style="-fx-font-size: 18; -fx-font-weight: bold; -fx-alignment: center;" text="Magasiniers" textFill="#222c3a" AnchorPane.leftAnchor="1.0" AnchorPane.topAnchor="214.0" />
                   <Label layoutX="241.0" layoutY="214.0" prefHeight="27.0" prefWidth="179.0" style="-fx-font-size: 18; -fx-font-weight: bold; -fx-alignment: center;" text="Caissiers" textFill="#222c3a" AnchorPane.leftAnchor="241.0" AnchorPane.topAnchor="214.0" />
-                  <Label layoutX="451.0" layoutY="214.0" prefHeight="27.0" prefWidth="200.0" style="-fx-font-size: 18; -fx-font-weight: bold; -fx-alignment: center;" text="Factures" textFill="#222c3a" AnchorPane.leftAnchor="451.0" AnchorPane.topAnchor="214.0" />
+                  <Label layoutX="444.0" layoutY="211.0" prefHeight="27.0" prefWidth="200.0" style="-fx-font-size: 18; -fx-font-weight: bold; -fx-alignment: center;" text="Factures" textFill="#222c3a" AnchorPane.leftAnchor="444.0" AnchorPane.topAnchor="214.0" />
+                  <Label layoutX="444.0" layoutY="211.0" prefHeight="27.0" prefWidth="200.0" style="-fx-font-size: 18; -fx-font-weight: bold; -fx-alignment: center;" text="Analyses" textFill="#222c3a" AnchorPane.leftAnchor="665.0" AnchorPane.topAnchor="214.0" />
                </children>
             </AnchorPane>
             <ImageView fx:id="arrowsImg" fitHeight="25.0" fitWidth="98.0" layoutX="14.0" layoutY="25.0" pickOnBounds="true" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="25.0">

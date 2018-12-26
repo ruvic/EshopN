@@ -52,9 +52,12 @@ public class AdminAccueilController extends Controllers implements Initializable
     private ImageView factImg;
     
     @FXML
+    private ImageView analyseImg;
+    
+    @FXML
     private StackPane stack;
 
-    public final double WIDTH=589;
+    public final double WIDTH=852;
     public final double HEIGHT=275;
     public final double STAGE_MIN_WIDTH=744;
     public final double STAGE_MIN_HEIGHT=479;
@@ -82,6 +85,11 @@ public class AdminAccueilController extends Controllers implements Initializable
     @FXML
     void onFactures(ActionEvent event) {
         getMain().showListeFactures();
+    }
+    
+    @FXML
+    void onAnalyse(ActionEvent event) {
+        getMain().showAnalyses();
     }
     
     @FXML
@@ -144,12 +152,14 @@ public class AdminAccueilController extends Controllers implements Initializable
         Image store=new Image("AdminAccueil/magasinier.png");
         Image pay=new Image("AdminAccueil/caissier.png");
         Image fact=new Image("AdminAccueil/facture.png");
+        Image analyse=new Image("AdminAccueil/analyse.png");
         Image arrow=new Image("arrow.png");
         
         fondImgView.setImage(fond);
         storeImg.setImage(store);
         payImg.setImage(pay);
         factImg.setImage(fact);
+        analyseImg.setImage(analyse);
         arrowsImg.setImage(arrow);
     }
     
